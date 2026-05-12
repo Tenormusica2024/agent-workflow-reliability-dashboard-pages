@@ -19,26 +19,30 @@ const state = {
 
 const I18N = {
   ja: {
-    documentTitle: "Agent Workflow Reliability Blueprint",
+    documentTitle: "AI開発ワークフロー設計",
     hero: {
-      eyebrow: "公開用Blueprint",
-      titleHtml: "<span>AI開発</span><span>Workflow</span><span>設計</span>",
-      lead: "AI開発を「agentが動いた」で終わらせず、設計・実行・評価・人による確認・戻し方・改善まで説明できる形にする。",
+      eyebrow: "公開用の設計図",
+      titleHtml: "<span>AI開発</span><span>ワークフロー</span><span>設計</span>",
+      lead: "AI開発を「AIエージェントが動いた」で終わらせず、設計・実行・評価・人による確認・戻し方・改善まで説明できる形にする。",
       languageAria: "言語選択",
-      panelAria: "Dashboardの位置づけ",
+      panelAria: "この画面の位置づけ",
       panelKicker: "この画面の目的",
-      panelBody: "公開しにくい個別taskではなく、AI agentワークフローをどう設計し、どう信頼できる形にしているかを見せる。",
+      panelBody: "公開しにくい個別タスクではなく、AIエージェントのワークフローをどう設計し、どう信頼できる形にしているかを見せる。",
+    },
+    language: {
+      ja: "日本語",
+      en: "英語",
     },
     workflow: {
       aria: "AI開発ワークフロー図",
-      eyebrow: "Workflow Blueprint",
+      eyebrow: "ワークフロー設計図",
       title: "AI開発ワークフロー図と説明",
       note: "各工程を押すと、その工程の役割・説得力のある説明・見せる証拠が切り替わります。",
       output: "この工程の成果物",
       tools: "使うツール",
       why: "説得力を出す説明",
       proof: "見せる証拠",
-      step: "Step",
+      step: "工程",
     },
     proof: {
       aria: "説得力を支える説明",
@@ -62,11 +66,15 @@ const I18N = {
     hero: {
       eyebrow: "Public Blueprint",
       titleHtml: "<span>AI Development</span><span>Workflow</span><span>Reliability</span>",
-      lead: "Make AI development explainable across design, execution, eval, HITL, rollback, and improvement instead of stopping at an agent demo.",
+      lead: "Make AI development explainable across design, execution, evaluation, human review, recovery, and improvement instead of stopping at an agent demo.",
       languageAria: "language selector",
       panelAria: "dashboard position statement",
       panelKicker: "What this screen is for",
       panelBody: "This does not expose individual private tasks. It shows how I design and make AI-agent workflows reliable.",
+    },
+    language: {
+      ja: "Japanese",
+      en: "English",
     },
     workflow: {
       aria: "AI development workflow diagram",
@@ -115,6 +123,10 @@ function text(value) {
     return value[state.language] ?? value[DEFAULT_LANGUAGE] ?? "";
   }
   return value ?? "";
+}
+
+function toolLabel(value) {
+  return text(value);
 }
 
 function escapeHtml(value) {
@@ -210,7 +222,7 @@ function renderStepDetail() {
     </div>
 
     <div class="tool-row" aria-label="${escapeHtml(copy().workflow.tools)}">
-      ${(stage.tools ?? []).map((tool) => `<span class="tag">${escapeHtml(tool)}</span>`).join("")}
+      ${(stage.tools ?? []).map((tool) => `<span class="tag">${escapeHtml(toolLabel(tool))}</span>`).join("")}
     </div>
   `;
 }
@@ -284,4 +296,3 @@ async function init() {
 }
 
 init();
-

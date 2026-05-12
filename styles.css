@@ -396,7 +396,7 @@ details p {
   .workflow-map, .detail-grid { grid-template-columns: 1fr; }
   .workflow-layout, .workflow-map, .step-detail { min-height: auto; }
   .step-detail {
-    min-height: 800px;
+    min-height: 830px;
     grid-template-rows: auto minmax(230px, auto) auto auto;
   }
   .flow-node { min-height: 130px; }

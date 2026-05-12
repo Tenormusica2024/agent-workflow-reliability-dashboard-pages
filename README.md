@@ -25,14 +25,14 @@ The main UI is therefore:
 
 1. AI development workflow diagram
 2. Explanation panel placed next to the selected workflow step
-3. Persuasive explanation cards for eval, HITL, and traceability
+3. Persuasive explanation cards for evaluation, human review, and traceability
 4. Optional interview Q&A hidden behind details
 
 ## Japanese / English switching
 
 The dashboard defaults to Japanese and includes a 日本語 / English toggle.
 
-The Japanese view keeps technical English terms such as AI agent, workflow, HITL, rollback, eval, GitHub Issue, and source-of-truth where those terms are clearer than forced translation.
+The Japanese view intentionally avoids client-unfriendly jargon. It keeps only widely understood terms or product names such as AI, Codex, Claude Code, GitHub, and Playwright, while explaining workflow concepts in natural Japanese.
 
 ## Public-safe content policy
 
@@ -43,10 +43,10 @@ Do not include:
 - employer private data
 - client data
 - family/personal details
-- credentials
+- credentials or secrets
 - private repository content
 - job-search research rows
-- issue text that includes sensitive context
+- issue text that includes sensitive background information
 - raw screenshots with private UI
 
 Use instead:
@@ -54,7 +54,7 @@ Use instead:
 - abstract workflow stages
 - sanitized tool categories
 - public-safe explanation copy
-- eval / HITL / traceability rationale
+- evaluation / human review / traceability rationale
 - interview-ready explanation notes
 
 ## Run locally
@@ -88,8 +88,8 @@ Current schema:
   - persuasive explanation
   - evidence to show
 - `proofCards`
-  - eval explanation
-  - HITL explanation
+  - evaluation explanation
+  - human-review explanation
   - traceability explanation
 - `qa`
   - optional interview answers
