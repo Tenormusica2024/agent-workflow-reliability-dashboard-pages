@@ -6,33 +6,50 @@ const requiredFiles = ["index.html", "styles.css", "app.js", "sample-runs.json",
 for (const file of requiredFiles) {
   const fullPath = path.join(root, file);
   if (!fs.existsSync(fullPath)) throw new Error(`${file} missing`);
-  if (fs.statSync(fullPath).size <= 0) throw new Error(`${file} empty`);
+  const stat = fs.statSync(fullPath);
+  if (stat.size <= 0) throw new Error(`${file} empty`);
 }
 
 const html = fs.readFileSync(path.join(root, "index.html"), "utf8");
 const app = fs.readFileSync(path.join(root, "app.js"), "utf8");
 const css = fs.readFileSync(path.join(root, "styles.css"), "utf8");
-const data = fs.readFileSync(path.join(root, "sample-runs.json"), "utf8");
-const combined = `${html}\n${app}\n${css}\n${data}`;
+const data = JSON.parse(fs.readFileSync(path.join(root, "sample-runs.json"), "utf8"));
+const combined = `${html}\n${app}\n${css}\n${JSON.stringify(data)}`;
 
 for (const needle of [
   "エージェント実行トリアージ",
   "トレースツリー",
   "トレース・ウォーターフォール",
   "原因推定アシスタント",
+  "ツール入力（秘匿済み）",
   "評価（トレース単位）",
+  "関連ログとエラー",
+  "workflowSelect",
   "sample-runs.json",
 ]) {
   if (!combined.includes(needle)) throw new Error(`${needle} missing`);
 }
 
-for (const cssNeedle of ["triage-app", "sidebar", "incident-card", "main-grid", "trace-row", "span-bar", "bottom-grid"]) {
+for (const cssNeedle of [
+  "triage-app",
+  "sidebar",
+  "incident-card",
+  "main-grid",
+  "trace-row",
+  "span-bar",
+  "hypothesis",
+  "bottom-grid",
+  "@media",
+]) {
   if (!css.includes(cssNeedle)) throw new Error(`${cssNeedle} CSS missing`);
 }
 
-for (const term of ["crm" + ".internal", "payments" + ".internal", "billing" + ".internal", "policy" + ".internal"]) {
-  if (combined.includes(term)) throw new Error(`internal-looking term remained: ${term}`);
+if (!Array.isArray(data.workflows) || data.workflows.length < 2) {
+  throw new Error("multi-workflow sample data missing");
 }
 
-console.log("OK: public dashboard smoke check passed");
+for (const banned of ["AI求人市場調査", "salary band", "年" + "収", "client" + " name", "employer" + " private", "pass" + "word"]) {
+  if (combined.toLowerCase().includes(banned.toLowerCase())) throw new Error(`public-facing banned term remained: ${banned}`);
+}
 
+console.log("OK: trace triage dashboard smoke check passed");

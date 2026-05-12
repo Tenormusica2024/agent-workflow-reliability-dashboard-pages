@@ -24,7 +24,7 @@
 }
 
 * { box-sizing: border-box; }
-html, body { min-height: 100%; }
+html, body { min-height: 100%; height: 100%; }
 body {
   margin: 0;
   min-width: 1180px;
@@ -32,6 +32,7 @@ body {
     radial-gradient(circle at 74% 8%, rgba(37, 99, 235, 0.18), transparent 25rem),
     linear-gradient(135deg, var(--shell) 0%, #071526 58%, #05101d 100%);
   color: var(--text);
+  overflow: hidden;
 }
 
 button, select { font: inherit; }
@@ -49,7 +50,9 @@ a { color: var(--blue); text-decoration: none; font-weight: 700; }
 .triage-app {
   display: grid;
   grid-template-columns: 184px minmax(1000px, 1fr);
-  min-height: 100vh;
+  height: 100vh;
+  min-height: 0;
+  overflow: hidden;
   background: linear-gradient(90deg, rgba(255,255,255,0.02), transparent 28%);
 }
 
@@ -125,15 +128,20 @@ a { color: var(--blue); text-decoration: none; font-weight: 700; }
 }
 
 .dashboard {
-  padding: 12px 18px 20px;
+  display: grid;
+  grid-template-rows: 76px 70px minmax(0, 1fr) 320px;
+  gap: 4px;
+  height: 100vh;
   min-width: 0;
+  overflow: hidden;
+  padding: 12px 18px 10px;
 }
 
 .topbar {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  min-height: 80px;
+  height: 76px; min-height: 0;
   color: #e9f1ff;
 }
 .topbar h1 {
@@ -185,6 +193,34 @@ a { color: var(--blue); text-decoration: none; font-weight: 700; }
   font-weight: 750;
 }
 .select-chip option { background: #0b1730; color: #fff; }
+.top-actions {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+.language-switch {
+  display: inline-flex;
+  gap: 3px;
+  padding: 3px;
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  border-radius: 5px;
+  background: rgba(17, 31, 54, 0.74);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
+}
+.lang-button {
+  min-height: 36px;
+  border: 0;
+  border-radius: 4px;
+  padding: 0 10px;
+  color: #c5d2e4;
+  background: transparent;
+  font-size: 12px;
+  font-weight: 850;
+}
+.lang-button.is-active {
+  color: #0b1730;
+  background: #eaf2ff;
+}
 .confidence-card {
   min-width: 282px;
   height: 44px;
@@ -215,7 +251,7 @@ a { color: var(--blue); text-decoration: none; font-weight: 700; }
   align-items: center;
   min-height: 64px;
   padding: 10px;
-  margin-bottom: 10px;
+  margin-bottom: 0;
 }
 .incident-alert {
   display: grid;
@@ -287,7 +323,7 @@ a { color: var(--blue); text-decoration: none; font-weight: 700; }
 }
 .status-dot { display: inline-flex; align-items: center; gap: 8px; font-size: 13px !important; font-weight: 750 !important; }
 .outline-button, .secondary-button {
-  min-height: 32px;
+  min-height: 28px;
   border: 1px solid #cbd5e1;
   border-radius: 4px;
   color: var(--blue);
@@ -300,14 +336,15 @@ a { color: var(--blue); text-decoration: none; font-weight: 700; }
   display: grid;
   grid-template-columns: 35% 41% 24%;
   gap: 4px;
-  min-height: 472px;
+  height: 100%;
+  min-height: 0;
 }
 .bottom-grid {
   display: grid;
   grid-template-columns: 31% 26% 17% 26%;
   gap: 4px;
   margin-top: 4px;
-  height: 276px;
+  height: 100%;
   min-height: 0;
 }
 .bottom-grid > .panel { height: 100%; }
@@ -317,12 +354,12 @@ a { color: var(--blue); text-decoration: none; font-weight: 700; }
   border-radius: 5px;
 }
 .panel-head {
-  min-height: 56px;
+  min-height: 50px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 12px 14px 10px;
+  padding: 10px 14px 8px;
   border-bottom: 1px solid var(--line-soft);
 }
 .panel-head h3 {
@@ -587,7 +624,8 @@ a { color: var(--blue); text-decoration: none; font-weight: 700; }
   padding: 0 14px 8px;
 }
 .code-block {
-  min-height: 180px;
+  height: 178px;
+  min-height: 0;
   margin: 0;
   border: 1px solid var(--line-soft);
   border-radius: 4px;
@@ -618,7 +656,7 @@ a { color: var(--blue); text-decoration: none; font-weight: 700; }
   border-radius: 4px;
   background: #fff;
   color: var(--blue);
-  min-height: 32px;
+  min-height: 28px;
   font-weight: 850;
 }
 .panel-footnote {
@@ -632,7 +670,7 @@ a { color: var(--blue); text-decoration: none; font-weight: 700; }
   display: grid;
   grid-template-columns: 1fr 54px 70px 78px 48px;
   align-items: center;
-  min-height: 28px;
+  min-height: 25px;
   border-bottom: 1px solid var(--line-soft);
   color: #334155;
 }
@@ -652,13 +690,13 @@ a { color: var(--blue); text-decoration: none; font-weight: 700; }
 
 .replay-panel { padding-bottom: 14px; }
 .replay-panel p { margin: 0 16px 12px; color: #475569; font-size: 11px; }
-.form-grid { display: grid; gap: 10px; padding: 0 16px 12px; }
+.form-grid { display: grid; gap: 6px; padding: 0 16px 8px; }
 .form-grid label {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  min-height: 32px;
+  min-height: 28px;
   color: #475569;
   font-size: 11px;
 }
@@ -666,7 +704,7 @@ a { color: var(--blue); text-decoration: none; font-weight: 700; }
   min-width: 144px;
   border: 1px solid var(--line-soft);
   border-radius: 4px;
-  padding: 7px 9px;
+  padding: 5px 9px;
   color: #334155;
   background: #fff;
   font-weight: 700;
@@ -694,8 +732,8 @@ a { color: var(--blue); text-decoration: none; font-weight: 700; }
 .primary-button, .secondary-button {
   display: block;
   width: calc(100% - 32px);
-  margin: 9px 16px 0;
-  min-height: 36px;
+  margin: 7px 16px 0;
+  min-height: 31px;
   border-radius: 4px;
   font-size: 12px;
   font-weight: 850;
@@ -718,7 +756,7 @@ a { color: var(--blue); text-decoration: none; font-weight: 700; }
   display: grid;
   grid-template-columns: 88px 70px 98px 1fr;
   align-items: center;
-  min-height: 29px;
+  min-height: 26px;
   border-bottom: 1px solid var(--line-soft);
   color: #334155;
 }
@@ -749,4 +787,48 @@ a { color: var(--blue); text-decoration: none; font-weight: 700; }
   .bottom-grid { grid-template-columns: 34% 27% 0 39%; }
 .bottom-grid > .panel { height: 100%; }
   .replay-panel { display: none; }
+}
+
+
+
+
+/* Maximize-view fit tuning: keep the right RCA card readable without page-level clipping. */
+.rca-panel .panel-head {
+  min-height: 42px;
+  padding: 8px 14px 6px;
+}
+.rca-panel h4 {
+  margin: 3px 14px 6px;
+}
+.hypothesis-list {
+  gap: 5px;
+}
+.hypothesis {
+  padding: 6px 9px 5px;
+}
+.hypothesis__top {
+  font-size: 11px;
+}
+.hypothesis__top strong {
+  font-size: 11px;
+}
+.hypothesis ul {
+  margin-top: 4px;
+  font-size: 10px;
+  line-height: 1.35;
+}
+.rca-panel .mini-link {
+  margin-top: 6px;
+}
+.recommended-action {
+  margin-top: 6px;
+  padding: 7px 9px;
+}
+.recommended-action p {
+  margin: 3px 0 5px;
+  line-height: 1.35;
+}
+.why-line {
+  margin-top: 5px;
+  line-height: 1.35;
 }

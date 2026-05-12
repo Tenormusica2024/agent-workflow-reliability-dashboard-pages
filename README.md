@@ -8,6 +8,10 @@ AIエージェントの実行が失敗・劣化したときに、どの工程で
 
 https://tenormusica2024.github.io/agent-workflow-reliability-dashboard-pages/
 
+## Language
+
+日本語 / English の切り替えに対応しています。
+
 ## What this shows
 
 - インシデント概要
