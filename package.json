@@ -1,0 +1,20 @@
+{
+  "name": "agent-workflow-reliability-dashboard",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Portfolio-safe static dashboard for explaining AI-agent workflow reliability: trace, evaluation, HITL, rollback, and handover.",
+  "scripts": {
+    "serve": "python -m http.server 4173",
+    "validate": "node scripts/validate-data.mjs",
+    "smoke": "node scripts/smoke-check.mjs"
+  },
+  "keywords": [
+    "ai-agent",
+    "agent-operations",
+    "reliability",
+    "hitl",
+    "portfolio"
+  ],
+  "license": "UNLICENSED"
+}

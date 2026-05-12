@@ -1,0 +1,234 @@
+{
+  "schemaVersion": "0.1.0",
+  "generatedAt": "2026-05-12T14:30:00+09:00",
+  "portfolioSafe": true,
+  "privacyPolicy": "Sample data is derived from real workflow patterns but anonymized. No client, employer, family, private repository, credential, or personal data is included.",
+  "workflows": [
+    {
+      "id": "run-20260512-jobdb-001",
+      "workflowName": "AI job-market research DB update",
+      "mode": "research-to-artifact",
+      "trigger": "GitHub Issue remote task",
+      "status": "success",
+      "startedAt": "2026-05-12T10:25:00+09:00",
+      "durationMinutes": 149,
+      "agentStack": ["Codex", "web search", "grok4cx handoff", "Python generators", "GitHub Issue reporter"],
+      "models": ["GPT-5.4", "Grok 4 via Chrome handoff"],
+      "summary": "Expanded a private AI-agent job research database from 17 to 31 rows, regenerated ranking artifacts, and reported the result back to a remote GitHub Issue.",
+      "goal": "Create a structured, source-backed database of Japanese AI-agent/FDE-like jobs and turn it into ranking artifacts that can guide interview and portfolio priorities.",
+      "plan": [
+        "Verify current repo state and existing artifacts",
+        "Search public job pages and route hard-to-find candidates through grok4cx",
+        "Normalize salary bands and requirement categories",
+        "Regenerate JSON/CSV/SQLite/HTML/Markdown artifacts",
+        "Validate counts and report through GitHub Issue"
+      ],
+      "toolCalls": [
+        {"tool": "web.search", "purpose": "Find additional public job listings", "risk": "low", "result": "additional candidates found"},
+        {"tool": "grok4cx", "purpose": "Check public jobs not easily found by ordinary search", "risk": "medium", "result": "4 candidates returned"},
+        {"tool": "python", "purpose": "Regenerate data artifacts", "risk": "low", "result": "31 jobs validated"},
+        {"tool": "git", "purpose": "Commit and push private repo update", "risk": "medium", "result": "pushed"}
+      ],
+      "artifacts": [
+        "data/jobs.json",
+        "data/jobs.sqlite",
+        "reports/requirement_ranking_by_salary_band_2026-05-12.md",
+        "reports/agent_tech_requirements_excel_like_2026-05-12.html"
+      ],
+      "metrics": {
+        "evalScore": 0.92,
+        "successRateImpact": "+14 validated rows",
+        "tokensApprox": 68000,
+        "costJpyApprox": 180,
+        "manualMinutesSaved": 110,
+        "criticalFailureCount": 0
+      },
+      "evaluation": {
+        "result": "pass",
+        "criteria": [
+          {"name": "source traceability", "score": 0.88, "note": "Every added row has a URL and source-status caveat."},
+          {"name": "artifact regeneration", "score": 1.0, "note": "JSON/CSV/SQLite/HTML/Markdown outputs regenerated."},
+          {"name": "portfolio safety", "score": 0.82, "note": "Repo is private; future public version needs additional sanitization."}
+        ]
+      },
+      "failure": {
+        "category": "none",
+        "severity": "low",
+        "rootCause": "No blocking failure. Some source pages are agent listings, so salary caveats were retained.",
+        "recovery": "Keep source_status_estimate and caveats visible in the DB."
+      },
+      "hitl": {
+        "required": false,
+        "status": "not_required",
+        "reason": "No external public release, no credential operation, and all outputs stayed in private GitHub context."
+      },
+      "versions": {
+        "promptVersion": "research-db-wave2-v1",
+        "configVersion": "salary-band-normalizer-v2",
+        "dataVersion": "jobs-2026-05-12-wave2"
+      },
+      "rollback": {
+        "condition": "If a source is later proven stale or salary was copied from an inconsistent listing, revert only the affected row and regenerate artifacts.",
+        "command": "git revert <commit> or edit generate_db.py row -> regenerate -> validate"
+      },
+      "interviewNotes": [
+        {
+          "question": "How do you keep AI research workflows reliable?",
+          "answer": "I treat research as a reproducible data pipeline: source capture, normalization, regenerated artifacts, validation, caveat labeling, and a final handover report. The goal is not just to search, but to produce a durable artifact that can be reviewed later."
+        },
+        {
+          "question": "Why was HITL not required?",
+          "answer": "The task did not publish sensitive data externally. It updated a private repository and reported to a private Issue. If the same artifact were made public, HITL review would be required for source freshness and privacy sanitization."
+        }
+      ]
+    },
+    {
+      "id": "run-20260512-ui-002",
+      "workflowName": "Portfolio UI update with verification",
+      "mode": "implementation-verification",
+      "trigger": "Remote GitHub Issue request",
+      "status": "warning",
+      "startedAt": "2026-05-12T10:25:33+09:00",
+      "durationMinutes": 52,
+      "agentStack": ["Codex", "imagegen", "local tests", "GitHub Actions", "GitHub Pages"],
+      "models": ["GPT-5.4", "Image generation model"],
+      "summary": "Generated a portfolio visual, updated README/portfolio copy, ran tests, and verified deployment. The run is marked warning because image generation is not ideal for fine-grained UI text.",
+      "goal": "Replace a project visual and make the portfolio card easier to understand while preserving attribution and public-facing safety.",
+      "plan": [
+        "Check source asset and usage constraints",
+        "Generate a new visual asset",
+        "Update README credits and portfolio card",
+        "Run tests and verify live deployment",
+        "Report to GitHub Issue"
+      ],
+      "toolCalls": [
+        {"tool": "imagegen", "purpose": "Create visual asset", "risk": "medium", "result": "asset generated"},
+        {"tool": "npm test", "purpose": "Validate code changes", "risk": "low", "result": "passed"},
+        {"tool": "browser/live check", "purpose": "Verify deployment", "risk": "low", "result": "passed"}
+      ],
+      "artifacts": ["README image", "portfolio card copy", "live portfolio page"],
+      "metrics": {
+        "evalScore": 0.78,
+        "successRateImpact": "visual clarity improved",
+        "tokensApprox": 21000,
+        "costJpyApprox": 120,
+        "manualMinutesSaved": 45,
+        "criticalFailureCount": 0
+      },
+      "evaluation": {
+        "result": "warning",
+        "criteria": [
+          {"name": "visual clarity", "score": 0.78, "note": "Good for hero image, not for detailed dashboard UI."},
+          {"name": "public safety", "score": 0.9, "note": "Credits and official links were added."},
+          {"name": "deployment", "score": 1.0, "note": "CI and Pages deploy succeeded."}
+        ]
+      },
+      "failure": {
+        "category": "visual_text_density",
+        "severity": "medium",
+        "rootCause": "Generated images are poor at dense, exact dashboard text.",
+        "recovery": "Use HTML/CSS for dashboard text and reserve imagegen for hero or thumbnail assets."
+      },
+      "hitl": {
+        "required": true,
+        "status": "approved_by_policy",
+        "reason": "Public-facing visual and attribution required explicit source/credit handling."
+      },
+      "versions": {
+        "promptVersion": "portfolio-visual-v1",
+        "configVersion": "ui-text-gate-v1",
+        "dataVersion": "public-asset-2026-05-12"
+      },
+      "rollback": {
+        "condition": "If public visual is misleading or attribution is insufficient, revert the portfolio image and card copy.",
+        "command": "git revert <visual-commit>"
+      },
+      "interviewNotes": [
+        {
+          "question": "When would you use image generation in an AI workflow dashboard?",
+          "answer": "I would not use it for dense operational UI. I use generated images for portfolio thumbnails or conceptual hero visuals, while exact text, filters, and explanations stay in HTML so they are readable, searchable, and maintainable."
+        }
+      ]
+    },
+    {
+      "id": "run-20260512-llmwiki-003",
+      "workflowName": "LLMWIKI metadata normalization lane",
+      "mode": "knowledge-ops",
+      "trigger": "Scheduled or batch knowledge maintenance",
+      "status": "failed",
+      "startedAt": "2026-05-12T09:10:00+09:00",
+      "durationMinutes": 31,
+      "agentStack": ["Codex", "Python validator", "metadata rules", "local files"],
+      "models": ["GPT-5.4", "low-cost normalizer candidate"],
+      "summary": "A metadata normalization batch was stopped because generated metadata risked drifting from the allowed schema and current-source boundaries.",
+      "goal": "Normalize markdown metadata without corrupting durable current-source structure or mixing generated summaries into manually maintained facts.",
+      "plan": [
+        "Read metadata review checklist",
+        "Run normalization candidate on a small batch",
+        "Validate allowed tags and doc_kind",
+        "Reject batch if ownership or schema boundaries are violated"
+      ],
+      "toolCalls": [
+        {"tool": "python validator", "purpose": "Check frontmatter schema", "risk": "low", "result": "failed validation"},
+        {"tool": "git status", "purpose": "Confirm no unsafe write", "risk": "low", "result": "clean"}
+      ],
+      "artifacts": ["rejection log", "validation notes"],
+      "metrics": {
+        "evalScore": 0.41,
+        "successRateImpact": "unsafe batch stopped",
+        "tokensApprox": 9000,
+        "costJpyApprox": 30,
+        "manualMinutesSaved": 0,
+        "criticalFailureCount": 1
+      },
+      "evaluation": {
+        "result": "fail_safe",
+        "criteria": [
+          {"name": "schema compliance", "score": 0.42, "note": "Some fields did not match allowed values."},
+          {"name": "source-of-truth boundary", "score": 0.35, "note": "Generated summaries risked duplicating current facts."},
+          {"name": "safe stop", "score": 0.95, "note": "No direct overwrite was made."}
+        ]
+      },
+      "failure": {
+        "category": "schema_boundary_risk",
+        "severity": "high",
+        "rootCause": "The generated batch did not sufficiently respect field-level ownership and current/historical boundaries.",
+        "recovery": "Reject the batch, tighten the prompt, and rerun only after schema examples are added."
+      },
+      "hitl": {
+        "required": true,
+        "status": "pending",
+        "reason": "Updating current-source metadata affects future routing and user-context judgments."
+      },
+      "versions": {
+        "promptVersion": "metadata-normalizer-v0.3",
+        "configVersion": "frontmatter-schema-2026-04",
+        "dataVersion": "sample-only"
+      },
+      "rollback": {
+        "condition": "If any file was modified, restore from git before rerunning normalization.",
+        "command": "git checkout -- <affected-files>"
+      },
+      "interviewNotes": [
+        {
+          "question": "How do you handle AI automation that may corrupt knowledge bases?",
+          "answer": "I treat source-of-truth updates as a high-risk operation. The agent can propose metadata, but schema validation and HITL gates decide whether it is promoted. A safe stop is a successful outcome if the alternative is corrupting durable knowledge."
+        }
+      ]
+    }
+  ],
+  "failureTaxonomy": [
+    {"id": "tool_error", "label": "Tool error", "description": "The agent called a tool that failed, timed out, or returned incomplete output.", "retryPolicy": "Retry only when the operation is idempotent and the input is unchanged."},
+    {"id": "missing_context", "label": "Missing context", "description": "The agent lacked the source file, policy, user constraint, or repo state needed for a safe decision.", "retryPolicy": "Do not auto-retry. Retrieve context or ask for clarification."},
+    {"id": "schema_boundary_risk", "label": "Schema / source boundary risk", "description": "Generated content may violate schema, field ownership, or current-source boundaries.", "retryPolicy": "Reject or route to HITL before write."},
+    {"id": "visual_text_density", "label": "Visual text density", "description": "Generated visual artifacts cannot reliably represent dense or exact UI text.", "retryPolicy": "Move dense information back into HTML/SVG/Markdown."},
+    {"id": "unsafe_operation", "label": "Unsafe operation", "description": "The agent is about to publish, delete, overwrite, expose private data, or affect credentials.", "retryPolicy": "Stop and require explicit approval."}
+  ],
+  "interviewPrompts": [
+    "How do you decide whether an AI workflow can run autonomously or needs HITL?",
+    "What metrics do you use to evaluate an agent workflow beyond success/failure?",
+    "How do you prevent AI-generated code or metadata from corrupting a repository?",
+    "How do you make an AI-agent workflow explainable to non-engineers?",
+    "What is the difference between a demo agent and an operable agent system?"
+  ]
+}

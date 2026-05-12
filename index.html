@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Agent Workflow Reliability Dashboard</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="hero">
+      <div class="hero__copy">
+        <p class="eyebrow">Portfolio-safe MVP</p>
+        <h1><span>Agent Workflow</span><span>Reliability</span><span>Dashboard</span></h1>
+        <p class="hero__lead">Trace, evaluation, HITL, rollback, and handover for operable AI-agent workflows.</p>
+        <div class="hero__actions" aria-label="display mode selector">
+          <button class="mode-button is-active" data-mode="portfolio">Portfolio Mode</button>
+          <button class="mode-button" data-mode="interview">Interview Mode</button>
+        </div>
+      </div>
+      <aside class="hero__panel" aria-label="dashboard position statement">
+        <span class="panel-kicker">What this proves</span>
+        <p>AIエージェントを「動くデモ」で終わらせず、<br>評価・監視・承認・引き継ぎまで含めて<br>運用可能にする力を見せる。</p>
+      </aside>
+    </header>
+
+    <main>
+      <section class="metrics-grid" id="metrics" aria-label="reliability metrics"></section>
+
+      <section class="toolbar" aria-label="filters">
+        <label>
+          Search
+          <input id="searchInput" type="search" placeholder="workflow, tool, failure, HITL...">
+        </label>
+        <label>
+          Status
+          <select id="statusFilter">
+            <option value="all">All</option>
+            <option value="success">Success</option>
+            <option value="warning">Warning</option>
+            <option value="failed">Failed</option>
+          </select>
+        </label>
+        <label>
+          Mode
+          <select id="modeFilter">
+            <option value="all">All</option>
+          </select>
+        </label>
+      </section>
+
+      <section class="dashboard-grid">
+        <section class="card timeline-card" aria-label="run timeline">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Run Timeline</p>
+              <h2>Agent runs</h2>
+            </div>
+            <span class="count-badge" id="visibleCount">0 runs</span>
+          </div>
+          <div class="run-list" id="runList"></div>
+        </section>
+
+        <section class="card detail-card" aria-label="run detail">
+          <div id="runDetail" class="run-detail empty-state">
+            <p class="eyebrow">Run Detail</p>
+            <h2>Select a run</h2>
+            <p>左のtimelineからrunを選ぶと、goal、plan、tool calls、eval、HITL、rollback、面接説明メモを確認できます。</p>
+          </div>
+        </section>
+      </section>
+
+      <section class="insight-grid">
+        <section class="card">
+          <p class="eyebrow">Failure Taxonomy</p>
+          <h2>Failure modes</h2>
+          <div id="failureTaxonomy" class="taxonomy-list"></div>
+        </section>
+        <section class="card interview-card">
+          <p class="eyebrow">Interview Mode</p>
+          <h2>説明力を補完する質問</h2>
+          <div id="interviewPrompts" class="prompt-list"></div>
+        </section>
+      </section>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
