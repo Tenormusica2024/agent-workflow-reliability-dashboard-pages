@@ -1,66 +1,58 @@
-# Agent Workflow Reliability Blueprint
+# Agent Workflow Reliability Dashboard
 
-![Agent Workflow Reliability Dashboard: observable, evaluable, reviewable AI-agent work](assets/agent-workflow-reliability-dashboard-hero.png)
+日本語UIの **Agent Trace Triage Console** プロトタイプです。
 
-Portfolio-safe static dashboard for explaining **AI development workflow reliability**.
-
-The screen is now a workflow blueprint, not a list of private work logs. It focuses on how AI-agent work is designed, evaluated, reviewed, released, and improved.
+AIエージェントの実行が失敗・劣化したときに、どの工程で壊れたか、なぜ壊れたか、次に何を確認すべきかを説明できるダッシュボードを目指しています。
 
 ## Live URL
 
-Public, sanitized GitHub Pages mirror:
-
 https://tenormusica2024.github.io/agent-workflow-reliability-dashboard-pages/
 
-The development repository remains private. The Pages mirror contains only portfolio-safe blueprint data.
+## What this shows
 
-## Main design intent
+- インシデント概要
+- トレースツリー
+- スパンのウォーターフォール
+- 原因推定アシスタント
+- 秘匿済みツール入力
+- トレース単位の評価
+- 再実行パネル
+- 関連ログとエラー
 
-This proof asset should communicate:
+## Design intent
 
-> I do not just use Codex / Claude Code / AI agents.
-> I design an AI development workflow that is observable, evaluable, reviewable, and explainable.
+この画面は、単なる分析ダッシュボードではなく、AIエージェント運用に必要な以下を一画面で説明するためのものです。
 
-The main UI is therefore:
+- 実行単位の可観測性
+- ツール呼び出しの失敗箇所
+- 評価指標との紐づき
+- 原因推定と次の対応
+- 再実行・検証の流れ
 
-1. AI development workflow diagram
-2. Explanation panel placed next to the selected workflow step
-3. Persuasive explanation cards for evaluation, human review, and traceability
-4. Optional interview Q&A hidden behind details
+## Data model
 
-## Japanese / English switching
+画面は `sample-runs.json` を読み込みます。
 
-The dashboard defaults to Japanese and includes a 日本語 / English toggle.
+主な構造：
 
-The Japanese view intentionally avoids client-unfriendly jargon. It keeps only widely understood terms or product names such as AI, Codex, Claude Code, GitHub, and Playwright, while explaining workflow concepts in natural Japanese.
+- `workflows[]`
+  - workflow / agent名
+  - environment / status / time window
+  - incident summary
+  - trace tree rows
+  - waterfall spans
+  - root-cause hypotheses
+  - recommended action
+  - redacted tool payload
+  - evaluations
+  - replay settings
+  - linked logs
 
-## Public-safe content policy
-
-Do not use this public dashboard to show individual private tasks or sensitive operational details.
-
-Do not include:
-
-- employer private data
-- client data
-- family/personal details
-- credentials or secrets
-- private repository content
-- job-search research rows
-- issue text that includes sensitive background information
-- raw screenshots with private UI
-
-Use instead:
-
-- abstract workflow stages
-- sanitized tool categories
-- public-safe explanation copy
-- evaluation / human review / traceability rationale
-- interview-ready explanation notes
+サンプルデータは公開用に匿名化・架空化しています。
 
 ## Run locally
 
 ```powershell
-cd C:\Users\Tenormusica\agent-workflow-reliability-dashboard
 npm run validate
 npm run smoke
 npm run serve
@@ -72,31 +64,6 @@ Open:
 http://localhost:4173
 ```
 
-If you open `index.html` directly as `file://`, the browser may block JSON loading. Use the local server command above.
+## Public-safe policy
 
-## Data model
-
-The dashboard reads `sample-runs.json`.
-
-Current schema:
-
-- `workflowStages`
-  - title
-  - short explanation
-  - tools
-  - output
-  - persuasive explanation
-  - evidence to show
-- `proofCards`
-  - evaluation explanation
-  - human-review explanation
-  - traceability explanation
-- `qa`
-  - optional interview answers
-
-## Next improvements
-
-- Add architecture diagram variant for README hero
-- Add more concrete but still public-safe workflow examples
-- Add before/after explanation mode
-- Add exportable interview answer sheet
+この公開repoには、非公開の調査メモ、実在の顧客情報、認証情報、private repo由来の詳細ログは含めません。

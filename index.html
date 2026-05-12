@@ -3,62 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>AI開発ワークフロー設計</title>
+  <title>エージェント実行トリアージ</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div class="app-shell">
-    <header class="hero">
-      <div class="hero__copy">
-        <div class="hero__topbar">
-          <p class="eyebrow" data-i18n="hero.eyebrow">公開用の設計図</p>
-          <div class="language-switch" data-i18n-aria-label="hero.languageAria" aria-label="言語選択">
-            <button class="lang-button is-active" type="button" data-lang="ja" data-i18n="language.ja">日本語</button>
-            <button class="lang-button" type="button" data-lang="en" data-i18n="language.en">英語</button>
-          </div>
-        </div>
-        <h1 data-i18n-html="hero.titleHtml"><span>AI開発</span><span>ワークフロー</span><span>設計</span></h1>
-        <p class="hero__lead" data-i18n="hero.lead">AI開発を「AIエージェントが動いた」で終わらせず、設計・実行・評価・人による確認・戻し方・改善まで説明できる形にする。</p>
-      </div>
-      <aside class="hero__panel" data-i18n-aria-label="hero.panelAria" aria-label="この画面の位置づけ">
-        <span class="panel-kicker" data-i18n="hero.panelKicker">この画面の目的</span>
-        <p data-i18n="hero.panelBody">公開しにくい個別タスクではなく、AIエージェントのワークフローをどう設計し、どう信頼できる形にしているかを見せる。</p>
-      </aside>
-    </header>
-
-    <main>
-      <section class="card workflow-section" data-i18n-aria-label="workflow.aria" aria-label="AI開発ワークフロー図">
-        <div class="section-heading section-heading--wide">
-          <div>
-            <p class="eyebrow" data-i18n="workflow.eyebrow">ワークフロー設計図</p>
-            <h2 data-i18n="workflow.title">AI開発ワークフロー図と説明</h2>
-          </div>
-          <p data-i18n="workflow.note">各工程を押すと、その工程の役割・説得力のある説明・見せる証拠が切り替わります。</p>
-        </div>
-
-        <div class="workflow-layout">
-          <div class="workflow-map" id="workflowMap" aria-live="polite"></div>
-          <article class="step-detail" id="stepDetail" aria-live="polite"></article>
-        </div>
-      </section>
-
-      <section class="proof-grid" id="proofGrid" data-i18n-aria-label="proof.aria" aria-label="説得力を支える説明"></section>
-
-      <section class="card qa-section">
-        <div class="section-heading">
-          <div>
-            <p class="eyebrow" data-i18n="qa.eyebrow">面接補助</p>
-            <h2 data-i18n="qa.title">面接での答え方</h2>
-          </div>
-          <span class="count-badge" id="qaCount">0</span>
-        </div>
-        <p class="qa-lead" data-i18n="qa.lead">質問一覧は主役ではなく、ワークフロー図を説明するための補助です。必要なときだけ開けるようにしています。</p>
-        <div class="qa-list" id="qaList"></div>
-      </section>
-    </main>
-  </div>
-
+  <div id="app" class="triage-app" aria-live="polite"></div>
   <script src="app.js"></script>
 </body>
 </html>
-

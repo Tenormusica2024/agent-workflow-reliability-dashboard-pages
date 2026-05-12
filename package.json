@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Portfolio-safe static blueprint for explaining AI development workflow reliability: design, evaluation, human review, recovery, and improvement.",
+  "description": "Japanese-first Agent Trace Triage Console prototype for AI agent workflow reliability dashboards.",
   "scripts": {
     "serve": "python -m http.server 4173",
     "validate": "node scripts/validate-data.mjs",
