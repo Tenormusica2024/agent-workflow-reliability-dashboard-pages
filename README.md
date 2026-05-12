@@ -1,5 +1,7 @@
 # Agent Workflow Reliability Blueprint
 
+![Agent Workflow Reliability Dashboard: observable, evaluable, reviewable AI-agent work](assets/agent-workflow-reliability-dashboard-hero.png)
+
 Portfolio-safe static dashboard for explaining **AI development workflow reliability**.
 
 The screen is now a workflow blueprint, not a list of private work logs. It focuses on how AI-agent work is designed, evaluated, reviewed, released, and improved.
