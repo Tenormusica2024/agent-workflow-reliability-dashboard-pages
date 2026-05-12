@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Agent Workflow Reliability Dashboard</title>
+  <title>Agent Workflow Reliability Blueprint</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -11,75 +11,49 @@
     <header class="hero">
       <div class="hero__copy">
         <div class="hero__topbar">
-          <p class="eyebrow" data-i18n="hero.eyebrow">公開可能なMVP</p>
+          <p class="eyebrow" data-i18n="hero.eyebrow">公開用Blueprint</p>
           <div class="language-switch" data-i18n-aria-label="hero.languageAria" aria-label="言語選択">
             <button class="lang-button is-active" type="button" data-lang="ja">日本語</button>
             <button class="lang-button" type="button" data-lang="en">English</button>
           </div>
         </div>
-        <h1><span>Agent Workflow</span><span>Reliability</span><span>Dashboard</span></h1>
-        <p class="hero__lead" data-i18n="hero.lead">Trace、評価、HITL、rollback、引き継ぎまで見える、運用可能なAI agent workflowのDashboard。</p>
-        <div class="hero__actions" data-i18n-aria-label="hero.modeAria" aria-label="表示モード選択">
-          <button class="mode-button is-active" type="button" data-mode="portfolio" data-i18n="hero.portfolioMode">Portfolio Mode</button>
-          <button class="mode-button" type="button" data-mode="interview" data-i18n="hero.interviewMode">Interview Mode</button>
-        </div>
+        <h1 data-i18n-html="hero.titleHtml"><span>AI開発</span><span>Workflow</span><span>設計</span></h1>
+        <p class="hero__lead" data-i18n="hero.lead">AI開発を「agentが動いた」で終わらせず、設計・実行・eval・HITL・rollback・改善まで説明できる形にする。</p>
       </div>
       <aside class="hero__panel" data-i18n-aria-label="hero.panelAria" aria-label="Dashboardの位置づけ">
-        <span class="panel-kicker" data-i18n="hero.panelKicker">このDashboardで示すこと</span>
-        <p data-i18n="hero.panelBody">AI agentを「動くデモ」で終わらせず、評価・監視・承認・引き継ぎまで含めて運用可能にする力を示す。</p>
+        <span class="panel-kicker" data-i18n="hero.panelKicker">この画面の目的</span>
+        <p data-i18n="hero.panelBody">公開しにくい個別taskではなく、AI agent workflowをどう設計し、どう信頼できる形にしているかを見せる。</p>
       </aside>
     </header>
 
     <main>
-      <section class="metrics-grid" id="metrics" data-i18n-aria-label="sections.metricsAria" aria-label="信頼性指標"></section>
+      <section class="card workflow-section" data-i18n-aria-label="workflow.aria" aria-label="AI開発workflow図">
+        <div class="section-heading section-heading--wide">
+          <div>
+            <p class="eyebrow" data-i18n="workflow.eyebrow">Workflow Blueprint</p>
+            <h2 data-i18n="workflow.title">AI開発workflow図と説明</h2>
+          </div>
+          <p data-i18n="workflow.note">各工程を押すと、その工程の役割・説得力のある説明・見せる証拠が切り替わります。</p>
+        </div>
 
-      <section class="toolbar" data-i18n-aria-label="sections.filtersAria" aria-label="絞り込み">
-        <label>
-          <span data-i18n="filters.search">検索</span>
-          <input id="searchInput" type="search" data-i18n-placeholder="filters.searchPlaceholder" placeholder="workflow、tool、failure、HITL...">
-        </label>
-        <label>
-          <span data-i18n="filters.status">状態</span>
-          <select id="statusFilter"></select>
-        </label>
-        <label>
-          <span data-i18n="filters.mode">種別</span>
-          <select id="modeFilter"></select>
-        </label>
+        <div class="workflow-layout">
+          <div class="workflow-map" id="workflowMap" aria-live="polite"></div>
+          <article class="step-detail" id="stepDetail" aria-live="polite"></article>
+        </div>
       </section>
 
-      <section class="dashboard-grid">
-        <section class="card timeline-card" data-i18n-aria-label="sections.timelineAria" aria-label="Run履歴">
-          <div class="section-heading">
-            <div>
-              <p class="eyebrow" data-i18n="sections.runTimeline">Run履歴</p>
-              <h2 data-i18n="sections.agentRuns">Agent run一覧</h2>
-            </div>
-            <span class="count-badge" id="visibleCount">0件</span>
-          </div>
-          <div class="run-list" id="runList"></div>
-        </section>
+      <section class="proof-grid" id="proofGrid" data-i18n-aria-label="proof.aria" aria-label="説得力を支える説明"></section>
 
-        <section class="card detail-card" data-i18n-aria-label="sections.detailAria" aria-label="Run詳細">
-          <div id="runDetail" class="run-detail empty-state">
-            <p class="eyebrow" data-i18n="sections.runDetail">Run詳細</p>
-            <h2 data-i18n="sections.selectRun">Runを選択</h2>
-            <p data-i18n="sections.selectRunBody">左のRun履歴からRunを選ぶと、goal、plan、tool calls、eval、HITL、rollback、面接説明メモを確認できます。</p>
+      <section class="card qa-section">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow" data-i18n="qa.eyebrow">Interview Support</p>
+            <h2 data-i18n="qa.title">面接での答え方</h2>
           </div>
-        </section>
-      </section>
-
-      <section class="insight-grid">
-        <section class="card">
-          <p class="eyebrow" data-i18n="sections.failureTaxonomy">失敗分類</p>
-          <h2 data-i18n="sections.failureModes">失敗モード</h2>
-          <div id="failureTaxonomy" class="taxonomy-list"></div>
-        </section>
-        <section class="card interview-card">
-          <p class="eyebrow" data-i18n="sections.interviewMode">Interview Mode</p>
-          <h2 data-i18n="sections.interviewQuestions">説明力を補完する質問</h2>
-          <div id="interviewPrompts" class="prompt-list"></div>
-        </section>
+          <span class="count-badge" id="qaCount">0</span>
+        </div>
+        <p class="qa-lead" data-i18n="qa.lead">質問一覧は主役ではなく、workflow図を説明するための補助です。必要なときだけ開けるようにしています。</p>
+        <div class="qa-list" id="qaList"></div>
       </section>
     </main>
   </div>

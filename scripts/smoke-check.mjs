@@ -13,18 +13,38 @@ for (const file of requiredFiles) {
 const html = fs.readFileSync(path.join(root, "index.html"), "utf8");
 const app = fs.readFileSync(path.join(root, "app.js"), "utf8");
 const css = fs.readFileSync(path.join(root, "styles.css"), "utf8");
+const data = fs.readFileSync(path.join(root, "sample-runs.json"), "utf8");
+const combined = `${html}\n${app}\n${css}\n${data}`;
 
-for (const needle of ["Portfolio Mode", "Interview Mode", "data-lang=\"ja\"", "data-lang=\"en\"", "sample-runs.json"]) {
-  if (!html.includes(needle) && !app.includes(needle)) throw new Error(`${needle} not referenced`);
+for (const needle of [
+  "AI Development",
+  "Workflow",
+  "Reliability",
+  "data-lang=\"ja\"",
+  "data-lang=\"en\"",
+  "workflowMap",
+  "stepDetail",
+  "sample-runs.json",
+]) {
+  if (!combined.includes(needle)) throw new Error(`${needle} not referenced`);
 }
-for (const needle of ["公開可能なMVP", "AI求人市場調査DB更新", "language-switch", "日本語", "English"]) {
-  if (!html.includes(needle) && !app.includes(needle) && !css.includes(needle)) throw new Error(`${needle} missing`);
+
+for (const needle of [
+  "AI開発workflow図",
+  "evalをgateにする",
+  "workflowの中にevalを入れる意味",
+  "公開しにくい個別task",
+  "language-switch",
+]) {
+  if (!combined.includes(needle)) throw new Error(`${needle} missing`);
 }
-for (const needle of ["dashboard-grid", "metrics-grid", "@media"]) {
+
+for (const needle of ["workflow-layout", "workflow-map", "flow-node", "step-detail", "@media"]) {
   if (!css.includes(needle)) throw new Error(`${needle} CSS missing`);
 }
-for (const needle of ["language-switch"]) {
-  if (!css.includes(needle)) throw new Error(`${needle} CSS missing`);
+
+for (const banned of ["AI求人市場調査", "job-market research", "年収", "salary band"]) {
+  if (combined.includes(banned)) throw new Error(`public-facing banned term remained: ${banned}`);
 }
 
-console.log("OK: static dashboard smoke check passed");
+console.log("OK: workflow blueprint smoke check passed");

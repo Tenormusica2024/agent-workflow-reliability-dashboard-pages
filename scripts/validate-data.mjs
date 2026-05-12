@@ -9,28 +9,46 @@ function assert(condition, message) {
   if (!condition) throw new Error(message);
 }
 
-assert(data.schemaVersion, "schemaVersion required");
-assert(data.portfolioSafe === true, "portfolioSafe must be true");
-assert(Array.isArray(data.workflows) && data.workflows.length >= 3, "at least 3 workflows required");
-assert(Array.isArray(data.failureTaxonomy) && data.failureTaxonomy.length >= 3, "failure taxonomy required");
-assert(Array.isArray(data.interviewPrompts) && data.interviewPrompts.length >= 3, "interview prompts required");
-
-const ids = new Set();
-for (const run of data.workflows) {
-  assert(run.id && !ids.has(run.id), `unique id required: ${run.id}`);
-  ids.add(run.id);
-  assert(run.workflowName, `${run.id}: workflowName required`);
-  assert(["success", "warning", "failed"].includes(run.status), `${run.id}: invalid status`);
-  assert(run.goal && run.summary, `${run.id}: goal and summary required`);
-  assert(Array.isArray(run.plan) && run.plan.length >= 3, `${run.id}: plan must have >=3 steps`);
-  assert(Array.isArray(run.toolCalls), `${run.id}: toolCalls must be array`);
-  assert(run.metrics && typeof run.metrics.evalScore === "number", `${run.id}: evalScore required`);
-  assert(run.metrics.evalScore >= 0 && run.metrics.evalScore <= 1, `${run.id}: evalScore must be 0..1`);
-  assert(run.evaluation?.criteria?.length >= 2, `${run.id}: evaluation criteria required`);
-  assert(run.hitl?.status, `${run.id}: HITL status required`);
-  assert(run.failure?.category, `${run.id}: failure category required`);
-  assert(run.rollback?.condition && run.rollback?.command, `${run.id}: rollback required`);
-  assert(Array.isArray(run.interviewNotes) && run.interviewNotes.length >= 1, `${run.id}: interview notes required`);
+function bilingual(value, pathName) {
+  assert(value && typeof value === "object", `${pathName}: bilingual object required`);
+  assert(typeof value.ja === "string" && value.ja.length > 0, `${pathName}.ja required`);
+  assert(typeof value.en === "string" && value.en.length > 0, `${pathName}.en required`);
 }
 
-console.log(`OK: ${data.workflows.length} workflows, ${data.failureTaxonomy.length} failure categories, ${data.interviewPrompts.length} prompts`);
+assert(data.schemaVersion === "0.2.0", "schemaVersion must be 0.2.0");
+assert(data.portfolioSafe === true, "portfolioSafe must be true");
+assert(Array.isArray(data.workflowStages) && data.workflowStages.length >= 7, "workflowStages must have >= 7 stages");
+assert(Array.isArray(data.proofCards) && data.proofCards.length >= 3, "proofCards must have >= 3 cards");
+assert(Array.isArray(data.qa) && data.qa.length >= 3, "qa must have >= 3 items");
+
+const ids = new Set();
+for (const [index, stage] of data.workflowStages.entries()) {
+  assert(stage.id && !ids.has(stage.id), `unique stage id required: ${stage.id}`);
+  ids.add(stage.id);
+  assert(stage.order === index + 1, `${stage.id}: order must be sequential`);
+  bilingual(stage.title, `${stage.id}.title`);
+  bilingual(stage.short, `${stage.id}.short`);
+  bilingual(stage.output, `${stage.id}.output`);
+  bilingual(stage.explain, `${stage.id}.explain`);
+  bilingual(stage.proof, `${stage.id}.proof`);
+  assert(Array.isArray(stage.tools) && stage.tools.length >= 2, `${stage.id}: tools must have >= 2 items`);
+}
+
+for (const card of data.proofCards) {
+  assert(card.id, "proof card id required");
+  bilingual(card.title, `${card.id}.title`);
+  bilingual(card.body, `${card.id}.body`);
+}
+
+for (const [index, item] of data.qa.entries()) {
+  bilingual(item.question, `qa[${index}].question`);
+  bilingual(item.answer, `qa[${index}].answer`);
+}
+
+const publicJson = JSON.stringify(data).toLowerCase();
+const bannedTerms = ["求人", "job-market", "salary band", "年収", "client name", "employer private"];
+for (const term of bannedTerms) {
+  assert(!publicJson.includes(term.toLowerCase()), `public data must not include banned term: ${term}`);
+}
+
+console.log(`OK: ${data.workflowStages.length} workflow stages, ${data.proofCards.length} proof cards, ${data.qa.length} QA items`);
