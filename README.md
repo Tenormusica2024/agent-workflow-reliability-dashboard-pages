@@ -8,6 +8,7 @@ https://tenormusica2024.github.io/agent-workflow-reliability-dashboard-pages/
 
 This static dashboard demonstrates AI-agent workflow reliability concepts:
 
+- Japanese / English language switching
 - Trace logs
 - Evaluation criteria
 - HITL decisions

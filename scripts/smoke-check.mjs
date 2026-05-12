@@ -14,10 +14,16 @@ const html = fs.readFileSync(path.join(root, "index.html"), "utf8");
 const app = fs.readFileSync(path.join(root, "app.js"), "utf8");
 const css = fs.readFileSync(path.join(root, "styles.css"), "utf8");
 
-for (const needle of ["Portfolio Mode", "Interview Mode", "Run Timeline", "sample-runs.json"]) {
+for (const needle of ["Portfolio Mode", "Interview Mode", "data-lang=\"ja\"", "data-lang=\"en\"", "sample-runs.json"]) {
   if (!html.includes(needle) && !app.includes(needle)) throw new Error(`${needle} not referenced`);
 }
+for (const needle of ["公開可能なMVP", "AI求人市場調査DB更新", "language-switch", "日本語", "English"]) {
+  if (!html.includes(needle) && !app.includes(needle) && !css.includes(needle)) throw new Error(`${needle} missing`);
+}
 for (const needle of ["dashboard-grid", "metrics-grid", "@media"]) {
+  if (!css.includes(needle)) throw new Error(`${needle} CSS missing`);
+}
+for (const needle of ["language-switch"]) {
   if (!css.includes(needle)) throw new Error(`${needle} CSS missing`);
 }
 

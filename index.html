@@ -10,75 +10,74 @@
   <div class="app-shell">
     <header class="hero">
       <div class="hero__copy">
-        <p class="eyebrow">Portfolio-safe MVP</p>
+        <div class="hero__topbar">
+          <p class="eyebrow" data-i18n="hero.eyebrow">公開可能なMVP</p>
+          <div class="language-switch" data-i18n-aria-label="hero.languageAria" aria-label="言語選択">
+            <button class="lang-button is-active" type="button" data-lang="ja">日本語</button>
+            <button class="lang-button" type="button" data-lang="en">English</button>
+          </div>
+        </div>
         <h1><span>Agent Workflow</span><span>Reliability</span><span>Dashboard</span></h1>
-        <p class="hero__lead">Trace, evaluation, HITL, rollback, and handover for operable AI-agent workflows.</p>
-        <div class="hero__actions" aria-label="display mode selector">
-          <button class="mode-button is-active" data-mode="portfolio">Portfolio Mode</button>
-          <button class="mode-button" data-mode="interview">Interview Mode</button>
+        <p class="hero__lead" data-i18n="hero.lead">Trace、評価、HITL、rollback、引き継ぎまで見える、運用可能なAI agent workflowのDashboard。</p>
+        <div class="hero__actions" data-i18n-aria-label="hero.modeAria" aria-label="表示モード選択">
+          <button class="mode-button is-active" type="button" data-mode="portfolio" data-i18n="hero.portfolioMode">Portfolio Mode</button>
+          <button class="mode-button" type="button" data-mode="interview" data-i18n="hero.interviewMode">Interview Mode</button>
         </div>
       </div>
-      <aside class="hero__panel" aria-label="dashboard position statement">
-        <span class="panel-kicker">What this proves</span>
-        <p>AIエージェントを「動くデモ」で終わらせず、<br>評価・監視・承認・引き継ぎまで含めて<br>運用可能にする力を見せる。</p>
+      <aside class="hero__panel" data-i18n-aria-label="hero.panelAria" aria-label="Dashboardの位置づけ">
+        <span class="panel-kicker" data-i18n="hero.panelKicker">このDashboardで示すこと</span>
+        <p data-i18n="hero.panelBody">AI agentを「動くデモ」で終わらせず、評価・監視・承認・引き継ぎまで含めて運用可能にする力を示す。</p>
       </aside>
     </header>
 
     <main>
-      <section class="metrics-grid" id="metrics" aria-label="reliability metrics"></section>
+      <section class="metrics-grid" id="metrics" data-i18n-aria-label="sections.metricsAria" aria-label="信頼性指標"></section>
 
-      <section class="toolbar" aria-label="filters">
+      <section class="toolbar" data-i18n-aria-label="sections.filtersAria" aria-label="絞り込み">
         <label>
-          Search
-          <input id="searchInput" type="search" placeholder="workflow, tool, failure, HITL...">
+          <span data-i18n="filters.search">検索</span>
+          <input id="searchInput" type="search" data-i18n-placeholder="filters.searchPlaceholder" placeholder="workflow、tool、failure、HITL...">
         </label>
         <label>
-          Status
-          <select id="statusFilter">
-            <option value="all">All</option>
-            <option value="success">Success</option>
-            <option value="warning">Warning</option>
-            <option value="failed">Failed</option>
-          </select>
+          <span data-i18n="filters.status">状態</span>
+          <select id="statusFilter"></select>
         </label>
         <label>
-          Mode
-          <select id="modeFilter">
-            <option value="all">All</option>
-          </select>
+          <span data-i18n="filters.mode">種別</span>
+          <select id="modeFilter"></select>
         </label>
       </section>
 
       <section class="dashboard-grid">
-        <section class="card timeline-card" aria-label="run timeline">
+        <section class="card timeline-card" data-i18n-aria-label="sections.timelineAria" aria-label="Run履歴">
           <div class="section-heading">
             <div>
-              <p class="eyebrow">Run Timeline</p>
-              <h2>Agent runs</h2>
+              <p class="eyebrow" data-i18n="sections.runTimeline">Run履歴</p>
+              <h2 data-i18n="sections.agentRuns">Agent run一覧</h2>
             </div>
-            <span class="count-badge" id="visibleCount">0 runs</span>
+            <span class="count-badge" id="visibleCount">0件</span>
           </div>
           <div class="run-list" id="runList"></div>
         </section>
 
-        <section class="card detail-card" aria-label="run detail">
+        <section class="card detail-card" data-i18n-aria-label="sections.detailAria" aria-label="Run詳細">
           <div id="runDetail" class="run-detail empty-state">
-            <p class="eyebrow">Run Detail</p>
-            <h2>Select a run</h2>
-            <p>左のtimelineからrunを選ぶと、goal、plan、tool calls、eval、HITL、rollback、面接説明メモを確認できます。</p>
+            <p class="eyebrow" data-i18n="sections.runDetail">Run詳細</p>
+            <h2 data-i18n="sections.selectRun">Runを選択</h2>
+            <p data-i18n="sections.selectRunBody">左のRun履歴からRunを選ぶと、goal、plan、tool calls、eval、HITL、rollback、面接説明メモを確認できます。</p>
           </div>
         </section>
       </section>
 
       <section class="insight-grid">
         <section class="card">
-          <p class="eyebrow">Failure Taxonomy</p>
-          <h2>Failure modes</h2>
+          <p class="eyebrow" data-i18n="sections.failureTaxonomy">失敗分類</p>
+          <h2 data-i18n="sections.failureModes">失敗モード</h2>
           <div id="failureTaxonomy" class="taxonomy-list"></div>
         </section>
         <section class="card interview-card">
-          <p class="eyebrow">Interview Mode</p>
-          <h2>説明力を補完する質問</h2>
+          <p class="eyebrow" data-i18n="sections.interviewMode">Interview Mode</p>
+          <h2 data-i18n="sections.interviewQuestions">説明力を補完する質問</h2>
           <div id="interviewPrompts" class="prompt-list"></div>
         </section>
       </section>

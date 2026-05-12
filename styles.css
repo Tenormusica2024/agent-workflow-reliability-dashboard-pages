@@ -65,6 +65,40 @@ button, input, select { font: inherit; }
   min-height: 260px;
 }
 
+.hero__topbar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 4px;
+}
+
+.language-switch {
+  display: inline-flex;
+  flex: 0 0 auto;
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(5, 12, 23, 0.48);
+}
+
+.lang-button {
+  border: 0;
+  border-radius: 999px;
+  padding: 7px 11px;
+  color: var(--muted);
+  background: transparent;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.lang-button.is-active {
+  color: #04111f;
+  background: linear-gradient(135deg, var(--cyan), var(--green));
+}
+
 .hero__panel {
   min-width: 0;
   border-radius: 30px;
@@ -440,6 +474,8 @@ body[data-mode="portfolio"] .portfolio-compact { display: block; }
 @media (max-width: 720px) {
   .app-shell { width: min(100% - 20px, 1500px); padding-top: 10px; }
   .hero__lead { font-size: 16px; }
+  .hero__topbar { align-items: stretch; flex-direction: column; }
+  .language-switch { align-self: flex-start; }
   .hero__copy, .hero__panel, .card { border-radius: 20px; padding: 18px; }
   h1 { font-size: 40px; }
   .metrics-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
