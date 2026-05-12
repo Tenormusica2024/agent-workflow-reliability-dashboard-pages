@@ -30,9 +30,9 @@ for (const needle of [
 }
 
 for (const needle of [
-  "AI開発workflow図",
-  "evalをgateにする",
-  "workflowの中にevalを入れる意味",
+  "AI開発ワークフロー図",
+  "評価基準で次工程を判断する",
+  "ワークフローに評価を組み込む意味",
   "公開しにくい個別task",
   "language-switch",
 ]) {
@@ -43,8 +43,20 @@ for (const needle of ["workflow-layout", "workflow-map", "flow-node", "step-deta
   if (!css.includes(needle)) throw new Error(`${needle} CSS missing`);
 }
 
-for (const banned of ["AI求人市場調査", "job-market research", "年収", "salary band"]) {
+for (const banned of [
+  "AI求人市場調査",
+  "job-market research",
+  "年収",
+  "salary band",
+  "contextを地図化",
+  "evalをgate",
+  "gateにする",
+  "releaseとhandover",
+  "公開safe",
+  "tool実行",
+]) {
   if (combined.includes(banned)) throw new Error(`public-facing banned term remained: ${banned}`);
 }
 
 console.log("OK: workflow blueprint smoke check passed");
+

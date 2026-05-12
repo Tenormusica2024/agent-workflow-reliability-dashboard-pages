@@ -46,7 +46,20 @@ for (const [index, item] of data.qa.entries()) {
 }
 
 const publicJson = JSON.stringify(data).toLowerCase();
-const bannedTerms = ["求人", "job-market", "salary band", "年収", "client name", "employer private"];
+const bannedTerms = [
+  "求人",
+  "job-market",
+  "salary band",
+  "年収",
+  "client name",
+  "employer private",
+  "contextを地図化",
+  "evalをgate",
+  "gateにする",
+  "releaseとhandover",
+  "公開safe",
+  "tool実行",
+];
 for (const term of bannedTerms) {
   assert(!publicJson.includes(term.toLowerCase()), `public data must not include banned term: ${term}`);
 }

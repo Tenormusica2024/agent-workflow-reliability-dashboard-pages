@@ -23,19 +23,19 @@ const I18N = {
     hero: {
       eyebrow: "公開用Blueprint",
       titleHtml: "<span>AI開発</span><span>Workflow</span><span>設計</span>",
-      lead: "AI開発を「agentが動いた」で終わらせず、設計・実行・eval・HITL・rollback・改善まで説明できる形にする。",
+      lead: "AI開発を「agentが動いた」で終わらせず、設計・実行・評価・人による確認・戻し方・改善まで説明できる形にする。",
       languageAria: "言語選択",
       panelAria: "Dashboardの位置づけ",
       panelKicker: "この画面の目的",
-      panelBody: "公開しにくい個別taskではなく、AI agent workflowをどう設計し、どう信頼できる形にしているかを見せる。",
+      panelBody: "公開しにくい個別taskではなく、AI agentワークフローをどう設計し、どう信頼できる形にしているかを見せる。",
     },
     workflow: {
-      aria: "AI開発workflow図",
+      aria: "AI開発ワークフロー図",
       eyebrow: "Workflow Blueprint",
-      title: "AI開発workflow図と説明",
+      title: "AI開発ワークフロー図と説明",
       note: "各工程を押すと、その工程の役割・説得力のある説明・見せる証拠が切り替わります。",
       output: "この工程の成果物",
-      tools: "使うtool",
+      tools: "使うツール",
       why: "説得力を出す説明",
       proof: "見せる証拠",
       step: "Step",
@@ -43,12 +43,12 @@ const I18N = {
     proof: {
       aria: "説得力を支える説明",
       eyebrow: "説明文",
-      title: "workflow図の近くに置く説明文",
+      title: "ワークフロー図の近くに置く説明文",
     },
     qa: {
       eyebrow: "面接補助",
       title: "面接での答え方",
-      lead: "質問一覧は主役ではなく、workflow図を説明するための補助です。必要なときだけ開けるようにしています。",
+      lead: "質問一覧は主役ではなく、ワークフロー図を説明するための補助です。必要なときだけ開けるようにしています。",
       count: "{count}問",
     },
     error: {
@@ -284,3 +284,4 @@ async function init() {
 }
 
 init();
+
