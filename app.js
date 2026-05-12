@@ -266,6 +266,10 @@ const TRANSLATIONS = {
     "古い文脈を検出": "Stale context detected",
     "接続失敗": "Connection failed",
     "人へ送信": "Sent to human",
+    "再試行 1": "Retry 1",
+    "再試行 2": "Retry 2",
+    "全ツール (2)": "All tools (2)",
+    "全ツール (3)": "All tools (3)",
   },
 };
 
