@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title">
+  <title>Agent Workflow Reliability Dashboard</title>
+  <rect width="64" height="64" rx="14" fill="#071426"/>
+  <path d="M20 15 L32 8 L45 15 L33 23 Z" fill="none" stroke="#2563eb" stroke-width="5" stroke-linejoin="round"/>
+  <path d="M20 29 L32 22 L45 29 L33 37 Z" fill="none" stroke="#3b82f6" stroke-width="5" stroke-linejoin="round"/>
+  <path d="M20 43 L32 36 L45 43 L33 51 Z" fill="none" stroke="#60a5fa" stroke-width="5" stroke-linejoin="round"/>
+</svg>
