@@ -23,16 +23,92 @@
       "costUsd": 0.064
     },
     "spans": [
-      { "id": "planner", "name": "計画作成", "status": "success", "startMs": 0, "durationMs": 1180, "provider": "gpt-4o-mini", "retries": 0, "tokens": 1102, "costUsd": 0.007 },
-      { "id": "retriever", "name": "文脈検索", "status": "warning", "startMs": 2400, "durationMs": 8420, "provider": "text-embedding-3-small / Azure OpenAI", "retries": 1, "highlight": true, "annotation": "関連度低下" },
-      { "id": "source_check", "name": "tool_call.source_check", "status": "success", "startMs": 11200, "durationMs": 4820, "provider": "REST (HTTPS) / source-check-api", "retries": 0 },
-      { "id": "verifier", "name": "検証", "status": "warning", "startMs": 18000, "durationMs": 9320, "provider": "gpt-4o-mini / Azure OpenAI", "retries": 1, "tokens": 5310, "costUsd": 0.032, "annotation": "鮮度確認" },
-      { "id": "response", "name": "応答生成", "status": "success", "startMs": 30000, "durationMs": 2200, "provider": "gpt-4o-mini", "retries": 0, "tokens": 510, "costUsd": 0.003 }
+      {
+        "id": "planner",
+        "name": "計画作成",
+        "status": "success",
+        "startMs": 0,
+        "durationMs": 1180,
+        "provider": "gpt-4o-mini",
+        "retries": 0,
+        "tokens": 1102,
+        "costUsd": 0.007
+      },
+      {
+        "id": "retriever",
+        "name": "文脈検索",
+        "status": "warning",
+        "startMs": 2400,
+        "durationMs": 8420,
+        "provider": "text-embedding-3-small / Azure OpenAI",
+        "retries": 1,
+        "highlight": true,
+        "annotation": "関連度低下"
+      },
+      {
+        "id": "source_check",
+        "name": "tool_call.source_check",
+        "status": "success",
+        "startMs": 11200,
+        "durationMs": 4820,
+        "provider": "REST (HTTPS) / source-check-api",
+        "retries": 0
+      },
+      {
+        "id": "verifier",
+        "name": "検証",
+        "status": "warning",
+        "startMs": 18000,
+        "durationMs": 9320,
+        "provider": "gpt-4o-mini / Azure OpenAI",
+        "retries": 1,
+        "tokens": 5310,
+        "costUsd": 0.032,
+        "annotation": "鮮度確認"
+      },
+      {
+        "id": "response",
+        "name": "応答生成",
+        "status": "success",
+        "startMs": 30000,
+        "durationMs": 2200,
+        "provider": "gpt-4o-mini",
+        "retries": 0,
+        "tokens": 510,
+        "costUsd": 0.003
+      }
     ],
     "hypotheses": [
-      { "rank": 1, "title": "検索インデックスの更新遅延", "score": 0.69, "tone": "warning", "evidence": ["直近24時間の文書が検索上位に出ない", "再検索後の関連度改善が小さい"] },
-      { "rank": 2, "title": "検索クエリの制約不足", "score": 0.42, "tone": "info", "evidence": ["対象期間フィルタが未指定", "古い文書が検証直前まで残る"] },
-      { "rank": 3, "title": "外部ソース確認の遅延", "score": 0.27, "tone": "info", "evidence": ["source_check p95 が通常比 1.8x", "全体遅延への寄与は限定的"] }
+      {
+        "rank": 1,
+        "title": "検索インデックスの更新遅延",
+        "score": 0.69,
+        "tone": "warning",
+        "evidence": [
+          "直近24時間の文書が検索上位に出ない",
+          "再検索後の関連度改善が小さい"
+        ]
+      },
+      {
+        "rank": 2,
+        "title": "検索クエリの制約不足",
+        "score": 0.42,
+        "tone": "info",
+        "evidence": [
+          "対象期間フィルタが未指定",
+          "古い文書が検証直前まで残る"
+        ]
+      },
+      {
+        "rank": 3,
+        "title": "外部ソース確認の遅延",
+        "score": 0.27,
+        "tone": "info",
+        "evidence": [
+          "source_check p95 が通常比 1.8x",
+          "全体遅延への寄与は限定的"
+        ]
+      }
     ],
     "recommendedAction": {
       "title": "検索インデックスの鮮度を確認",
@@ -43,23 +119,121 @@
       "tool": "knowledge_retrieval",
       "endpoint": "https://example.local/retrieval",
       "method": "POST",
-      "headers": { "Authorization": "Bearer demo-token" },
-      "body": { "query": "latest customer policy changes", "limit": 8, "include_history": false }
+      "headers": {
+        "Authorization": "Bearer demo-token"
+      },
+      "body": {
+        "query": "latest customer policy changes",
+        "limit": 8,
+        "include_history": false
+      }
     },
     "evaluations": [
-      { "name": "目標達成", "score": 0.63, "baseline": 0.74, "impact": "中" },
-      { "name": "正確性", "score": 0.66, "baseline": 0.72, "impact": "中" },
-      { "name": "根拠の明確さ", "score": 0.54, "baseline": 0.78, "impact": "高" },
-      { "name": "文脈関連度", "score": 0.41, "baseline": 0.70, "impact": "高" },
-      { "name": "応答関連度", "score": 0.62, "baseline": 0.72, "impact": "中" },
-      { "name": "有用性", "score": 0.59, "baseline": 0.68, "impact": "中" }
+      {
+        "name": "目標達成",
+        "score": 0.63,
+        "baseline": 0.74,
+        "impact": "中"
+      },
+      {
+        "name": "正確性",
+        "score": 0.66,
+        "baseline": 0.72,
+        "impact": "中"
+      },
+      {
+        "name": "根拠の明確さ",
+        "score": 0.54,
+        "baseline": 0.78,
+        "impact": "高"
+      },
+      {
+        "name": "文脈関連度",
+        "score": 0.41,
+        "baseline": 0.7,
+        "impact": "高"
+      },
+      {
+        "name": "応答関連度",
+        "score": 0.62,
+        "baseline": 0.72,
+        "impact": "中"
+      },
+      {
+        "name": "有用性",
+        "score": 0.59,
+        "baseline": 0.68,
+        "impact": "中"
+      }
     ],
-    "replay": { "model": "gpt-4o-mini (Azure OpenAI)", "temperature": "0.2", "tools": "全ツール (3)" },
+    "replay": {
+      "model": "gpt-4o-mini (Azure OpenAI)",
+      "temperature": "0.2",
+      "tools": "全ツール (3)"
+    },
     "logs": [
-      { "time": "11:18:52.018", "level": "WARN", "source": "retriever", "message": "検索上位の文書鮮度が低い" },
-      { "time": "11:18:50.204", "level": "INFO", "source": "source_check", "message": "外部ソース確認完了" },
-      { "time": "11:18:48.992", "level": "WARN", "source": "verifier", "message": "根拠の鮮度確認を要求" },
-      { "time": "11:18:44.120", "level": "INFO", "source": "session", "message": "セッション開始" }
+      {
+        "time": "11:18:52.018",
+        "level": "WARN",
+        "source": "retriever",
+        "message": "検索上位の文書鮮度が低い"
+      },
+      {
+        "time": "11:18:50.204",
+        "level": "INFO",
+        "source": "source_check",
+        "message": "外部ソース確認完了"
+      },
+      {
+        "time": "11:18:48.992",
+        "level": "WARN",
+        "source": "verifier",
+        "message": "根拠の鮮度確認を要求"
+      },
+      {
+        "time": "11:18:44.120",
+        "level": "INFO",
+        "source": "session",
+        "message": "セッション開始"
+      }
+    ],
+    "history": [
+      {
+        "label": "latest",
+        "time": "今日 11:08",
+        "affectedSessions": 418,
+        "sloBurn": 1.4,
+        "durationMs": 36204,
+        "errorRate": 0.4,
+        "status": "監視中"
+      },
+      {
+        "label": "previous",
+        "time": "45分前",
+        "affectedSessions": 326,
+        "sloBurn": 1,
+        "durationMs": 29687,
+        "errorRate": 0.3,
+        "status": "監視中"
+      },
+      {
+        "label": "earlier",
+        "time": "2時間前",
+        "affectedSessions": 217,
+        "sloBurn": 0.6,
+        "durationMs": 20998,
+        "errorRate": 0.2,
+        "status": "stable"
+      },
+      {
+        "label": "baseline-7d",
+        "time": "7日基準",
+        "affectedSessions": 130,
+        "sloBurn": 0.5,
+        "durationMs": 15206,
+        "errorRate": 0.1,
+        "status": "baseline"
+      }
     ]
   }
 }

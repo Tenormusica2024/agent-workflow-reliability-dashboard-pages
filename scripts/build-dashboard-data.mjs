@@ -156,7 +156,17 @@ function buildWorkflow(workflow, config) {
 }
 
 function buildHistory(workflow) {
-  if (Array.isArray(workflow.history) && workflow.history.length >= 2) return workflow.history;
+  if (Array.isArray(workflow.history) && workflow.history.length >= 2) {
+    return workflow.history.map((item) => ({
+      label: item.label,
+      time: item.time,
+      affectedSessions: Number(item.affectedSessions),
+      sloBurn: Number(item.sloBurn),
+      durationMs: Number(item.durationMs),
+      errorRate: Number(item.errorRate),
+      status: item.status,
+    }));
+  }
   const affected = Number(workflow.incident.affectedSessions);
   const slo = Number(workflow.incident.sloBurn);
   const durationMs = Number(workflow.trace.durationMs);

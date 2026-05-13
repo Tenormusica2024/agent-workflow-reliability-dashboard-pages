@@ -24,6 +24,7 @@ The source format is intentionally smaller than `sample-runs.json`. It represent
 - hypotheses and evidence
 - generated run history / previous-run comparison
 - recommended next action
+- optional `history[]` for previous-run and 7-day-baseline comparison
 - tool payload to be redacted
 - evaluations
 - replay defaults
@@ -35,7 +36,27 @@ Validate the source telemetry contract:
 npm run validate:source
 ```
 
-The validator checks required object shape, duplicate IDs, basic numeric ranges, span timing within trace duration, hypothesis/evaluation scores, replay defaults, and minimum log/evaluation rows.
+The validator checks required object shape, duplicate IDs, basic numeric ranges, span timing within trace duration, hypothesis/evaluation scores, optional `history[]`, replay defaults, and minimum log/evaluation rows.
+
+### Run history shape
+
+Real collectors can pass previous-run comparison data through `workflow.history[]`.
+
+Each item uses this minimal shape:
+
+```json
+{
+  "label": "latest",
+  "time": "2026-05-13T13:42:00+09:00",
+  "affectedSessions": 1243,
+  "sloBurn": 2.6,
+  "durationMs": 48712,
+  "errorRate": 2.7,
+  "status": "ongoing"
+}
+```
+
+If `history[]` is missing, the builder generates a demo-safe fallback from the current incident, trace, and logs. For real operation, prefer explicit collector-provided history so trend and recovery judgments are not inferred from a single run.
 
 ## Generated dashboard data
 

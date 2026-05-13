@@ -103,6 +103,7 @@ function validateWorkflow(workflow, label) {
     fail(`${label}.payload`, "object required");
   }
   validateEvaluations(workflow.evaluations, `${label}.evaluations`);
+  if (workflow.history != null) validateHistory(workflow.history, `${label}.history`);
   validateReplay(workflow.replay, `${label}.replay`);
   validateLogs(workflow.logs, `${label}.logs`);
 }
@@ -193,6 +194,22 @@ function validateEvaluations(evaluations, label) {
     ratio(item.score, `${itemPath}.score`);
     ratio(item.baseline, `${itemPath}.baseline`);
     nonEmptyString(item.impact, `${itemPath}.impact`);
+  }
+}
+
+function validateHistory(history, label) {
+  arrayMin(history, 2, label);
+  for (const [index, item] of history.entries()) {
+    const itemPath = `${label}[${index}]`;
+    if (!item || typeof item !== "object" || Array.isArray(item)) fail(itemPath, "object required");
+    nonEmptyString(item.label ?? item.time, `${itemPath}.labelOrTime`);
+    if (item.label != null) nonEmptyString(item.label, `${itemPath}.label`);
+    if (item.time != null) nonEmptyString(item.time, `${itemPath}.time`);
+    nonNegativeNumber(item.affectedSessions, `${itemPath}.affectedSessions`);
+    nonNegativeNumber(item.sloBurn, `${itemPath}.sloBurn`);
+    positiveNumber(item.durationMs, `${itemPath}.durationMs`);
+    nonNegativeNumber(item.errorRate, `${itemPath}.errorRate`);
+    optionalString(item.status, `${itemPath}.status`);
   }
 }
 

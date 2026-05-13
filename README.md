@@ -82,6 +82,8 @@ http://localhost:4173
 
 複数のAIエージェントワークフローを `workflows[]` に追加すれば、上部セレクトから切り替えられます。
 
+実運用では、各workflowに任意の `history[]` を追加できます。これにより、前回run・7日基準との差分をcollector由来の値で表示できます。`history[]` がない場合は、デモ用fallbackを生成して表示します。
+
 ## Operational data path
 
 実運用に近づけるため、最小のデータ投入パイプラインを追加しています。
