@@ -118,9 +118,9 @@ npm run promote:data
 
 ## Public-safe content policy
 
-公開化するまではprivate repoで進めます。
+private repoで作業し、公開可能な内容だけpublic Pages repoへ同期します。
 
-公開時は以下を入れないこと：
+公開版には以下を入れないこと：
 
 - employer / client の非公開情報
 - 個人情報・家族情報
