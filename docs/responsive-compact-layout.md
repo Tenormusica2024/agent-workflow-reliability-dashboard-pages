@@ -36,3 +36,24 @@
 - bottom area は `Payload + Evaluations`、次に `Replay + Logs`。
 - `@media (max-width: 1180px)` で全パネルを1カラム化。
 - Dense table / timeline はコンテナ内の `overflow-x: auto` に閉じ込め、page-level horizontal scroll を避ける。
+
+## Mobile-specific update 2026-05-13
+
+追加でモバイル表示を以下の方針に寄せた。
+
+- Material Design の bottom navigation 方針に合わせ、スマホ幅では左サイドバーを固定の下部ナビへ変換する。
+  - Material Design は bottom navigation を mobile primarily とし、3〜5個の top-level destinations に向くとしている。
+  - このため、スマホでは主要5項目だけを下部ナビに出し、残りの `再実行` / `アラート` / settings 系は表示優先度を下げた。
+  - 参照: https://m1.material.io/components/bottom-navigation.html
+- WCAG 2.2 Target Size Minimum に合わせ、スマホ幅の主要ボタンは 44px 前後以上のタップ領域を確保する。
+  - WCAG 2.2 SC 2.5.8 は少なくとも 24 x 24 CSS px の target / spacing を求める。
+  - 実装上は主要操作を 44px 以上に寄せ、誤タップ耐性を優先した。
+  - 参照: https://www.w3.org/WAI/WCAG22/Understanding/target-size-minimum
+- Android accessibility guidance / Material accessibility の考え方に合わせ、アイコン自体ではなく周辺 padding を含む touch target を確保する。
+  - 参照: https://support.google.com/accessibility/android/answer/7101858?hl=en
+- スマホではページ全体の横スクロールを禁止し、Trace Tree / Waterfall のような dense panel のみ内部横スクロールにする。
+- スマホの情報優先順位は `Incident summary -> Trace Tree -> RCA -> Waterfall -> Payload/Eval/Replay/Logs` とした。
+  - 最初の1画面では「何が起きているか」と「どの trace が怪しいか」を優先する。
+  - 原因推定は Trace Tree の直後に置き、モバイルでも triage 作業の流れが途切れないようにした。
+- `max-width: 760px` でスマホ専用表示へ切り替える。
+  - さらに `max-width: 420px` では言語切替と confidence card を縦積みにして横はみ出しを避ける。
