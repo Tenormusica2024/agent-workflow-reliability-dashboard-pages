@@ -95,11 +95,18 @@ npm run check
 - generated dashboard data: `tmp/generated-sample-runs.json`
 - contract notes: `docs/operations-data-contract.md`
 
+source telemetryの契約だけを確認する場合は以下を使います。
+
+```powershell
+npm run validate:source
+```
+
 現時点ではブラウザは引き続き `sample-runs.json` を読み込みます。実運用接続時は、実行ログ収集側が `agent-runs.v0.1` 形式を出し、`build:data` でUI用schemaへ変換する想定です。
 
 複数の実行ログをファイル投入する場合は `data/incoming/*.json` に `agent-run.v0.1` を置き、以下で1つのUI用JSONに変換できます。
 
 ```powershell
+npm run validate:incoming:raw
 npm run build:incoming
 npm run check:incoming
 ```
@@ -124,6 +131,7 @@ GitHub Actions で dashboard data pipeline のpreflightを自動実行します�
 
 - checked-in sampleの検証: `npm run check`
 - file-drop intakeの検証: `npm run check:incoming`
+- source/incoming telemetry contractの検証
 - `sample-runs.json` 昇格前のdry-run promotion
 - CI中にtracked fileが意図せず変わっていないことの確認
 

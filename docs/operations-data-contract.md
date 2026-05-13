@@ -28,6 +28,14 @@ The source format is intentionally smaller than `sample-runs.json`. It represent
 - replay defaults
 - logs
 
+Validate the source telemetry contract:
+
+```powershell
+npm run validate:source
+```
+
+The validator checks required object shape, duplicate IDs, basic numeric ranges, span timing within trace duration, hypothesis/evaluation scores, replay defaults, and minimum log/evaluation rows.
+
 ## Generated dashboard data
 
 Command:
@@ -79,7 +87,7 @@ Run the file-drop preflight:
 npm run check:incoming
 ```
 
-The merge step rejects duplicate workflow IDs so the dashboard selector cannot silently point to the wrong run. `check:incoming` also scans both `tmp/merged-agent-runs.json` and `tmp/generated-sample-runs.json` before the data can be promoted.
+The merge step rejects duplicate workflow IDs so the dashboard selector cannot silently point to the wrong run. `check:incoming` validates raw incoming files, validates the merged telemetry bundle, and scans both `tmp/merged-agent-runs.json` and `tmp/generated-sample-runs.json` before the data can be promoted.
 
 ## Safe promotion
 
@@ -133,6 +141,7 @@ The workflow checks:
 
 - `npm run check`
 - `npm run check:incoming`
+- source/incoming telemetry contract validation
 - dry-run promotion to `tmp/promoted-sample-runs.json`
 - no tracked file mutations after generation
 
