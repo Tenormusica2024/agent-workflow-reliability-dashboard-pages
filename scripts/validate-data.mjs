@@ -2,11 +2,11 @@ import fs from "node:fs";
 import path from "node:path";
 
 const root = path.resolve(new URL("..", import.meta.url).pathname.replace(/^\/(.:\/)/, "$1"));
-const dataPath = path.join(root, "sample-runs.json");
+const dataPath = process.argv[2] ? path.resolve(root, process.argv[2]) : path.join(root, "sample-runs.json");
 const data = JSON.parse(fs.readFileSync(dataPath, "utf8"));
 
 function assert(condition, message) {
-  if (!condition) throw new Error(message);
+  if (!condition) throw new Error(`${path.relative(root, dataPath)}: ${message}`);
 }
 
 function nonEmptyString(value, pathName) {
@@ -73,7 +73,7 @@ const serialized = JSON.stringify(data).toLowerCase();
 const bannedTerms = [
   "client" + " name",
   "employer" + " private",
-  "salary band",
+  "salary" + " band",
   "年" + "収",
   "credential",
   "pass" + "word"
@@ -82,4 +82,4 @@ for (const term of bannedTerms) {
   assert(!serialized.includes(term.toLowerCase()), `public data must not include banned term: ${term}`);
 }
 
-console.log(`OK: ${data.workflows.length} agent workflows validated for trace triage dashboard`);
+console.log(`OK: ${data.workflows.length} agent workflows validated for trace triage dashboard (${path.relative(root, dataPath)})`);

@@ -6,8 +6,12 @@
   "description": "Japanese-first Agent Trace Triage Console prototype for AI agent workflow reliability dashboards.",
   "scripts": {
     "serve": "python -m http.server 4173",
+    "build:data": "node scripts/build-dashboard-data.mjs --input data/agent-runs.example.json --output tmp/generated-sample-runs.json",
     "validate": "node scripts/validate-data.mjs",
-    "smoke": "node scripts/smoke-check.mjs"
+    "validate:generated": "node scripts/validate-data.mjs tmp/generated-sample-runs.json",
+    "safety:scan": "node scripts/safety-scan.mjs sample-runs.json data/agent-runs.example.json tmp/generated-sample-runs.json",
+    "smoke": "node scripts/smoke-check.mjs",
+    "check": "npm run build:data && npm run validate && npm run validate:generated && npm run smoke && npm run safety:scan"
   },
   "keywords": [
     "ai-agent",

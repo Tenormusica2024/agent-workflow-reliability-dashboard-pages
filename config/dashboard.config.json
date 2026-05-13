@@ -1,0 +1,37 @@
+{
+  "schemaVersion": "dashboard-ops-config.v0.1",
+  "dashboardSchemaVersion": "0.3.0",
+  "portfolioSafeDefault": true,
+  "navigation": [
+    "トリアージ",
+    "ライブ実行",
+    "スパン分析",
+    "ツール呼び出し",
+    "評価",
+    "再実行",
+    "アラート"
+  ],
+  "thresholds": {
+    "severity": {
+      "sev2MinAffectedSessions": 1000,
+      "sev3MinAffectedSessions": 250
+    },
+    "rcaConfidence": {
+      "high": 80,
+      "medium": 55
+    },
+    "sloBurnHigh": 2.0,
+    "spanTimeoutMs": 10000,
+    "maxWaterfallMs": 60000
+  },
+  "redaction": {
+    "mask": "********",
+    "secretHeaderKeys": ["authorization", "x-api-key", "api-key", "cookie", "set-cookie"],
+    "sensitiveBodyKeys": ["email", "phone", "name", "address", "token", "secret", "customer_id", "account_id", "record_id"],
+    "rules": ["個人情報", "Secrets", "Tokens", "Email", "+12 more"]
+  },
+  "publicSafety": {
+    "enabled": true,
+    "description": "Do not publish credentials, private customer identifiers, employer-private facts, private repo paths, or non-redacted live payloads. Banned literal examples are defined in scripts/safety-scan.mjs without exposing the terms as data."
+  }
+}

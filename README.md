@@ -1,18 +1,35 @@
 # Agent Workflow Reliability Dashboard
 
-日本語UIの **Agent Trace Triage Console** プロトタイプです。
+日本語UIで使う **Agent Trace Triage Console** のプロトタイプです。
 
-AIエージェントの実行が失敗・劣化したときに、どの工程で壊れたか、なぜ壊れたか、次に何を確認すべきかを説明できるダッシュボードを目指しています。
+目的は、AIエージェントの実行が失敗・劣化したときに、どの工程で壊れたか、なぜ壊れたか、次に何を確認すべきかを説明できるダッシュボードにすることです。
 
-## Live URL
+## Current UI direction
 
-https://tenormusica2024.github.io/agent-workflow-reliability-dashboard-pages/
+現在の実装は、デザイン案のうち特に気に入っている **v2 - Engineer Trace Triage Console** をベースにしています。
 
-## Language
+重視点：
 
-日本語 / English の切り替えに対応しています。
+- v2画像に近い、左サイドバー + 暗色ヘッダー + 白カードの構成
+- 日本語で企業・クライアントに説明しやすいUI
+- trace / span / tool call / eval / RCA / replay / logs を一画面で見る構成
+- 後から複数のAIエージェントワークフローに接続できるデータ駆動設計
 
-## What this shows
+## Design concepts
+
+生成済みのデザイン参考画像はこちらです。
+
+- [Full design concept gallery](assets/design-concepts/2026-05-12/README.md)
+
+| Executive / overview | Engineer / trace triage |
+|---|---|
+| <img src="assets/design-concepts/2026-05-12/v1-executive-reliability-command-center.png" alt="Executive Reliability Command Center" width="480"> | <img src="assets/design-concepts/2026-05-12/v2-engineer-trace-triage-console.png" alt="Engineer Trace Triage Console" width="480"> |
+
+| Evaluation / governance | Operations / tool reliability |
+|---|---|
+| <img src="assets/design-concepts/2026-05-12/v3-evaluation-release-governance-board.png" alt="Evaluation and Release Governance Board" width="480"> | <img src="assets/design-concepts/2026-05-12/v4-agent-operations-tool-reliability-map.png" alt="Agent Operations and Tool Reliability Map" width="480"> |
+
+## What this dashboard shows
 
 - インシデント概要
 - トレースツリー
@@ -23,19 +40,28 @@ https://tenormusica2024.github.io/agent-workflow-reliability-dashboard-pages/
 - 再実行パネル
 - 関連ログとエラー
 
-## Design intent
+## Run locally
 
-この画面は、単なる分析ダッシュボードではなく、AIエージェント運用に必要な以下を一画面で説明するためのものです。
+```powershell
+cd C:\Users\Tenormusica\agent-workflow-reliability-dashboard
+npm run validate
+npm run smoke
+npm run serve
+```
 
-- 実行単位の可観測性
-- ツール呼び出しの失敗箇所
-- 評価指標との紐づき
-- 原因推定と次の対応
-- 再実行・検証の流れ
+Open:
+
+```text
+http://localhost:4173
+```
+
+`file://` で直接開くと JSON 読み込みが止まる場合があります。ローカルサーバー経由で確認してください。
 
 ## Data model
 
 画面は `sample-runs.json` を読み込みます。
+
+現在のschemaは `0.3.0` です。
 
 主な構造：
 
@@ -52,22 +78,48 @@ https://tenormusica2024.github.io/agent-workflow-reliability-dashboard-pages/
   - replay settings
   - linked logs
 
-サンプルデータは公開用に匿名化・架空化しています。
+複数のAIエージェントワークフローを `workflows[]` に追加すれば、上部セレクトから切り替えられます。
 
-## Run locally
+## Operational data path
+
+実運用に近づけるため、最小のデータ投入パイプラインを追加しています。
 
 ```powershell
-npm run validate
-npm run smoke
-npm run serve
+npm run build:data
+npm run check
 ```
 
-Open:
+- source telemetry example: `data/agent-runs.example.json`
+- operational config: `config/dashboard.config.json`
+- generated dashboard data: `tmp/generated-sample-runs.json`
+- contract notes: `docs/operations-data-contract.md`
 
-```text
-http://localhost:4173
-```
+現時点ではブラウザは引き続き `sample-runs.json` を読み込みます。実運用接続時は、実行ログ収集側が `agent-runs.v0.1` 形式を出し、`build:data` でUI用schemaへ変換する想定です。
 
-## Public-safe policy
+## Public-safe content policy
 
-この公開repoには、非公開の調査メモ、実在の顧客情報、認証情報、private repo由来の詳細ログは含めません。
+公開化するまではprivate repoで進めます。
+
+公開時は以下を入れないこと：
+
+- employer / client の非公開情報
+- 個人情報・家族情報
+- credentials / secrets
+- private repository content
+- 実在顧客のログやpayload
+- NDA案件の具体名
+
+使うべきもの：
+
+- 架空または匿名化したワークフロー名
+- 秘匿済みpayload
+- 抽象化したログ・評価項目
+- 公開可能な設計意図
+
+## Next improvements
+
+- v2 PNGとの細部比較を行い、余白・罫線・密度をさらに近づける
+- v3の評価・リリース統制画面を別タブとして追加する
+- 実データ接続用のadapter層を追加する
+- trace / eval / logs のschemaをOpenTelemetry風に寄せる
+- 公開用のサンプルデータとprivate運用データを分離する

@@ -132,7 +132,7 @@
         { "id": "trace", "level": 1, "name": "実行トレース", "status": "warning", "duration": "31,540", "provider": "gpt-4o-mini / Azure OpenAI", "retries": "1", "cost": "9,443 / $0.061", "selected": true },
         { "id": "planner", "level": 2, "name": "計画作成", "status": "success", "duration": "1,108", "provider": "gpt-4o-mini", "retries": "0", "cost": "1,004 / $0.006" },
         { "id": "retriever", "level": 2, "name": "文脈検索", "status": "warning", "duration": "8,920", "provider": "vector-db / hybrid-search", "retries": "1", "cost": "1,820 / $0.004", "highlight": true },
-        { "id": "web", "level": 2, "name": "tool_call.source_check", "status": "success", "duration": "6,410", "provider": "REST (HTTPS) / source.internal", "retries": "0", "cost": "— / —" },
+        { "id": "web", "level": 2, "name": "tool_call.source_check", "status": "success", "duration": "6,410", "provider": "REST (HTTPS) / source-check-api", "retries": "0", "cost": "— / —" },
         { "id": "verifier", "level": 2, "name": "検証", "status": "warning", "duration": "11,204", "provider": "gpt-4o-mini", "retries": "0", "cost": "5,612 / $0.036" },
         { "id": "response", "level": 2, "name": "応答生成", "status": "success", "duration": "2,146", "provider": "gpt-4o-mini", "retries": "0", "cost": "1,007 / $0.005" }
       ],
@@ -260,4 +260,3 @@
     }
   ]
 }
-
