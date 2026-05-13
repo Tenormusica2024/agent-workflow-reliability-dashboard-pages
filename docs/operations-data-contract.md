@@ -22,6 +22,7 @@ The source format is intentionally smaller than `sample-runs.json`. It represent
 - trace/session summary
 - spans with status, duration, retries, provider, cost, and annotations
 - hypotheses and evidence
+- generated run history / previous-run comparison
 - recommended next action
 - tool payload to be redacted
 - evaluations

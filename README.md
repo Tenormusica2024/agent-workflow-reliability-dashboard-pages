@@ -35,6 +35,7 @@
 - トレースツリー
 - スパンのウォーターフォール
 - 原因推定アシスタント
+- 実行履歴・過去run比較
 - 秘匿済みツール入力
 - トレース単位の評価
 - 再実行パネル
@@ -72,6 +73,7 @@ http://localhost:4173
   - trace tree rows
   - waterfall spans
   - root-cause hypotheses
+  - run history / previous-run comparison
   - recommended action
   - redacted tool payload
   - evaluations

@@ -65,6 +65,17 @@ for (const workflow of data.workflows) {
   assert(workflow.payload && Array.isArray(workflow.payload.code) && workflow.payload.code.length >= 4, `${workflow.id}.payload.code required`);
   assert(Array.isArray(workflow.payload.redactionRules) && workflow.payload.redactionRules.length >= 3, `${workflow.id}.payload.redactionRules required`);
   assert(Array.isArray(workflow.evaluations) && workflow.evaluations.length >= 5, `${workflow.id}.evaluations required`);
+  if (workflow.history != null) {
+    assert(Array.isArray(workflow.history) && workflow.history.length >= 2, `${workflow.id}.history must have >= 2 items`);
+    for (const [index, item] of workflow.history.entries()) {
+      const itemPath = `${workflow.id}.history[${index}]`;
+      assert(item && typeof item === "object", `${itemPath} must be object`);
+      nonEmptyString(item.label ?? item.time, `${itemPath}.labelOrTime`);
+      for (const key of ["affectedSessions", "sloBurn", "durationMs", "errorRate"]) {
+        assert(typeof item[key] === "number" && Number.isFinite(item[key]) && item[key] >= 0, `${itemPath}.${key} must be non-negative number`);
+      }
+    }
+  }
   assert(workflow.replay, `${workflow.id}.replay required`);
   assert(Array.isArray(workflow.logs) && workflow.logs.length >= 4, `${workflow.id}.logs required`);
 }

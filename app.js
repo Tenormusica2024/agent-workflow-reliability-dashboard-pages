@@ -23,6 +23,17 @@ const UI = {
     status: "状態",
     details: "詳細",
     viewDetails: "詳細を見る",
+    historyTitle: "実行履歴・過去run比較",
+    historySubtitle: "直近4回 / 7日基準との差分",
+    historyLatest: "最新run",
+    historyPrevious: "前回比",
+    historySlo: "SLO消費",
+    historyDuration: "p95時間",
+    historyAffected: "影響",
+    historyErrorRate: "エラー率",
+    historyRecovered: "改善",
+    historyWorse: "悪化",
+    historyStable: "横ばい",
     traceTree: "トレースツリー",
     tracePath: "Session → Trace → Spans",
     searchSpans: "スパン検索",
@@ -102,6 +113,17 @@ const UI = {
     status: "Status",
     details: "View",
     viewDetails: "View incident",
+    historyTitle: "Run History & Comparison",
+    historySubtitle: "Last 4 runs / 7d baseline delta",
+    historyLatest: "Latest run",
+    historyPrevious: "vs previous",
+    historySlo: "SLO burn",
+    historyDuration: "p95 duration",
+    historyAffected: "Affected",
+    historyErrorRate: "Error rate",
+    historyRecovered: "Recovered",
+    historyWorse: "Worse",
+    historyStable: "Stable",
     traceTree: "Trace Tree",
     tracePath: "Session → Trace → Spans",
     searchSpans: "Search spans",
@@ -180,6 +202,10 @@ const TRANSLATIONS = {
     "今日 13:42": "Today 13:42",
     "今日 11:08": "Today 11:08",
     "今日 09:16": "Today 09:16",
+    "45分前": "45m ago",
+    "2時間前": "2h ago",
+    "4時間前": "4h ago",
+    "7日基準": "7d baseline",
     "対応中": "Ongoing",
     "監視中": "Monitoring",
     "高": "High",
@@ -188,9 +214,9 @@ const TRANSLATIONS = {
     "サポート対応AI": "Support Agent",
     "情報整理AI": "Research Agent",
     "手続き確認AI": "Operations Agent",
-    "サポート対応AI": "Customer Support Agent",
-    "情報整理AI": "Research Agent",
-    "手続き確認AI": "Billing Agent",
+    "顧客サポートAI": "Customer Support Agent",
+    "調査支援AI": "Research Agent",
+    "請求確認AI": "Billing Agent",
     "ツール応答遅延により検証処理が再試行": "Tool timeout spike causing verifier retries",
     "検索文脈の鮮度低下により回答検証が保留": "Stale retrieval context causing verifier hold",
     "決済ツールの接続失敗により人による確認へ送信": "Tool connection failure routed to human review",
@@ -348,6 +374,50 @@ function impactClass(value) {
   return "info";
 }
 
+function numericValue(value) {
+  if (typeof value === "number") return value;
+  const parsed = Number(String(value ?? "").replace(/[^0-9.-]/g, ""));
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function compactNumber(value) {
+  return Math.round(numericValue(value)).toLocaleString("en-US");
+}
+
+function signedDelta(current, previous, suffix = "") {
+  const delta = numericValue(current) - numericValue(previous);
+  const sign = delta > 0 ? "+" : "";
+  return `${sign}${Number(delta.toFixed(1))}${suffix}`;
+}
+
+function historyDirection(current, previous, lowerIsBetter = true) {
+  const delta = numericValue(current) - numericValue(previous);
+  if (Math.abs(delta) < 0.05) return "stable";
+  const worse = lowerIsBetter ? delta > 0 : delta < 0;
+  return worse ? "worse" : "recovered";
+}
+
+function directionLabel(direction) {
+  if (direction === "worse") return ui("historyWorse");
+  if (direction === "recovered") return ui("historyRecovered");
+  return ui("historyStable");
+}
+
+function historyFor(workflow) {
+  if (Array.isArray(workflow.history) && workflow.history.length >= 2) return workflow.history;
+  const affected = numericValue(workflow.incident.affectedSessions);
+  const slo = numericValue(workflow.incident.sloBurn);
+  const durationMs = numericValue(workflow.traceTree?.[1]?.duration);
+  const errorCount = workflow.logs.filter((log) => log.level === "ERROR").length;
+  const errorRate = Math.max(0.4, Number(((errorCount / Math.max(workflow.logs.length, 1)) * 8).toFixed(1)));
+  return [
+    { label: ui("historyLatest"), time: text(workflow.incident.started), affectedSessions: affected, sloBurn: slo, durationMs, errorRate, status: text(workflow.incident.status) },
+    { label: "45分前", time: "45分前", affectedSessions: Math.round(affected * 0.78), sloBurn: Math.max(0.4, Number((slo * 0.72).toFixed(1))), durationMs: Math.round(durationMs * 0.82), errorRate: Math.max(0.2, Number((errorRate * 0.72).toFixed(1))), status: text(workflow.incident.status) },
+    { label: "2時間前", time: "2時間前", affectedSessions: Math.round(affected * 0.52), sloBurn: Math.max(0.3, Number((slo * 0.46).toFixed(1))), durationMs: Math.round(durationMs * 0.58), errorRate: Math.max(0.1, Number((errorRate * 0.48).toFixed(1))), status: ui("historyStable") },
+    { label: "7日基準", time: "7日基準", affectedSessions: Math.round(affected * 0.31), sloBurn: Math.max(0.2, Number((slo * 0.34).toFixed(1))), durationMs: Math.round(durationMs * 0.42), errorRate: Math.max(0.1, Number((errorRate * 0.35).toFixed(1))), status: "baseline" },
+  ];
+}
+
 function renderShell() {
   const workflow = currentWorkflow();
   document.documentElement.lang = state.language;
@@ -373,6 +443,7 @@ function renderShell() {
     <main class="dashboard">
       ${renderHeader(workflow)}
       ${renderIncident(workflow)}
+      ${renderHistory(workflow)}
       <section class="main-grid">
         ${renderTraceTree(workflow)}
         ${renderWaterfall(workflow)}
@@ -430,6 +501,45 @@ function renderHeader(workflow) {
         </aside>
       </div>
     </header>
+  `;
+}
+
+function renderHistory(workflow) {
+  const history = historyFor(workflow);
+  const latest = history[0];
+  const previous = history[1] ?? history[0];
+  const baseline = history[history.length - 1] ?? previous;
+  const direction = historyDirection(latest.sloBurn, previous.sloBurn, true);
+  const sparkMax = Math.max(...history.map((item) => numericValue(item.affectedSessions)), 1);
+  const latestSlo = numericValue(latest.sloBurn);
+  const latestDuration = numericValue(latest.durationMs);
+  const latestAffected = numericValue(latest.affectedSessions);
+  const latestErrorRate = numericValue(latest.errorRate);
+  return `
+    <section class="panel history-panel" aria-label="${escapeHtml(ui("historyTitle"))}">
+      <div class="history-head">
+        <div>
+          <h3>${escapeHtml(ui("historyTitle"))}</h3>
+          <p>${escapeHtml(ui("historySubtitle"))}</p>
+        </div>
+        <span class="history-state history-state--${direction}">${escapeHtml(directionLabel(direction))}</span>
+      </div>
+      <div class="history-metrics">
+        <div class="history-metric"><span>${escapeHtml(ui("historySlo"))}</span><strong>${latestSlo.toFixed(1)}x</strong><em>${escapeHtml(signedDelta(latestSlo, previous.sloBurn, "x"))}</em></div>
+        <div class="history-metric"><span>${escapeHtml(ui("historyDuration"))}</span><strong>${compactNumber(latestDuration)}ms</strong><em>${escapeHtml(signedDelta(latestDuration, baseline.durationMs, "ms"))}</em></div>
+        <div class="history-metric"><span>${escapeHtml(ui("historyAffected"))}</span><strong>${compactNumber(latestAffected)}</strong><em>${escapeHtml(signedDelta(latestAffected, previous.affectedSessions))}</em></div>
+        <div class="history-metric"><span>${escapeHtml(ui("historyErrorRate"))}</span><strong>${latestErrorRate.toFixed(1)}%</strong><em>${escapeHtml(signedDelta(latestErrorRate, baseline.errorRate, "%"))}</em></div>
+      </div>
+      <div class="history-spark" aria-label="${escapeHtml(ui("historyPrevious"))}">
+        ${history.map((item, index) => `
+          <div class="history-run ${index === 0 ? "is-current" : ""}">
+            <span>${escapeHtml(text(item.time ?? item.label))}</span>
+            <i style="height:${Math.max(14, Math.round((numericValue(item.affectedSessions) / sparkMax) * 54))}px"></i>
+            <b>${compactNumber(item.affectedSessions)}</b>
+          </div>
+        `).join("")}
+      </div>
+    </section>
   `;
 }
 

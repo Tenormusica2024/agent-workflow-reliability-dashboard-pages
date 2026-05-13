@@ -21,6 +21,7 @@ for (const needle of [
   "トレースツリー",
   "トレース・ウォーターフォール",
   "原因推定アシスタント",
+  "実行履歴・過去run比較",
   "ツール入力（秘匿済み）",
   "評価（トレース単位）",
   "関連ログとエラー",
@@ -48,7 +49,7 @@ if (!Array.isArray(data.workflows) || data.workflows.length < 2) {
   throw new Error("multi-workflow sample data missing");
 }
 
-for (const banned of ["AI求人市場調査", "salary band", "年" + "収", "client" + " name", "employer" + " private", "pass" + "word"]) {
+for (const banned of ["AI求人市場調査", "salary band", "年" + "収", "client name", "employer private", "password"]) {
   if (combined.toLowerCase().includes(banned.toLowerCase())) throw new Error(`public-facing banned term remained: ${banned}`);
 }
 
