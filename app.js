@@ -1,6 +1,14 @@
 const DATA_URL = "sample-runs.json";
 const LANGUAGE_STORAGE_KEY = "awrd-language";
 const DEFAULT_LANGUAGE = "ja";
+const DEFAULT_RELIABILITY_THRESHOLDS = Object.freeze({
+  sloPreviousDeltaAlert: 0.5,
+  sloBaselineRatioAlert: 2,
+  errorRateDeltaAlert: 1,
+  affectedSessionsDeltaAlert: 100,
+  recoverySloBurnMax: 1.2,
+  criticalSloBurnMin: 2,
+});
 
 const UI = {
   ja: {
@@ -48,10 +56,10 @@ const UI = {
     decisionNextWatch: "次runを監視",
     decisionNextRecovery: "回復を確認",
     decisionNextContinue: "通常監視",
-    ruleSloDelta: "SLO前回比 +0.5x以上",
-    ruleBaselineRatio: "7日基準比 2倍以上",
-    ruleErrorDelta: "エラー率 +1pt以上",
-    ruleAffectedDelta: "影響 +100以上",
+    ruleSloDelta: "SLO前回比",
+    ruleBaselineRatio: "7日基準比",
+    ruleErrorDelta: "エラー率",
+    ruleAffectedDelta: "影響",
     ruleTwoRunRecovery: "2連続改善",
     ruleNormal: "閾値内",
     traceTree: "トレースツリー",
@@ -158,10 +166,10 @@ const UI = {
     decisionNextWatch: "Watch next run",
     decisionNextRecovery: "Confirm recovery",
     decisionNextContinue: "Continue monitoring",
-    ruleSloDelta: "SLO +0.5x vs previous",
-    ruleBaselineRatio: "2x over 7d baseline",
-    ruleErrorDelta: "Error rate +1pt",
-    ruleAffectedDelta: "Affected +100",
+    ruleSloDelta: "SLO vs previous",
+    ruleBaselineRatio: "7d baseline ratio",
+    ruleErrorDelta: "Error rate",
+    ruleAffectedDelta: "Affected",
     ruleTwoRunRecovery: "2-run recovery",
     ruleNormal: "Within threshold",
     traceTree: "Trace Tree",
@@ -443,12 +451,26 @@ function directionLabel(direction) {
   return ui("historyStable");
 }
 
+function reliabilityThresholds() {
+  return {
+    ...DEFAULT_RELIABILITY_THRESHOLDS,
+    ...(state.data?.reliabilityThresholds ?? {}),
+  };
+}
+
+function thresholdsForDecision(decision) {
+  return {
+    ...reliabilityThresholds(),
+    ...(decision?.thresholds ?? {}),
+  };
+}
+
 function reliabilityDecisionFor(workflow, history) {
   if (workflow.reliabilityDecision?.level) return workflow.reliabilityDecision;
   return computeReliabilityDecision(history);
 }
 
-function computeReliabilityDecision(history) {
+function computeReliabilityDecision(history, thresholds = reliabilityThresholds()) {
   const latest = history[0];
   const previous = history[1] ?? latest;
   const earlier = history[2] ?? previous;
@@ -461,15 +483,18 @@ function computeReliabilityDecision(history) {
     && numericValue(previous.sloBurn) < numericValue(earlier.sloBurn)
     && numericValue(latest.errorRate) <= numericValue(previous.errorRate);
   const ruleHits = [];
-  if (sloDelta >= 0.5) ruleHits.push("slo_prev_delta");
-  if (sloBaselineRatio >= 2) ruleHits.push("slo_baseline_ratio");
-  if (errorDelta >= 1) ruleHits.push("error_rate_delta");
-  if (affectedDelta >= 100) ruleHits.push("affected_sessions_delta");
+  if (sloDelta >= thresholds.sloPreviousDeltaAlert) ruleHits.push("slo_prev_delta");
+  if (sloBaselineRatio >= thresholds.sloBaselineRatioAlert) ruleHits.push("slo_baseline_ratio");
+  if (errorDelta >= thresholds.errorRateDeltaAlert) ruleHits.push("error_rate_delta");
+  if (affectedDelta >= thresholds.affectedSessionsDeltaAlert) ruleHits.push("affected_sessions_delta");
   if (twoRunRecovery) ruleHits.push("two_run_recovery");
   let level = "stable";
-  if (twoRunRecovery && numericValue(latest.sloBurn) < 1.2) level = "recovering";
+  if (twoRunRecovery && numericValue(latest.sloBurn) < thresholds.recoverySloBurnMax) level = "recovering";
   if (ruleHits.some((rule) => rule !== "two_run_recovery")) level = "alert";
-  if (numericValue(latest.sloBurn) >= 2 && (sloDelta >= 0.5 || sloBaselineRatio >= 2)) level = "critical";
+  if (numericValue(latest.sloBurn) >= thresholds.criticalSloBurnMin
+    && (sloDelta >= thresholds.sloPreviousDeltaAlert || sloBaselineRatio >= thresholds.sloBaselineRatioAlert)) {
+    level = "critical";
+  }
   return {
     level,
     sloDelta,
@@ -477,6 +502,7 @@ function computeReliabilityDecision(history) {
     errorDelta,
     affectedDelta,
     ruleHits,
+    thresholds,
     nextActionKey: level === "critical" ? "inspect_dependency"
       : level === "alert" ? "watch_trend"
       : level === "recovering" ? "confirm_recovery"
@@ -505,11 +531,26 @@ function decisionAction(decision) {
   return ui("decisionNextContinue");
 }
 
-function ruleLabel(rule) {
-  if (rule === "slo_prev_delta") return ui("ruleSloDelta");
-  if (rule === "slo_baseline_ratio") return ui("ruleBaselineRatio");
-  if (rule === "error_rate_delta") return ui("ruleErrorDelta");
-  if (rule === "affected_sessions_delta") return ui("ruleAffectedDelta");
+function formatThreshold(value) {
+  const numeric = numericValue(value);
+  return Number.isInteger(numeric) ? String(numeric) : numeric.toFixed(1);
+}
+
+function ruleLabel(rule, decision) {
+  const thresholds = thresholdsForDecision(decision);
+  const atLeast = state.language === "en" ? ">=" : "以上";
+  if (rule === "slo_prev_delta") return state.language === "en"
+    ? `${ui("ruleSloDelta")} >= +${formatThreshold(thresholds.sloPreviousDeltaAlert)}x`
+    : `${ui("ruleSloDelta")} +${formatThreshold(thresholds.sloPreviousDeltaAlert)}x${atLeast}`;
+  if (rule === "slo_baseline_ratio") return state.language === "en"
+    ? `${ui("ruleBaselineRatio")} >= ${formatThreshold(thresholds.sloBaselineRatioAlert)}x`
+    : `${ui("ruleBaselineRatio")} ${formatThreshold(thresholds.sloBaselineRatioAlert)}倍${atLeast}`;
+  if (rule === "error_rate_delta") return state.language === "en"
+    ? `${ui("ruleErrorDelta")} >= +${formatThreshold(thresholds.errorRateDeltaAlert)}pt`
+    : `${ui("ruleErrorDelta")} +${formatThreshold(thresholds.errorRateDeltaAlert)}pt${atLeast}`;
+  if (rule === "affected_sessions_delta") return state.language === "en"
+    ? `${ui("ruleAffectedDelta")} >= +${formatThreshold(thresholds.affectedSessionsDeltaAlert)}`
+    : `${ui("ruleAffectedDelta")} +${formatThreshold(thresholds.affectedSessionsDeltaAlert)}${atLeast}`;
   if (rule === "two_run_recovery") return ui("ruleTwoRunRecovery");
   if (rule === "normal_monitoring") return ui("ruleNormal");
   return rule;
@@ -639,7 +680,7 @@ function renderHistory(workflow) {
             <span>${escapeHtml(decisionSummary(decision))}</span>
           </div>
           <div class="decision-rules">
-            ${ruleHits.slice(0, 3).map((rule) => `<span>${escapeHtml(ruleLabel(rule))}</span>`).join("")}
+            ${ruleHits.slice(0, 3).map((rule) => `<span>${escapeHtml(ruleLabel(rule, decision))}</span>`).join("")}
           </div>
         </div>
         <div class="decision-stack">

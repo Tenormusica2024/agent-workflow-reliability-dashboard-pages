@@ -21,6 +21,14 @@
       "medium": 55
     },
     "sloBurnHigh": 2.0,
+    "reliabilityDecision": {
+      "sloPreviousDeltaAlert": 0.5,
+      "sloBaselineRatioAlert": 2.0,
+      "errorRateDeltaAlert": 1.0,
+      "affectedSessionsDeltaAlert": 100,
+      "recoverySloBurnMax": 1.2,
+      "criticalSloBurnMin": 2.0
+    },
     "spanTimeoutMs": 10000,
     "maxWaterfallMs": 60000
   },

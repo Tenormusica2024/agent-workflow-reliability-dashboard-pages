@@ -76,6 +76,7 @@ http://localhost:4173
   - root-cause hypotheses
   - run history / previous-run comparison
   - reliability decision derived from run history
+  - configurable reliability thresholds
   - recommended action
   - redacted tool payload
   - evaluations
@@ -98,6 +99,7 @@ npm run check
 - source telemetry example: `data/agent-runs.example.json`
 - file-drop telemetry examples: `data/incoming/*.json`
 - operational config: `config/dashboard.config.json`
+- reliability threshold config: `thresholds.reliabilityDecision`
 - generated dashboard data: `tmp/generated-sample-runs.json`
 - contract notes: `docs/operations-data-contract.md`
 

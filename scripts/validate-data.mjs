@@ -20,6 +20,9 @@ function numberLike(value, pathName) {
 assert(data.schemaVersion === "0.3.0", "schemaVersion must be 0.3.0");
 assert(data.portfolioSafe === true, "portfolioSafe must be true");
 assert(Array.isArray(data.navigation) && data.navigation.length >= 6, "navigation must have >= 6 items");
+if (data.reliabilityThresholds != null) {
+  validateReliabilityThresholds(data.reliabilityThresholds, "reliabilityThresholds");
+}
 assert(Array.isArray(data.workflows) && data.workflows.length >= 2, "workflows must have >= 2 workflows for future multi-agent support");
 assert(data.workflows.some((workflow) => workflow.id === data.defaultWorkflowId), "defaultWorkflowId must point to a workflow");
 
@@ -84,6 +87,9 @@ for (const workflow of data.workflows) {
       assert(typeof decision[key] === "number" && Number.isFinite(decision[key]), `${workflow.id}.reliabilityDecision.${key} must be number`);
     }
     assert(Array.isArray(decision.ruleHits), `${workflow.id}.reliabilityDecision.ruleHits must be array`);
+    if (decision.thresholds != null) {
+      validateReliabilityThresholds(decision.thresholds, `${workflow.id}.reliabilityDecision.thresholds`);
+    }
     nonEmptyString(decision.nextActionKey, `${workflow.id}.reliabilityDecision.nextActionKey`);
   }
   assert(workflow.replay, `${workflow.id}.replay required`);
@@ -104,3 +110,17 @@ for (const term of bannedTerms) {
 }
 
 console.log(`OK: ${data.workflows.length} agent workflows validated for trace triage dashboard (${path.relative(root, dataPath)})`);
+
+function validateReliabilityThresholds(thresholds, pathName) {
+  assert(thresholds && typeof thresholds === "object" && !Array.isArray(thresholds), `${pathName}: object required`);
+  for (const key of [
+    "sloPreviousDeltaAlert",
+    "sloBaselineRatioAlert",
+    "errorRateDeltaAlert",
+    "affectedSessionsDeltaAlert",
+    "recoverySloBurnMax",
+    "criticalSloBurnMin",
+  ]) {
+    assert(typeof thresholds[key] === "number" && Number.isFinite(thresholds[key]) && thresholds[key] >= 0, `${pathName}.${key} must be non-negative number`);
+  }
+}

@@ -398,6 +398,14 @@
           "slo_baseline_ratio",
           "affected_sessions_delta"
         ],
+        "thresholds": {
+          "sloPreviousDeltaAlert": 0.5,
+          "sloBaselineRatioAlert": 2,
+          "errorRateDeltaAlert": 1,
+          "affectedSessionsDeltaAlert": 100,
+          "recoverySloBurnMax": 1.2,
+          "criticalSloBurnMin": 2
+        },
         "nextActionKey": "inspect_dependency"
       }
     },
@@ -741,6 +749,14 @@
         "ruleHits": [
           "slo_baseline_ratio"
         ],
+        "thresholds": {
+          "sloPreviousDeltaAlert": 0.5,
+          "sloBaselineRatioAlert": 2,
+          "errorRateDeltaAlert": 1,
+          "affectedSessionsDeltaAlert": 100,
+          "recoverySloBurnMax": 1.2,
+          "criticalSloBurnMin": 2
+        },
         "nextActionKey": "watch_trend"
       }
     },
@@ -1091,8 +1107,24 @@
           "error_rate_delta",
           "affected_sessions_delta"
         ],
+        "thresholds": {
+          "sloPreviousDeltaAlert": 0.5,
+          "sloBaselineRatioAlert": 2,
+          "errorRateDeltaAlert": 1,
+          "affectedSessionsDeltaAlert": 100,
+          "recoverySloBurnMax": 1.2,
+          "criticalSloBurnMin": 2
+        },
         "nextActionKey": "inspect_dependency"
       }
     }
-  ]
+  ],
+  "reliabilityThresholds": {
+    "sloPreviousDeltaAlert": 0.5,
+    "sloBaselineRatioAlert": 2,
+    "errorRateDeltaAlert": 1,
+    "affectedSessionsDeltaAlert": 100,
+    "recoverySloBurnMax": 1.2,
+    "criticalSloBurnMin": 2
+  }
 }

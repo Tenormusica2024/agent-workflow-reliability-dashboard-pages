@@ -7,6 +7,14 @@ const args = parseArgs(process.argv.slice(2));
 const inputPath = path.resolve(root, args.input ?? "data/agent-runs.example.json");
 const outputPath = args.output ? path.resolve(root, args.output) : null;
 const configPath = path.resolve(root, args.config ?? "config/dashboard.config.json");
+const DEFAULT_RELIABILITY_THRESHOLDS = Object.freeze({
+  sloPreviousDeltaAlert: 0.5,
+  sloBaselineRatioAlert: 2.0,
+  errorRateDeltaAlert: 1.0,
+  affectedSessionsDeltaAlert: 100,
+  recoverySloBurnMax: 1.2,
+  criticalSloBurnMin: 2.0,
+});
 
 const raw = readJson(inputPath);
 const config = readJson(configPath);
@@ -40,6 +48,7 @@ function readJson(filePath) {
 function buildDashboard(source, config) {
   assert(source.schemaVersion === "agent-runs.v0.1", "input schemaVersion must be agent-runs.v0.1");
   assert(Array.isArray(source.workflows) && source.workflows.length >= 1, "input workflows required");
+  const reliabilityThresholds = reliabilityThresholdsFor(config);
 
   return {
     schemaVersion: config.dashboardSchemaVersion,
@@ -47,12 +56,13 @@ function buildDashboard(source, config) {
     portfolioSafe: config.portfolioSafeDefault === true,
     purpose: "Generated dashboard data from agent run telemetry. Public-safe examples only.",
     navigation: config.navigation,
+    reliabilityThresholds,
     defaultWorkflowId: source.defaultWorkflowId ?? source.workflows[0].id,
-    workflows: source.workflows.map((workflow) => buildWorkflow(workflow, config)),
+    workflows: source.workflows.map((workflow) => buildWorkflow(workflow, config, reliabilityThresholds)),
   };
 }
 
-function buildWorkflow(workflow, config) {
+function buildWorkflow(workflow, config, reliabilityThresholds) {
   const traceDuration = workflow.trace.durationMs;
   const failed = workflow.spans.some((span) => span.status === "error");
   const degraded = workflow.spans.some((span) => span.status === "warning");
@@ -151,10 +161,22 @@ function buildWorkflow(workflow, config) {
       delta: Number((item.score - item.baseline).toFixed(2)),
     })),
     history,
-    reliabilityDecision: buildReliabilityDecision(history),
+    reliabilityDecision: buildReliabilityDecision(history, reliabilityThresholds),
     replay: workflow.replay,
     logs: workflow.logs,
   };
+}
+
+function reliabilityThresholdsFor(config) {
+  const configured = config.thresholds?.reliabilityDecision ?? {};
+  const thresholds = { ...DEFAULT_RELIABILITY_THRESHOLDS, ...configured };
+  for (const [key, value] of Object.entries(thresholds)) {
+    assert(typeof value === "number" && Number.isFinite(value) && value >= 0, `thresholds.reliabilityDecision.${key} must be a non-negative number`);
+  }
+  assert(thresholds.sloBaselineRatioAlert > 0, "thresholds.reliabilityDecision.sloBaselineRatioAlert must be > 0");
+  assert(thresholds.criticalSloBurnMin > 0, "thresholds.reliabilityDecision.criticalSloBurnMin must be > 0");
+  assert(thresholds.recoverySloBurnMax > 0, "thresholds.reliabilityDecision.recoverySloBurnMax must be > 0");
+  return thresholds;
 }
 
 function buildHistory(workflow) {
@@ -214,7 +236,7 @@ function buildHistory(workflow) {
   ];
 }
 
-function buildReliabilityDecision(history) {
+function buildReliabilityDecision(history, thresholds) {
   const latest = history[0];
   const previous = history[1] ?? latest;
   const earlier = history[2] ?? previous;
@@ -227,16 +249,19 @@ function buildReliabilityDecision(history) {
     && previous.sloBurn < earlier.sloBurn
     && latest.errorRate <= previous.errorRate;
   const ruleHits = [];
-  if (sloDelta >= 0.5) ruleHits.push("slo_prev_delta");
-  if (sloBaselineRatio >= 2) ruleHits.push("slo_baseline_ratio");
-  if (errorDelta >= 1) ruleHits.push("error_rate_delta");
-  if (affectedDelta >= 100) ruleHits.push("affected_sessions_delta");
+  if (sloDelta >= thresholds.sloPreviousDeltaAlert) ruleHits.push("slo_prev_delta");
+  if (sloBaselineRatio >= thresholds.sloBaselineRatioAlert) ruleHits.push("slo_baseline_ratio");
+  if (errorDelta >= thresholds.errorRateDeltaAlert) ruleHits.push("error_rate_delta");
+  if (affectedDelta >= thresholds.affectedSessionsDeltaAlert) ruleHits.push("affected_sessions_delta");
   if (twoRunRecovery) ruleHits.push("two_run_recovery");
 
   let level = "stable";
-  if (twoRunRecovery && latest.sloBurn < 1.2) level = "recovering";
+  if (twoRunRecovery && latest.sloBurn < thresholds.recoverySloBurnMax) level = "recovering";
   if (ruleHits.some((rule) => rule !== "two_run_recovery")) level = "alert";
-  if (latest.sloBurn >= 2 && (sloDelta >= 0.5 || sloBaselineRatio >= 2)) level = "critical";
+  if (latest.sloBurn >= thresholds.criticalSloBurnMin
+    && (sloDelta >= thresholds.sloPreviousDeltaAlert || sloBaselineRatio >= thresholds.sloBaselineRatioAlert)) {
+    level = "critical";
+  }
 
   return {
     level,
@@ -245,6 +270,7 @@ function buildReliabilityDecision(history) {
     errorDelta,
     affectedDelta,
     ruleHits,
+    thresholds,
     nextActionKey: level === "critical" ? "inspect_dependency"
       : level === "alert" ? "watch_trend"
       : level === "recovering" ? "confirm_recovery"

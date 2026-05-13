@@ -59,12 +59,26 @@ Each item uses this minimal shape:
 
 If `history[]` is missing, the builder generates a demo-safe fallback from the current incident, trace, and logs. For real operation, prefer explicit collector-provided history so trend and recovery judgments are not inferred from a single run.
 
-The builder also derives `reliabilityDecision` from `history[]`:
+The builder also derives `reliabilityDecision` from `history[]`.
+Thresholds are read from `config/dashboard.config.json` under `thresholds.reliabilityDecision`, so each deployment can tune the operational sensitivity without changing UI code:
+
+```json
+{
+  "sloPreviousDeltaAlert": 0.5,
+  "sloBaselineRatioAlert": 2.0,
+  "errorRateDeltaAlert": 1.0,
+  "affectedSessionsDeltaAlert": 100,
+  "recoverySloBurnMax": 1.2,
+  "criticalSloBurnMin": 2.0
+}
+```
 
 - `critical`: SLO burn is high and either previous-run delta or 7-day-baseline ratio exceeds the threshold.
 - `alert`: SLO, error rate, or affected sessions worsened enough to require closer monitoring.
 - `recovering`: two consecutive improvements are visible and the latest SLO burn is below the recovery threshold.
 - `stable`: no alert or recovery threshold is crossed.
+
+Generated dashboard JSON includes `reliabilityThresholds` at the root and `reliabilityDecision.thresholds` per workflow for traceability.
 
 ## Generated dashboard data
 
