@@ -116,6 +116,23 @@ node scripts/promote-dashboard-data.mjs --input tmp/generated-sample-runs.json -
 npm run promote:data
 ```
 
+## CI preflight
+
+GitHub Actions で dashboard data pipeline のpreflightを自動実行します。
+
+対象：
+
+- checked-in sampleの検証: `npm run check`
+- file-drop intakeの検証: `npm run check:incoming`
+- `sample-runs.json` 昇格前のdry-run promotion
+- CI中にtracked fileが意図せず変わっていないことの確認
+
+Workflow:
+
+```text
+.github/workflows/dashboard-preflight.yml
+```
+
 ## Public-safe content policy
 
 private repoで作業し、公開可能な内容だけpublic Pages repoへ同期します。

@@ -121,6 +121,21 @@ The full preflight is:
 npm run check
 ```
 
+## CI preflight
+
+GitHub Actions runs the same safety boundary on push, pull request, and manual dispatch:
+
+```text
+.github/workflows/dashboard-preflight.yml
+```
+
+The workflow checks:
+
+- `npm run check`
+- `npm run check:incoming`
+- dry-run promotion to `tmp/promoted-sample-runs.json`
+- no tracked file mutations after generation
+
 ## Current boundary
 
 This is not yet a live backend. The dashboard still fetches `sample-runs.json` in the browser. The new contract makes the next integration step smaller: a real collector can emit `agent-runs.v0.1`, run the builder, and publish the resulting dashboard JSON.

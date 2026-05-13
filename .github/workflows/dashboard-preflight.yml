@@ -1,0 +1,49 @@
+name: Dashboard preflight
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: dashboard-preflight-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  preflight:
+    name: Validate dashboard data pipeline
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Show tool versions
+        run: |
+          node --version
+          npm --version
+
+      - name: Validate checked-in dashboard sample
+        run: npm run check
+
+      - name: Validate file-drop intake
+        run: npm run check:incoming
+
+      - name: Dry-run promotion
+        run: node scripts/promote-dashboard-data.mjs --input tmp/generated-sample-runs.json --target tmp/promoted-sample-runs.json --backup false
+
+      - name: Ensure tracked files were not mutated
+        run: git diff --exit-code -- .
