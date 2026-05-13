@@ -833,3 +833,327 @@ a { color: var(--blue); text-decoration: none; font-weight: 700; }
   margin-top: 5px;
   line-height: 1.35;
 }
+
+/* Compact-window mode:
+   - keep the maximized v2-style composition above this breakpoint
+   - switch to vertical page flow when the viewport cannot responsibly fit every panel
+   - keep dense data grids in their own scroll containers instead of clipping the page */
+@media (max-width: 1500px), (max-height: 900px) {
+  html,
+  body {
+    height: auto;
+    min-height: 100%;
+  }
+
+  body {
+    min-width: 0;
+    overflow: auto;
+  }
+
+  .triage-app {
+    grid-template-columns: 72px minmax(0, 1fr);
+    height: auto;
+    min-height: 100vh;
+    overflow: visible;
+  }
+
+  .sidebar {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    min-height: 100vh;
+  }
+
+  .brand-mark {
+    margin: 14px auto 18px;
+    transform: scale(0.82);
+    transform-origin: top center;
+  }
+
+  .side-nav {
+    gap: 6px;
+    padding: 0 7px;
+  }
+
+  .side-nav--bottom {
+    padding-top: 14px;
+    padding-bottom: 14px;
+  }
+
+  .side-nav__item {
+    justify-content: center;
+    gap: 0;
+    min-height: 40px;
+    padding: 0;
+  }
+
+  .side-nav__item span:not(.side-nav__icon) {
+    display: none;
+  }
+
+  .side-nav__icon {
+    width: 34px;
+    height: 34px;
+  }
+
+  .dashboard {
+    grid-template-rows: auto auto auto auto;
+    gap: 8px;
+    height: auto;
+    min-height: 100vh;
+    overflow: visible;
+    padding: 10px;
+  }
+
+  .topbar {
+    flex-wrap: wrap;
+    align-items: stretch;
+    height: auto;
+    gap: 8px;
+  }
+
+  .topbar h1 {
+    margin-bottom: 8px;
+    font-size: 20px;
+  }
+
+  .filter-row {
+    gap: 6px;
+  }
+
+  .filter-chip,
+  .select-chip {
+    min-height: 28px;
+    padding-inline: 10px;
+  }
+
+  .select-chip select {
+    min-width: 170px;
+  }
+
+  .top-actions {
+    margin-left: auto;
+  }
+
+  .confidence-card {
+    min-width: 210px;
+    height: 42px;
+  }
+
+  .incident-card {
+    grid-template-columns: 44px minmax(0, 1fr) auto repeat(2, minmax(104px, 0.42fr)) 112px;
+    gap: 10px;
+    min-height: 60px;
+    padding: 8px;
+  }
+
+  .incident-title h2 {
+    font-size: 14px;
+  }
+
+  .incident-card .metric-block:nth-of-type(n+5) {
+    display: none;
+  }
+
+  .metric-block {
+    min-height: 40px;
+    padding-left: 12px;
+  }
+
+  .metric-block strong {
+    font-size: 18px;
+  }
+
+  .main-grid,
+  .bottom-grid {
+    display: grid;
+    gap: 8px;
+    height: auto;
+    min-height: 0;
+    margin-top: 0;
+  }
+
+  .main-grid {
+    grid-template-columns: minmax(560px, 1.3fr) minmax(330px, 0.75fr);
+    grid-template-areas:
+      "trace rca"
+      "waterfall waterfall";
+  }
+
+  .trace-tree-panel { grid-area: trace; }
+  .waterfall-panel { grid-area: waterfall; }
+  .rca-panel { grid-area: rca; }
+
+  .bottom-grid {
+    grid-template-columns: minmax(430px, 1fr) minmax(360px, 0.92fr);
+    grid-template-areas:
+      "payload eval"
+      "replay logs";
+  }
+
+  .payload-panel { grid-area: payload; }
+  .eval-panel { grid-area: eval; }
+  .replay-panel { grid-area: replay; }
+  .logs-panel { grid-area: logs; }
+
+  .bottom-grid > .panel {
+    height: auto;
+  }
+
+  .replay-panel {
+    display: block;
+  }
+
+  .panel {
+    min-height: 0;
+  }
+
+  .trace-tree-panel,
+  .waterfall-panel,
+  .rca-panel,
+  .payload-panel,
+  .eval-panel,
+  .replay-panel,
+  .logs-panel {
+    min-height: 260px;
+  }
+
+  .panel-head {
+    min-height: 44px;
+    padding: 8px 12px 7px;
+  }
+
+  .trace-table,
+  .eval-table,
+  .log-table {
+    overflow-x: auto;
+    scrollbar-width: thin;
+  }
+
+  .trace-row {
+    min-width: 780px;
+  }
+
+  .eval-row {
+    min-width: 480px;
+  }
+
+  .log-row {
+    min-width: 620px;
+  }
+
+  .waterfall-panel {
+    overflow-x: auto;
+    scrollbar-width: thin;
+  }
+
+  .waterfall-panel .panel-head,
+  .timeline-scale,
+  .waterfall-body,
+  .legend-row {
+    min-width: 660px;
+  }
+
+  .waterfall-body {
+    padding-bottom: 12px;
+  }
+
+  .legend-row {
+    justify-content: flex-start;
+    padding-left: 180px;
+  }
+
+  .payload-layout {
+    grid-template-columns: minmax(430px, 1fr) 128px;
+    overflow-x: auto;
+    scrollbar-width: thin;
+  }
+
+  .code-block {
+    height: 178px;
+  }
+
+  .form-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .form-grid label {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .form-grid b {
+    min-width: 0;
+  }
+
+  .toggle-row {
+    flex-direction: row !important;
+    align-items: center !important;
+  }
+}
+
+@media (max-width: 1180px) {
+  .main-grid,
+  .bottom-grid {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: none;
+  }
+
+  .trace-tree-panel,
+  .waterfall-panel,
+  .rca-panel,
+  .payload-panel,
+  .eval-panel,
+  .replay-panel,
+  .logs-panel {
+    grid-area: auto;
+  }
+}
+
+@media (max-width: 760px) {
+  .triage-app {
+    grid-template-columns: 60px minmax(0, 1fr);
+  }
+
+  .dashboard {
+    padding: 8px;
+  }
+
+  .top-actions {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .language-switch,
+  .confidence-card {
+    flex: 1 1 auto;
+  }
+
+  .confidence-card {
+    min-width: 0;
+  }
+
+  .incident-card {
+    grid-template-columns: 42px minmax(0, 1fr) auto;
+  }
+
+  .incident-card .metric-block,
+  .incident-card .outline-button {
+    display: none;
+  }
+
+  .payload-layout,
+  .form-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .redaction-card {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .redaction-card strong,
+  .redaction-card button {
+    grid-column: 1 / -1;
+  }
+}
