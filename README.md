@@ -36,6 +36,7 @@
 - スパンのウォーターフォール
 - 原因推定アシスタント
 - 実行履歴・過去run比較
+- 履歴に基づく運用判定
 - 秘匿済みツール入力
 - トレース単位の評価
 - 再実行パネル
@@ -74,6 +75,7 @@ http://localhost:4173
   - waterfall spans
   - root-cause hypotheses
   - run history / previous-run comparison
+  - reliability decision derived from run history
   - recommended action
   - redacted tool payload
   - evaluations

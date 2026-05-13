@@ -23,6 +23,7 @@ The source format is intentionally smaller than `sample-runs.json`. It represent
 - spans with status, duration, retries, provider, cost, and annotations
 - hypotheses and evidence
 - generated run history / previous-run comparison
+- generated reliability decision based on `history[]`
 - recommended next action
 - optional `history[]` for previous-run and 7-day-baseline comparison
 - tool payload to be redacted
@@ -57,6 +58,13 @@ Each item uses this minimal shape:
 ```
 
 If `history[]` is missing, the builder generates a demo-safe fallback from the current incident, trace, and logs. For real operation, prefer explicit collector-provided history so trend and recovery judgments are not inferred from a single run.
+
+The builder also derives `reliabilityDecision` from `history[]`:
+
+- `critical`: SLO burn is high and either previous-run delta or 7-day-baseline ratio exceeds the threshold.
+- `alert`: SLO, error rate, or affected sessions worsened enough to require closer monitoring.
+- `recovering`: two consecutive improvements are visible and the latest SLO burn is below the recovery threshold.
+- `stable`: no alert or recovery threshold is crossed.
 
 ## Generated dashboard data
 

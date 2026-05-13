@@ -386,7 +386,20 @@
           "errorRate": 0.9,
           "status": "baseline"
         }
-      ]
+      ],
+      "reliabilityDecision": {
+        "level": "critical",
+        "sloDelta": 0.7,
+        "sloBaselineRatio": 2.9,
+        "errorDelta": 0.8,
+        "affectedDelta": 273,
+        "ruleHits": [
+          "slo_prev_delta",
+          "slo_baseline_ratio",
+          "affected_sessions_delta"
+        ],
+        "nextActionKey": "inspect_dependency"
+      }
     },
     {
       "id": "research-agent-retrieval",
@@ -718,7 +731,18 @@
           "errorRate": 0.1,
           "status": "baseline"
         }
-      ]
+      ],
+      "reliabilityDecision": {
+        "level": "alert",
+        "sloDelta": 0.4,
+        "sloBaselineRatio": 2.8,
+        "errorDelta": 0.1,
+        "affectedDelta": 84,
+        "ruleHits": [
+          "slo_baseline_ratio"
+        ],
+        "nextActionKey": "watch_trend"
+      }
     },
     {
       "id": "billing-agent-payment",
@@ -1054,7 +1078,21 @@
           "errorRate": 1.4,
           "status": "baseline"
         }
-      ]
+      ],
+      "reliabilityDecision": {
+        "level": "critical",
+        "sloDelta": 0.6,
+        "sloBaselineRatio": 3,
+        "errorDelta": 1.1,
+        "affectedDelta": 160,
+        "ruleHits": [
+          "slo_prev_delta",
+          "slo_baseline_ratio",
+          "error_rate_delta",
+          "affected_sessions_delta"
+        ],
+        "nextActionKey": "inspect_dependency"
+      }
     }
   ]
 }

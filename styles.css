@@ -129,7 +129,7 @@ a { color: var(--blue); text-decoration: none; font-weight: 700; }
 
 .dashboard {
   display: grid;
-  grid-template-rows: 76px 70px 104px clamp(360px, 36vh, 440px) minmax(260px, 1fr);
+  grid-template-rows: 76px 70px 124px clamp(340px, 34vh, 420px) minmax(250px, 1fr);
   gap: 4px;
   height: 100vh;
   min-width: 0;
@@ -343,7 +343,7 @@ a { color: var(--blue); text-decoration: none; font-weight: 700; }
 }
 .history-head {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
   min-width: 0;
@@ -367,8 +367,51 @@ a { color: var(--blue); text-decoration: none; font-weight: 700; }
   font-weight: 900;
 }
 .history-state--worse { color: #dc2626; background: #fff5f5; border: 1px solid #fca5a5; }
-.history-state--recovered { color: #15803d; background: #f0fdf4; border: 1px solid #86efac; }
+.history-state--critical { color: #fff; background: #dc2626; border: 1px solid #b91c1c; }
+.history-state--alert { color: #b45309; background: #fffbeb; border: 1px solid #fbbf24; }
+.history-state--recovering { color: #15803d; background: #f0fdf4; border: 1px solid #86efac; }
 .history-state--stable { color: #2563eb; background: #eff6ff; border: 1px solid #bfdbfe; }
+.history-state--recovered { color: #15803d; background: #f0fdf4; border: 1px solid #86efac; }
+.decision-copy {
+  display: grid;
+  gap: 2px;
+  margin-top: 7px;
+}
+.decision-copy strong {
+  color: #334155;
+  font-size: 10px;
+  font-weight: 900;
+}
+.decision-copy span {
+  color: #475569;
+  font-size: 10px;
+  line-height: 1.35;
+}
+.decision-rules {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 6px;
+}
+.decision-rules span {
+  border: 1px solid var(--line-soft);
+  border-radius: 999px;
+  padding: 2px 6px;
+  color: #475569;
+  background: #f8fafc;
+  font-size: 9px;
+  font-weight: 800;
+}
+.decision-stack {
+  display: grid;
+  justify-items: end;
+  gap: 5px;
+}
+.decision-stack small {
+  color: var(--blue);
+  font-size: 10px;
+  font-weight: 850;
+}
 .history-metrics {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -889,7 +932,7 @@ a { color: var(--blue); text-decoration: none; font-weight: 700; }
 @media (max-width: 1400px) {
   body { min-width: 1060px; }
   .triage-app { grid-template-columns: 168px minmax(890px, 1fr); }
-  .dashboard { grid-template-rows: 76px 70px 100px clamp(340px, 34vh, 420px) minmax(250px, 1fr); }
+  .dashboard { grid-template-rows: 76px 70px 124px clamp(320px, 32vh, 400px) minmax(245px, 1fr); }
   .incident-card { grid-template-columns: 48px minmax(250px, 1.3fr) auto repeat(3, minmax(106px, 0.52fr)) 112px; }
   .incident-card .metric-block:nth-of-type(n+5) { display: none; }
   .history-panel { grid-template-columns: minmax(220px, 0.8fr) minmax(360px, 1.25fr) minmax(260px, 1fr); }
@@ -1406,6 +1449,15 @@ a { color: var(--blue); text-decoration: none; font-weight: 700; }
 
   .history-head {
     align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .decision-stack {
+    grid-auto-flow: column;
+    justify-content: start;
+    justify-items: start;
+    align-items: center;
+    width: 100%;
   }
 
   .history-metrics {

@@ -34,6 +34,26 @@ const UI = {
     historyRecovered: "改善",
     historyWorse: "悪化",
     historyStable: "横ばい",
+    decisionTitle: "運用判定",
+    decisionReason: "判定理由",
+    decisionCritical: "要対応",
+    decisionAlert: "注視",
+    decisionRecovering: "回復傾向",
+    decisionStable: "安定",
+    decisionCriticalSummary: "SLO悪化が閾値を超過。依存先と直近runを優先確認。",
+    decisionAlertSummary: "履歴上の悪化を検出。監視を強化し次runで再確認。",
+    decisionRecoveringSummary: "2連続改善を検出。回復完了まで監視継続。",
+    decisionStableSummary: "主要指標は閾値内。通常監視を継続。",
+    decisionNextInspect: "依存先を確認",
+    decisionNextWatch: "次runを監視",
+    decisionNextRecovery: "回復を確認",
+    decisionNextContinue: "通常監視",
+    ruleSloDelta: "SLO前回比 +0.5x以上",
+    ruleBaselineRatio: "7日基準比 2倍以上",
+    ruleErrorDelta: "エラー率 +1pt以上",
+    ruleAffectedDelta: "影響 +100以上",
+    ruleTwoRunRecovery: "2連続改善",
+    ruleNormal: "閾値内",
     traceTree: "トレースツリー",
     tracePath: "Session → Trace → Spans",
     searchSpans: "スパン検索",
@@ -124,6 +144,26 @@ const UI = {
     historyRecovered: "Recovered",
     historyWorse: "Worse",
     historyStable: "Stable",
+    decisionTitle: "Operational decision",
+    decisionReason: "Decision reason",
+    decisionCritical: "Action required",
+    decisionAlert: "Watch",
+    decisionRecovering: "Recovering",
+    decisionStable: "Stable",
+    decisionCriticalSummary: "SLO degradation crossed threshold. Inspect dependencies and latest run first.",
+    decisionAlertSummary: "History shows degradation. Increase monitoring and confirm on next run.",
+    decisionRecoveringSummary: "Two consecutive improvements detected. Keep monitoring until recovery is confirmed.",
+    decisionStableSummary: "Core metrics are within threshold. Continue normal monitoring.",
+    decisionNextInspect: "Inspect dependency",
+    decisionNextWatch: "Watch next run",
+    decisionNextRecovery: "Confirm recovery",
+    decisionNextContinue: "Continue monitoring",
+    ruleSloDelta: "SLO +0.5x vs previous",
+    ruleBaselineRatio: "2x over 7d baseline",
+    ruleErrorDelta: "Error rate +1pt",
+    ruleAffectedDelta: "Affected +100",
+    ruleTwoRunRecovery: "2-run recovery",
+    ruleNormal: "Within threshold",
     traceTree: "Trace Tree",
     tracePath: "Session → Trace → Spans",
     searchSpans: "Search spans",
@@ -403,6 +443,78 @@ function directionLabel(direction) {
   return ui("historyStable");
 }
 
+function reliabilityDecisionFor(workflow, history) {
+  if (workflow.reliabilityDecision?.level) return workflow.reliabilityDecision;
+  return computeReliabilityDecision(history);
+}
+
+function computeReliabilityDecision(history) {
+  const latest = history[0];
+  const previous = history[1] ?? latest;
+  const earlier = history[2] ?? previous;
+  const baseline = history[history.length - 1] ?? previous;
+  const sloDelta = Number((numericValue(latest.sloBurn) - numericValue(previous.sloBurn)).toFixed(1));
+  const sloBaselineRatio = Number((numericValue(latest.sloBurn) / Math.max(numericValue(baseline.sloBurn), 0.1)).toFixed(1));
+  const errorDelta = Number((numericValue(latest.errorRate) - numericValue(previous.errorRate)).toFixed(1));
+  const affectedDelta = numericValue(latest.affectedSessions) - numericValue(previous.affectedSessions);
+  const twoRunRecovery = numericValue(latest.sloBurn) < numericValue(previous.sloBurn)
+    && numericValue(previous.sloBurn) < numericValue(earlier.sloBurn)
+    && numericValue(latest.errorRate) <= numericValue(previous.errorRate);
+  const ruleHits = [];
+  if (sloDelta >= 0.5) ruleHits.push("slo_prev_delta");
+  if (sloBaselineRatio >= 2) ruleHits.push("slo_baseline_ratio");
+  if (errorDelta >= 1) ruleHits.push("error_rate_delta");
+  if (affectedDelta >= 100) ruleHits.push("affected_sessions_delta");
+  if (twoRunRecovery) ruleHits.push("two_run_recovery");
+  let level = "stable";
+  if (twoRunRecovery && numericValue(latest.sloBurn) < 1.2) level = "recovering";
+  if (ruleHits.some((rule) => rule !== "two_run_recovery")) level = "alert";
+  if (numericValue(latest.sloBurn) >= 2 && (sloDelta >= 0.5 || sloBaselineRatio >= 2)) level = "critical";
+  return {
+    level,
+    sloDelta,
+    sloBaselineRatio,
+    errorDelta,
+    affectedDelta,
+    ruleHits,
+    nextActionKey: level === "critical" ? "inspect_dependency"
+      : level === "alert" ? "watch_trend"
+      : level === "recovering" ? "confirm_recovery"
+      : "continue_monitoring",
+  };
+}
+
+function decisionLabel(decision) {
+  if (decision.level === "critical") return ui("decisionCritical");
+  if (decision.level === "alert") return ui("decisionAlert");
+  if (decision.level === "recovering") return ui("decisionRecovering");
+  return ui("decisionStable");
+}
+
+function decisionSummary(decision) {
+  if (decision.level === "critical") return ui("decisionCriticalSummary");
+  if (decision.level === "alert") return ui("decisionAlertSummary");
+  if (decision.level === "recovering") return ui("decisionRecoveringSummary");
+  return ui("decisionStableSummary");
+}
+
+function decisionAction(decision) {
+  if (decision.nextActionKey === "inspect_dependency") return ui("decisionNextInspect");
+  if (decision.nextActionKey === "watch_trend") return ui("decisionNextWatch");
+  if (decision.nextActionKey === "confirm_recovery") return ui("decisionNextRecovery");
+  return ui("decisionNextContinue");
+}
+
+function ruleLabel(rule) {
+  if (rule === "slo_prev_delta") return ui("ruleSloDelta");
+  if (rule === "slo_baseline_ratio") return ui("ruleBaselineRatio");
+  if (rule === "error_rate_delta") return ui("ruleErrorDelta");
+  if (rule === "affected_sessions_delta") return ui("ruleAffectedDelta");
+  if (rule === "two_run_recovery") return ui("ruleTwoRunRecovery");
+  if (rule === "normal_monitoring") return ui("ruleNormal");
+  return rule;
+}
+
 function historyFor(workflow) {
   if (Array.isArray(workflow.history) && workflow.history.length >= 2) return workflow.history;
   const affected = numericValue(workflow.incident.affectedSessions);
@@ -509,20 +621,31 @@ function renderHistory(workflow) {
   const latest = history[0];
   const previous = history[1] ?? history[0];
   const baseline = history[history.length - 1] ?? previous;
-  const direction = historyDirection(latest.sloBurn, previous.sloBurn, true);
   const sparkMax = Math.max(...history.map((item) => numericValue(item.affectedSessions)), 1);
   const latestSlo = numericValue(latest.sloBurn);
   const latestDuration = numericValue(latest.durationMs);
   const latestAffected = numericValue(latest.affectedSessions);
   const latestErrorRate = numericValue(latest.errorRate);
+  const decision = reliabilityDecisionFor(workflow, history);
+  const ruleHits = decision.ruleHits?.length ? decision.ruleHits : ["normal_monitoring"];
   return `
     <section class="panel history-panel" aria-label="${escapeHtml(ui("historyTitle"))}">
       <div class="history-head">
         <div>
           <h3>${escapeHtml(ui("historyTitle"))}</h3>
           <p>${escapeHtml(ui("historySubtitle"))}</p>
+          <div class="decision-copy">
+            <strong>${escapeHtml(ui("decisionReason"))}</strong>
+            <span>${escapeHtml(decisionSummary(decision))}</span>
+          </div>
+          <div class="decision-rules">
+            ${ruleHits.slice(0, 3).map((rule) => `<span>${escapeHtml(ruleLabel(rule))}</span>`).join("")}
+          </div>
         </div>
-        <span class="history-state history-state--${direction}">${escapeHtml(directionLabel(direction))}</span>
+        <div class="decision-stack">
+          <span class="history-state history-state--${decision.level}">${escapeHtml(decisionLabel(decision))}</span>
+          <small>${escapeHtml(decisionAction(decision))}</small>
+        </div>
       </div>
       <div class="history-metrics">
         <div class="history-metric"><span>${escapeHtml(ui("historySlo"))}</span><strong>${latestSlo.toFixed(1)}x</strong><em>${escapeHtml(signedDelta(latestSlo, previous.sloBurn, "x"))}</em></div>

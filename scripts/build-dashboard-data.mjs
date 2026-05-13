@@ -59,6 +59,7 @@ function buildWorkflow(workflow, config) {
   const severity = severityFor(workflow.incident, config.thresholds);
   const maxMs = Math.min(Math.max(traceDuration, 1), config.thresholds.maxWaterfallMs);
   const traceRowCost = costLabel(workflow.trace.tokens, workflow.trace.costUsd);
+  const history = buildHistory(workflow);
 
   return {
     id: workflow.id,
@@ -149,7 +150,8 @@ function buildWorkflow(workflow, config) {
       ...item,
       delta: Number((item.score - item.baseline).toFixed(2)),
     })),
-    history: buildHistory(workflow),
+    history,
+    reliabilityDecision: buildReliabilityDecision(history),
     replay: workflow.replay,
     logs: workflow.logs,
   };
@@ -210,6 +212,44 @@ function buildHistory(workflow) {
       status: "baseline",
     },
   ];
+}
+
+function buildReliabilityDecision(history) {
+  const latest = history[0];
+  const previous = history[1] ?? latest;
+  const earlier = history[2] ?? previous;
+  const baseline = history[history.length - 1] ?? previous;
+  const sloDelta = Number((latest.sloBurn - previous.sloBurn).toFixed(1));
+  const sloBaselineRatio = Number((latest.sloBurn / Math.max(baseline.sloBurn, 0.1)).toFixed(1));
+  const errorDelta = Number((latest.errorRate - previous.errorRate).toFixed(1));
+  const affectedDelta = latest.affectedSessions - previous.affectedSessions;
+  const twoRunRecovery = latest.sloBurn < previous.sloBurn
+    && previous.sloBurn < earlier.sloBurn
+    && latest.errorRate <= previous.errorRate;
+  const ruleHits = [];
+  if (sloDelta >= 0.5) ruleHits.push("slo_prev_delta");
+  if (sloBaselineRatio >= 2) ruleHits.push("slo_baseline_ratio");
+  if (errorDelta >= 1) ruleHits.push("error_rate_delta");
+  if (affectedDelta >= 100) ruleHits.push("affected_sessions_delta");
+  if (twoRunRecovery) ruleHits.push("two_run_recovery");
+
+  let level = "stable";
+  if (twoRunRecovery && latest.sloBurn < 1.2) level = "recovering";
+  if (ruleHits.some((rule) => rule !== "two_run_recovery")) level = "alert";
+  if (latest.sloBurn >= 2 && (sloDelta >= 0.5 || sloBaselineRatio >= 2)) level = "critical";
+
+  return {
+    level,
+    sloDelta,
+    sloBaselineRatio,
+    errorDelta,
+    affectedDelta,
+    ruleHits,
+    nextActionKey: level === "critical" ? "inspect_dependency"
+      : level === "alert" ? "watch_trend"
+      : level === "recovering" ? "confirm_recovery"
+      : "continue_monitoring",
+  };
 }
 
 function severityFor(incident, thresholds) {

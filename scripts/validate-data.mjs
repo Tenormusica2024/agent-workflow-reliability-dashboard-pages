@@ -76,6 +76,16 @@ for (const workflow of data.workflows) {
       }
     }
   }
+  if (workflow.reliabilityDecision != null) {
+    const decision = workflow.reliabilityDecision;
+    assert(decision && typeof decision === "object", `${workflow.id}.reliabilityDecision must be object`);
+    assert(["critical", "alert", "recovering", "stable"].includes(decision.level), `${workflow.id}.reliabilityDecision.level invalid`);
+    for (const key of ["sloDelta", "sloBaselineRatio", "errorDelta", "affectedDelta"]) {
+      assert(typeof decision[key] === "number" && Number.isFinite(decision[key]), `${workflow.id}.reliabilityDecision.${key} must be number`);
+    }
+    assert(Array.isArray(decision.ruleHits), `${workflow.id}.reliabilityDecision.ruleHits must be array`);
+    nonEmptyString(decision.nextActionKey, `${workflow.id}.reliabilityDecision.nextActionKey`);
+  }
   assert(workflow.replay, `${workflow.id}.replay required`);
   assert(Array.isArray(workflow.logs) && workflow.logs.length >= 4, `${workflow.id}.logs required`);
 }
