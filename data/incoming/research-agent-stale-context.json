@@ -1,0 +1,65 @@
+{
+  "schemaVersion": "agent-run.v0.1",
+  "workflow": {
+    "id": "research-agent-stale-context",
+    "name": "情報整理AI",
+    "environment": "本番",
+    "window": "直近6時間",
+    "incident": {
+      "title": "検索文脈の鮮度低下により回答検証が保留",
+      "started": "今日 11:08",
+      "affectedSessions": 418,
+      "sessionDelta": "+8.4%",
+      "impactedWorkflows": 2,
+      "sloBurn": 1.4,
+      "status": "監視中"
+    },
+    "trace": {
+      "sessionId": "sess_11a2cc8f",
+      "traceId": "trace_0d9c8712b2aa",
+      "durationMs": 36204,
+      "model": "gpt-4o-mini / Azure OpenAI",
+      "tokens": 10042,
+      "costUsd": 0.064
+    },
+    "spans": [
+      { "id": "planner", "name": "計画作成", "status": "success", "startMs": 0, "durationMs": 1180, "provider": "gpt-4o-mini", "retries": 0, "tokens": 1102, "costUsd": 0.007 },
+      { "id": "retriever", "name": "文脈検索", "status": "warning", "startMs": 2400, "durationMs": 8420, "provider": "text-embedding-3-small / Azure OpenAI", "retries": 1, "highlight": true, "annotation": "関連度低下" },
+      { "id": "source_check", "name": "tool_call.source_check", "status": "success", "startMs": 11200, "durationMs": 4820, "provider": "REST (HTTPS) / source-check-api", "retries": 0 },
+      { "id": "verifier", "name": "検証", "status": "warning", "startMs": 18000, "durationMs": 9320, "provider": "gpt-4o-mini / Azure OpenAI", "retries": 1, "tokens": 5310, "costUsd": 0.032, "annotation": "鮮度確認" },
+      { "id": "response", "name": "応答生成", "status": "success", "startMs": 30000, "durationMs": 2200, "provider": "gpt-4o-mini", "retries": 0, "tokens": 510, "costUsd": 0.003 }
+    ],
+    "hypotheses": [
+      { "rank": 1, "title": "検索インデックスの更新遅延", "score": 0.69, "tone": "warning", "evidence": ["直近24時間の文書が検索上位に出ない", "再検索後の関連度改善が小さい"] },
+      { "rank": 2, "title": "検索クエリの制約不足", "score": 0.42, "tone": "info", "evidence": ["対象期間フィルタが未指定", "古い文書が検証直前まで残る"] },
+      { "rank": 3, "title": "外部ソース確認の遅延", "score": 0.27, "tone": "info", "evidence": ["source_check p95 が通常比 1.8x", "全体遅延への寄与は限定的"] }
+    ],
+    "recommendedAction": {
+      "title": "検索インデックスの鮮度を確認",
+      "body": "直近更新分の取り込み時刻と検索上位のソース日付を照合する。",
+      "button": "確認手順"
+    },
+    "payload": {
+      "tool": "knowledge_retrieval",
+      "endpoint": "https://example.local/retrieval",
+      "method": "POST",
+      "headers": { "Authorization": "Bearer demo-token" },
+      "body": { "query": "latest customer policy changes", "limit": 8, "include_history": false }
+    },
+    "evaluations": [
+      { "name": "目標達成", "score": 0.63, "baseline": 0.74, "impact": "中" },
+      { "name": "正確性", "score": 0.66, "baseline": 0.72, "impact": "中" },
+      { "name": "根拠の明確さ", "score": 0.54, "baseline": 0.78, "impact": "高" },
+      { "name": "文脈関連度", "score": 0.41, "baseline": 0.70, "impact": "高" },
+      { "name": "応答関連度", "score": 0.62, "baseline": 0.72, "impact": "中" },
+      { "name": "有用性", "score": 0.59, "baseline": 0.68, "impact": "中" }
+    ],
+    "replay": { "model": "gpt-4o-mini (Azure OpenAI)", "temperature": "0.2", "tools": "全ツール (3)" },
+    "logs": [
+      { "time": "11:18:52.018", "level": "WARN", "source": "retriever", "message": "検索上位の文書鮮度が低い" },
+      { "time": "11:18:50.204", "level": "INFO", "source": "source_check", "message": "外部ソース確認完了" },
+      { "time": "11:18:48.992", "level": "WARN", "source": "verifier", "message": "根拠の鮮度確認を要求" },
+      { "time": "11:18:44.120", "level": "INFO", "source": "session", "message": "セッション開始" }
+    ]
+  }
+}

@@ -90,11 +90,31 @@ npm run check
 ```
 
 - source telemetry example: `data/agent-runs.example.json`
+- file-drop telemetry examples: `data/incoming/*.json`
 - operational config: `config/dashboard.config.json`
 - generated dashboard data: `tmp/generated-sample-runs.json`
 - contract notes: `docs/operations-data-contract.md`
 
 現時点ではブラウザは引き続き `sample-runs.json` を読み込みます。実運用接続時は、実行ログ収集側が `agent-runs.v0.1` 形式を出し、`build:data` でUI用schemaへ変換する想定です。
+
+複数の実行ログをファイル投入する場合は `data/incoming/*.json` に `agent-run.v0.1` を置き、以下で1つのUI用JSONに変換できます。
+
+```powershell
+npm run build:incoming
+npm run check:incoming
+```
+
+生成結果を `sample-runs.json` へ反映する前には、まず一時出力先で安全確認します。
+
+```powershell
+node scripts/promote-dashboard-data.mjs --input tmp/generated-sample-runs.json --target tmp/promoted-sample-runs.json --backup false
+```
+
+公開・デモ表示に反映してよいと判断した場合だけ、次のコマンドで `sample-runs.json` へ昇格します。
+
+```powershell
+npm run promote:data
+```
 
 ## Public-safe content policy
 

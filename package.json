@@ -6,12 +6,17 @@
   "description": "Japanese-first Agent Trace Triage Console prototype for AI agent workflow reliability dashboards.",
   "scripts": {
     "serve": "python -m http.server 4173",
+    "merge:incoming": "node scripts/merge-incoming-runs.mjs --input-dir data/incoming --output tmp/merged-agent-runs.json",
     "build:data": "node scripts/build-dashboard-data.mjs --input data/agent-runs.example.json --output tmp/generated-sample-runs.json",
+    "build:incoming": "npm run merge:incoming && node scripts/build-dashboard-data.mjs --input tmp/merged-agent-runs.json --output tmp/generated-sample-runs.json",
+    "promote:data": "node scripts/promote-dashboard-data.mjs --input tmp/generated-sample-runs.json --target sample-runs.json",
     "validate": "node scripts/validate-data.mjs",
     "validate:generated": "node scripts/validate-data.mjs tmp/generated-sample-runs.json",
     "safety:scan": "node scripts/safety-scan.mjs sample-runs.json data/agent-runs.example.json tmp/generated-sample-runs.json",
+    "safety:scan:incoming": "node scripts/safety-scan.mjs tmp/merged-agent-runs.json tmp/generated-sample-runs.json",
     "smoke": "node scripts/smoke-check.mjs",
-    "check": "npm run build:data && npm run validate && npm run validate:generated && npm run smoke && npm run safety:scan"
+    "check": "npm run build:data && npm run validate && npm run validate:generated && npm run smoke && npm run safety:scan",
+    "check:incoming": "npm run build:incoming && npm run validate:generated && npm run safety:scan:incoming && npm run safety:scan"
   },
   "keywords": [
     "ai-agent",
