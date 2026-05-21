@@ -417,10 +417,10 @@ function renderErrorClusters(clusters) {
         <thead><tr><th>クラスタ</th><th>件数</th><th>影響</th><th>トレンド</th></tr></thead>
         <tbody>${clusters.map((cluster) => `
           <tr>
-            <td>${escapeHtml(cluster.name)}</td>
-            <td>${compactNumber(cluster.count)}</td>
-            <td><span class="impact impact--${cluster.impact === "高" ? "high" : cluster.impact === "中" ? "medium" : "low"}">${escapeHtml(cluster.impact)}</span></td>
-            <td>${renderSpark(cluster.trend)}</td>
+            <td data-label="クラスタ">${escapeHtml(cluster.name)}</td>
+            <td data-label="件数">${compactNumber(cluster.count)}</td>
+            <td data-label="影響"><span class="impact impact--${cluster.impact === "高" ? "high" : cluster.impact === "中" ? "medium" : "low"}">${escapeHtml(cluster.impact)}</span></td>
+            <td data-label="トレンド">${renderSpark(cluster.trend)}</td>
           </tr>
         `).join("")}</tbody>
       </table>

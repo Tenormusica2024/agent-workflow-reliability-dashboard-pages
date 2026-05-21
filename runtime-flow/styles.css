@@ -437,21 +437,26 @@ dt, dd { margin: 0; }
   .icon-button { display: none; }
 
   .anomaly-table,
-  .anomaly-table tbody {
+  .anomaly-table tbody,
+  .cluster-table,
+  .cluster-table tbody {
     display: block;
     width: 100%;
   }
 
-  .anomaly-table thead {
+  .anomaly-table thead,
+  .cluster-table thead {
     display: none;
   }
 
-  .anomaly-table tbody {
+  .anomaly-table tbody,
+  .cluster-table tbody {
     padding: 10px;
     background: #f7faff;
   }
 
-  .anomaly-table tr {
+  .anomaly-table tr,
+  .cluster-table tr {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 8px 12px;
@@ -463,11 +468,13 @@ dt, dd { margin: 0; }
     box-shadow: 0 10px 20px rgba(15, 23, 42, .05);
   }
 
-  .anomaly-table tr:last-child {
+  .anomaly-table tr:last-child,
+  .cluster-table tr:last-child {
     margin-bottom: 0;
   }
 
-  .anomaly-table td {
+  .anomaly-table td,
+  .cluster-table td {
     display: flex;
     min-width: 0;
     align-items: center;
@@ -480,7 +487,8 @@ dt, dd { margin: 0; }
     line-height: 1.35;
   }
 
-  .anomaly-table td::before {
+  .anomaly-table td::before,
+  .cluster-table td::before {
     content: attr(data-label);
     flex: 0 0 auto;
     color: var(--slate-500);
@@ -505,6 +513,25 @@ dt, dd { margin: 0; }
     color: var(--slate-900);
     font-size: 13px;
     font-weight: 900;
+  }
+
+  .cluster-table td[data-label="クラスタ"] {
+    grid-column: 1 / -1;
+    align-items: flex-start;
+    flex-direction: column;
+    justify-content: flex-start;
+    color: var(--slate-900);
+    font-size: 13px;
+    font-weight: 900;
+  }
+
+  .cluster-table td[data-label="トレンド"] {
+    grid-column: 1 / -1;
+  }
+
+  .cluster-table .spark {
+    width: 110px;
+    height: 24px;
   }
 }
 
