@@ -395,7 +395,81 @@ dt, dd { margin: 0; }
   .runtime-note { border-radius: 10px; }
   .card-header { flex-direction: column; }
   .legend { justify-content: flex-start; gap: 10px 12px; }
+  .panel-grid { gap: 12px; }
   .panel-grid--two, .panel-grid--three, .insight-rail { grid-template-columns: 1fr; }
+  .metric-panel,
+  .rail-card {
+    padding: 14px;
+    border-color: #d8e4f2;
+    background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
+    box-shadow: 0 12px 24px rgba(15, 23, 42, .06);
+  }
+  .card-subheader,
+  .rail-title {
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #e6eef8;
+  }
+  .card-subheader h3,
+  .rail-title h3 {
+    font-size: 16px;
+    line-height: 1.35;
+  }
+  .card-subheader a,
+  .rail-title a {
+    white-space: nowrap;
+  }
+  .line-chart {
+    height: 142px;
+    margin: 2px 0 6px;
+  }
+  .cost-layout {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 14px;
+  }
+  .cost-panel strong {
+    font-size: 28px;
+  }
+  .donut {
+    width: 104px;
+    height: 104px;
+  }
+  .health-bars {
+    gap: 9px;
+  }
+  .health-row {
+    grid-template-columns: minmax(112px, 1fr) minmax(92px, 1.2fr) 44px;
+    gap: 8px;
+    font-size: 12px;
+  }
+  .summary-grid {
+    gap: 10px;
+  }
+  .summary-grid > div {
+    min-height: 94px;
+    padding: 13px;
+  }
+  .failed-box {
+    padding: 14px;
+    border-color: #d8e4f2;
+    background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
+  }
+  .failed-box dl {
+    grid-template-columns: 94px 1fr;
+    gap: 7px 10px;
+  }
+  .root-list,
+  .check-list {
+    gap: 8px;
+  }
+  .root-list li {
+    padding: 2px 0;
+  }
+  .check-list li {
+    padding: 11px 0;
+  }
   .runtime-card { overflow: visible; padding: 12px; }
   .flow-map {
     display: grid;
