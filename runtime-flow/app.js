@@ -1,5 +1,7 @@
 const DEFAULT_DATA_URL = "sample-runs.json";
 const LANGUAGE_STORAGE_KEY = "agent-dashboard-lang";
+const DESIGN_ARTBOARD_WIDTH = 1792;
+const RESPONSIVE_BREAKPOINT = 900;
 
 const RUNTIME_COMPONENTS = [
   { key: "intent", number: 1, label: "Intent Parser", labelJa: "意図解析", icon: "◎", sourceHints: ["intent", "入力正規化"] },
@@ -217,42 +219,63 @@ function renderApp() {
 
   document.title = "Agent Workflow Reliability Dashboard";
   document.getElementById("app").innerHTML = `
-    <div class="dashboard-shell">
-      ${renderTopbar(workflow, score)}
-      ${renderSidebar(data, workflow)}
-      <main class="dashboard-main">
-        <div class="dashboard-content">
-          <section class="workspace">
-            <div class="page-title-row">
-              <div>
-                <p class="eyebrow">Agent Runtime Flow</p>
-                <h1>AIエージェント内部構成</h1>
+    <div class="dashboard-viewport">
+      <div class="dashboard-shell">
+        ${renderTopbar(workflow, score)}
+        ${renderSidebar(data, workflow)}
+        <main class="dashboard-main">
+          <div class="dashboard-content">
+            <section class="workspace">
+              <div class="page-title-row">
+                <div>
+                  <p class="eyebrow">Agent Runtime Flow</p>
+                  <h1>AIエージェント内部構成</h1>
+                </div>
+                <div class="runtime-note">${APP_LABELS.workflowOnlyNotice}</div>
               </div>
-              <div class="runtime-note">${APP_LABELS.workflowOnlyNotice}</div>
-            </div>
-            ${renderRuntimeFlow(components)}
-            <div class="panel-grid panel-grid--two">
-              ${renderAnomalyEvents(events)}
-              ${renderErrorClusters(clusters)}
-            </div>
-            <div class="panel-grid panel-grid--three">
-              ${renderLatencyPanel(workflow)}
-              ${renderTokenCostPanel(workflow)}
-              ${renderComponentHealth(components)}
-            </div>
-          </section>
-          <aside class="insight-rail">
-            ${renderAnomalySummary(workflow, score)}
-            ${renderFailedSpan(workflow, critical)}
-            ${renderRootCause(workflow)}
-            ${renderTechnicalChecks(critical)}
-          </aside>
-        </div>
-      </main>
+              ${renderRuntimeFlow(components)}
+              <div class="panel-grid panel-grid--two">
+                ${renderAnomalyEvents(events)}
+                ${renderErrorClusters(clusters)}
+              </div>
+              <div class="panel-grid panel-grid--three">
+                ${renderLatencyPanel(workflow)}
+                ${renderTokenCostPanel(workflow)}
+                ${renderComponentHealth(components)}
+              </div>
+            </section>
+            <aside class="insight-rail">
+              ${renderAnomalySummary(workflow, score)}
+              ${renderFailedSpan(workflow, critical)}
+              ${renderRootCause(workflow)}
+              ${renderTechnicalChecks(critical)}
+            </aside>
+          </div>
+        </main>
+      </div>
     </div>
   `;
 
   bindInteractions();
+  syncArtboardScale();
+}
+
+function syncArtboardScale() {
+  const viewport = document.querySelector(".dashboard-viewport");
+  const shell = document.querySelector(".dashboard-shell");
+  if (!viewport || !shell) return;
+
+  if (window.innerWidth <= RESPONSIVE_BREAKPOINT) {
+    viewport.style.removeProperty("--artboard-scale");
+    viewport.style.removeProperty("width");
+    viewport.style.removeProperty("height");
+    return;
+  }
+
+  const scale = Math.min(1, window.innerWidth / DESIGN_ARTBOARD_WIDTH);
+  viewport.style.setProperty("--artboard-scale", String(scale));
+  viewport.style.width = `${Math.round(DESIGN_ARTBOARD_WIDTH * scale)}px`;
+  viewport.style.height = `${Math.round(shell.scrollHeight * scale)}px`;
 }
 
 function renderSidebar(data, workflow) {
@@ -533,6 +556,8 @@ function bindInteractions() {
     renderApp();
   });
 }
+
+window.addEventListener("resize", syncArtboardScale);
 
 function renderError(message) {
   document.getElementById("app").innerHTML = `
