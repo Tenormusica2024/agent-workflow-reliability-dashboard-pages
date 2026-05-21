@@ -399,6 +399,19 @@ a { color: var(--blue-600); text-decoration: none; }
 .rail-title { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
 .rail-title h3 { color: var(--navy-900); font-size: 15px; }
 .rail-title a { font-size: 12px; font-weight: 900; }
+.info-dot {
+  display: inline-grid;
+  place-items: center;
+  width: 14px;
+  height: 14px;
+  margin-left: 3px;
+  border: 1px solid #b6c6dc;
+  border-radius: 999px;
+  color: var(--slate-500);
+  font-size: 10px;
+  font-weight: 900;
+  vertical-align: 1px;
+}
 .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
 .summary-grid > div { min-height: 74px; padding: 11px; border: 1px solid #e0e8f3; border-radius: 10px; background: linear-gradient(180deg, #fbfdff 0%, #f8fbff 100%); box-shadow: inset 0 1px 0 rgba(255,255,255,.86); }
 .summary-grid span, .summary-grid em { display: block; color: var(--slate-500); font-size: 12px; font-style: normal; font-weight: 900; }
@@ -640,14 +653,32 @@ dt, dd { margin: 0; }
     margin-bottom: 7px;
   }
 
+  .rail-card--summary {
+    padding: 10px;
+  }
+
+  .rail-card--summary .rail-title {
+    margin-bottom: 8px;
+  }
+
   .summary-grid {
+    grid-template-columns: 1.12fr .88fr .88fr;
     gap: 8px;
   }
 
-  .summary-grid > div {
-    min-height: 50px;
+  .summary-tile {
+    min-height: 52px;
     padding: 8px 9px;
     border-radius: 9px;
+  }
+
+  .summary-tile--score {
+    grid-row: span 2;
+    min-height: 112px;
+  }
+
+  .summary-tile--score .risk-number {
+    margin-top: 8px;
   }
 
   .summary-grid span,
@@ -657,6 +688,7 @@ dt, dd { margin: 0; }
 
   .summary-grid strong {
     font-size: 19px;
+    line-height: 1.08;
   }
 
   .summary-grid .risk-number {

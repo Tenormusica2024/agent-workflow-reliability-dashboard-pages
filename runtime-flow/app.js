@@ -480,14 +480,14 @@ function renderComponentHealth(components) {
 
 function renderAnomalySummary(workflow, score) {
   return `
-    <section class="card rail-card">
-      <div class="rail-title"><h3>異常検知サマリー</h3><a href="#">詳細</a></div>
+    <section class="card rail-card rail-card--summary">
+      <div class="rail-title"><h3>異常検知サマリー <span class="info-dot">i</span></h3><a href="#">詳細</a></div>
       <div class="summary-grid">
-        <div><span>影響スコア</span><strong class="risk-number">${score}</strong><em>/100</em><b>${score < 80 ? "高リスク" : "監視中"}</b></div>
-        <div><span>異常スパン</span><strong>${workflow.incident?.impactedWorkflows || 27}</strong></div>
-        <div><span>影響トレース数</span><strong>${escapeHtml(workflow.incident?.affectedSessions || "1,842")}</strong></div>
-        <div><span>エラー率</span><strong>${(asNumber(workflow.history?.[0]?.errorRate, 5.84)).toFixed(2)}%</strong><em class="down">+2.21pt</em></div>
-        <div><span>タイムアウト率</span><strong>1.21%</strong><em>↓ 0.35pt</em></div>
+        <div class="summary-tile summary-tile--score"><span>影響スコア</span><strong class="risk-number">${score}</strong><em>/100</em><b>${score < 80 ? "高リスク" : "監視中"}</b></div>
+        <div class="summary-tile"><span>異常スパン</span><strong>${workflow.incident?.impactedWorkflows || 27}</strong></div>
+        <div class="summary-tile"><span>影響トレース数</span><strong>${escapeHtml(workflow.incident?.affectedSessions || "1,842")}</strong></div>
+        <div class="summary-tile"><span>エラー率</span><strong>${(asNumber(workflow.history?.[0]?.errorRate, 5.84)).toFixed(2)}%</strong><em class="down">+2.21pt</em></div>
+        <div class="summary-tile"><span>タイムアウト率</span><strong>1.21%</strong><em>↓ 0.35pt</em></div>
       </div>
     </section>
   `;
