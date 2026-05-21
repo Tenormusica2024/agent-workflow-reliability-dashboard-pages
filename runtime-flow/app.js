@@ -360,7 +360,7 @@ function renderFlowSvg() {
     <svg class="flow-lines" viewBox="0 0 1120 450" aria-hidden="true" focusable="false">
       <defs>
         <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
-          <path d="M0,0 L0,6 L9,3 z" fill="#0758d8"></path>
+          <path d="M0,0 L0,6 L9,3 z" fill="#1d67d8" fill-opacity="0.9"></path>
         </marker>
       </defs>
       <path d="M96 130 H262 H430 H598 H764 H930" class="flow-path" marker-end="url(#arrow)"></path>

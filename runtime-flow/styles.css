@@ -196,8 +196,16 @@ a { color: var(--blue-600); text-decoration: none; }
   overflow: hidden;
 }
 .flow-lines { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
-.flow-path { fill: none; stroke: #0758d8; stroke-width: 3.4; stroke-linecap: round; stroke-linejoin: round; filter: drop-shadow(0 2px 2px rgba(7,88,216,.08)); }
-.flow-path--dash { stroke-dasharray: 8 8; }
+.flow-path {
+  fill: none;
+  stroke: #1d67d8;
+  stroke-width: 2.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: .9;
+  filter: drop-shadow(0 1px 1px rgba(7,88,216,.05));
+}
+.flow-path--dash { stroke-dasharray: 7 9; opacity: .82; }
 .runtime-node {
   position: absolute;
   z-index: 2;
