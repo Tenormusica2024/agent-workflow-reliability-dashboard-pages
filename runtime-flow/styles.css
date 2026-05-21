@@ -601,48 +601,58 @@ dt, dd { margin: 0; }
   }
 
   .metric-panel {
-    padding: 9px 11px;
+    min-height: 0;
+    padding: 8px 11px;
   }
 
   .card-subheader {
-    margin-bottom: 6px;
+    margin-bottom: 5px;
   }
 
   .line-chart {
-    height: 82px;
+    height: 96px;
+    margin: -6px 0 -4px;
   }
 
   .chart-legend {
+    gap: 10px;
     font-size: 11px;
+    line-height: 1;
   }
 
   .cost-layout {
-    grid-template-columns: 1fr 88px;
-    gap: 9px;
+    grid-template-columns: minmax(0, 1fr) 94px;
+    gap: 8px;
+    min-height: 0;
   }
 
   .cost-panel strong {
-    margin: 3px 0 6px;
-    font-size: 20px;
+    margin: 2px 0 5px;
+    font-size: 21px;
   }
 
   .donut {
-    width: 82px;
-    height: 82px;
+    width: 90px;
+    height: 90px;
   }
 
   .donut::after {
-    inset: 22px;
+    inset: 23px;
   }
 
   .health-bars {
-    gap: 5px;
+    gap: 4px;
   }
 
   .health-row {
-    grid-template-columns: 108px 1fr 40px;
-    gap: 7px;
-    font-size: 10px;
+    grid-template-columns: 102px 1fr 38px;
+    gap: 6px;
+    font-size: 9.5px;
+    line-height: 1.12;
+  }
+
+  .bar {
+    height: 6px;
   }
 
   .rail-card {
