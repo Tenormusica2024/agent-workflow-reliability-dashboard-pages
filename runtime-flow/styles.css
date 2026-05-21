@@ -435,6 +435,77 @@ dt, dd { margin: 0; }
   .top-select, .top-pill, .system-health { min-width: 0; width: 100%; height: 36px; font-size: 12px; padding: 0 10px; }
   .system-health { grid-column: 1 / -1; height: 40px; }
   .icon-button { display: none; }
+
+  .anomaly-table,
+  .anomaly-table tbody {
+    display: block;
+    width: 100%;
+  }
+
+  .anomaly-table thead {
+    display: none;
+  }
+
+  .anomaly-table tbody {
+    padding: 10px;
+    background: #f7faff;
+  }
+
+  .anomaly-table tr {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px 12px;
+    margin-bottom: 10px;
+    padding: 12px;
+    border: 1px solid #d9e4f2;
+    border-radius: 12px;
+    background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
+    box-shadow: 0 10px 20px rgba(15, 23, 42, .05);
+  }
+
+  .anomaly-table tr:last-child {
+    margin-bottom: 0;
+  }
+
+  .anomaly-table td {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 0;
+    border-bottom: 0;
+    color: var(--navy-900);
+    font-size: 12px;
+    line-height: 1.35;
+  }
+
+  .anomaly-table td::before {
+    content: attr(data-label);
+    flex: 0 0 auto;
+    color: var(--slate-500);
+    font-size: 11px;
+    font-weight: 900;
+  }
+
+  .anomaly-table td[data-label="コンポーネント"],
+  .anomaly-table td[data-label="イベント"] {
+    grid-column: 1 / -1;
+    align-items: flex-start;
+    flex-direction: column;
+    justify-content: flex-start;
+  }
+
+  .anomaly-table td[data-label="コンポーネント"] {
+    font-size: 13px;
+    font-weight: 900;
+  }
+
+  .anomaly-table td[data-label="イベント"] {
+    color: var(--slate-900);
+    font-size: 13px;
+    font-weight: 900;
+  }
 }
 
 @media (max-width: 520px) {

@@ -390,18 +390,18 @@ function renderAnomalyEvents(events) {
   return `
     <section class="card data-panel data-panel--wide">
       <div class="panel-title panel-title--navy"><span>△</span><h3>異常イベント</h3><a href="#">すべて表示</a></div>
-      <table class="data-table">
+      <table class="data-table anomaly-table">
         <thead><tr><th>発生時刻</th><th>レベル</th><th>コンポーネント</th><th>イベント</th><th>影響</th><th>継続時間</th><th>トレース数</th><th>ステータス</th></tr></thead>
         <tbody>${events.map((event) => `
           <tr>
-            <td>${escapeHtml(event.time)}</td>
-            <td><span class="severity severity--${event.level === "異常" ? "critical" : event.level === "注意" ? "warning" : "info"}">${escapeHtml(event.level)}</span></td>
-            <td>${escapeHtml(event.component)}</td>
-            <td>${escapeHtml(event.event)}</td>
-            <td>${escapeHtml(event.impact)}</td>
-            <td>${escapeHtml(event.duration)}</td>
-            <td>${escapeHtml(event.traceCount)}</td>
-            <td><span class="state-pill ${event.status === "継続中" ? "state-pill--live" : ""}">${escapeHtml(event.status)}</span></td>
+            <td data-label="発生時刻">${escapeHtml(event.time)}</td>
+            <td data-label="レベル"><span class="severity severity--${event.level === "異常" ? "critical" : event.level === "注意" ? "warning" : "info"}">${escapeHtml(event.level)}</span></td>
+            <td data-label="コンポーネント">${escapeHtml(event.component)}</td>
+            <td data-label="イベント">${escapeHtml(event.event)}</td>
+            <td data-label="影響">${escapeHtml(event.impact)}</td>
+            <td data-label="継続時間">${escapeHtml(event.duration)}</td>
+            <td data-label="トレース数">${escapeHtml(event.traceCount)}</td>
+            <td data-label="ステータス"><span class="state-pill ${event.status === "継続中" ? "state-pill--live" : ""}">${escapeHtml(event.status)}</span></td>
           </tr>
         `).join("")}</tbody>
       </table>
