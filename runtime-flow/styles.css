@@ -201,13 +201,13 @@ a { color: var(--blue-600); text-decoration: none; }
 .flow-path {
   fill: none;
   stroke: #1d67d8;
-  stroke-width: 2.6;
+  stroke-width: 2.25;
   stroke-linecap: round;
   stroke-linejoin: round;
-  opacity: .9;
-  filter: drop-shadow(0 1px 1px rgba(7,88,216,.05));
+  opacity: .86;
+  filter: drop-shadow(0 1px 1px rgba(7,88,216,.035));
 }
-.flow-path--dash { stroke-dasharray: 7 9; opacity: .82; }
+.flow-path--dash { stroke-dasharray: 6 8; opacity: .74; }
 .runtime-node {
   --node-accent: var(--blue-600);
   --node-border: #cbd8ea;

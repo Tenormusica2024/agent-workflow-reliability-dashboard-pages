@@ -363,11 +363,11 @@ function renderFlowSvg() {
           <path d="M0,0 L0,6 L9,3 z" fill="#1d67d8" fill-opacity="0.9"></path>
         </marker>
       </defs>
-      <path d="M96 130 H262 H430 H598 H764 H930" class="flow-path" marker-end="url(#arrow)"></path>
-      <path d="M930 142 C982 150 1004 184 1004 236" class="flow-path flow-path--dash" marker-end="url(#arrow)"></path>
-      <path d="M1004 316 H764 H598 H480" class="flow-path" marker-end="url(#arrow)"></path>
-      <path d="M432 238 C438 214 525 200 568 164" class="flow-path flow-path--dash" marker-end="url(#arrow)"></path>
-      <path d="M688 238 C688 212 748 202 764 164" class="flow-path flow-path--dash" marker-end="url(#arrow)"></path>
+      <path d="M102 130 H260 H428 H596 H764 H922" class="flow-path" marker-end="url(#arrow)"></path>
+      <path d="M928 145 C982 145 1012 177 1012 230" class="flow-path flow-path--dash" marker-end="url(#arrow)"></path>
+      <path d="M1006 318 H780 C744 318 744 292 744 276 C744 252 725 244 696 244 H602 H480" class="flow-path" marker-end="url(#arrow)"></path>
+      <path d="M390 236 C392 204 438 196 484 196 H566 C602 196 624 174 626 150" class="flow-path flow-path--dash" marker-end="url(#arrow)"></path>
+      <path d="M604 238 C604 210 660 198 710 198 H748 C776 198 794 176 796 150" class="flow-path flow-path--dash" marker-end="url(#arrow)"></path>
     </svg>
   `;
 }
