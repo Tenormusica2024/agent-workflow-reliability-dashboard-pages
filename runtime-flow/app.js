@@ -357,18 +357,18 @@ function renderRuntimeFlow(components) {
 
 function renderFlowSvg() {
   return `
-    <svg class="flow-lines" viewBox="0 0 1000 430" aria-hidden="true" focusable="false">
+    <svg class="flow-lines" viewBox="0 0 1120 450" aria-hidden="true" focusable="false">
       <defs>
         <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
           <path d="M0,0 L0,6 L9,3 z" fill="#0758d8"></path>
         </marker>
       </defs>
-      <path d="M118 108 H238 H358 H478 H598 H718" class="flow-path" marker-end="url(#arrow)"></path>
-      <path d="M778 118 V230 H790" class="flow-path flow-path--dash" marker-end="url(#arrow)"></path>
-      <path d="M738 292 H585 H430" class="flow-path" marker-end="url(#arrow)"></path>
-      <path d="M430 292 H285" class="flow-path" marker-end="url(#arrow)"></path>
-      <path d="M312 247 C310 210 430 210 430 150" class="flow-path flow-path--dash" marker-end="url(#arrow)"></path>
-      <path d="M548 247 C548 205 624 205 624 150" class="flow-path flow-path--dash" marker-end="url(#arrow)"></path>
+      <path d="M96 130 H262 H430 H598 H764 H930" class="flow-path" marker-end="url(#arrow)"></path>
+      <path d="M930 142 C982 150 1004 188 1004 246" class="flow-path flow-path--dash" marker-end="url(#arrow)"></path>
+      <path d="M1004 326 H764 H598 H430" class="flow-path" marker-end="url(#arrow)"></path>
+      <path d="M430 326 H286" class="flow-path" marker-end="url(#arrow)"></path>
+      <path d="M432 248 C438 218 525 202 568 164" class="flow-path flow-path--dash" marker-end="url(#arrow)"></path>
+      <path d="M688 248 C688 214 748 204 764 164" class="flow-path flow-path--dash" marker-end="url(#arrow)"></path>
     </svg>
   `;
 }
