@@ -185,7 +185,7 @@ a { color: var(--blue-600); text-decoration: none; }
 .legend-line--dash { border-top-style: dashed; }
 .flow-map {
   position: relative;
-  min-height: 448px;
+  min-height: 420px;
   margin-top: 12px;
   border: 1px solid #d6e2f1;
   border-radius: 13px;
@@ -201,9 +201,9 @@ a { color: var(--blue-600); text-decoration: none; }
 .runtime-node {
   position: absolute;
   z-index: 2;
-  width: 142px;
-  min-height: 152px;
-  padding: 16px 12px 13px;
+  width: 128px;
+  min-height: 132px;
+  padding: 14px 10px 12px;
   border: 1px solid #cbd8ea;
   border-radius: 11px;
   background: #fff;
@@ -217,8 +217,8 @@ a { color: var(--blue-600); text-decoration: none; }
 .runtime-node--executor { left: 58%; top: 54px; }
 .runtime-node--validator { left: 72%; top: 54px; }
 .runtime-node--reflection { left: 79%; top: 222px; }
-.runtime-node--memory { left: 49%; top: 252px; }
-.runtime-node--composer { left: 31%; top: 252px; }
+.runtime-node--memory { left: 49%; top: 248px; }
+.runtime-node--composer { left: 31%; top: 248px; }
 .runtime-node--critical { border-color: #f0a1a1; background: linear-gradient(180deg, #fff 0%, #fff8f8 100%); }
 .runtime-node--warning { border-color: #f3c56a; background: linear-gradient(180deg, #fff 0%, #fffaf0 100%); }
 .node-badge {
@@ -232,8 +232,8 @@ a { color: var(--blue-600); text-decoration: none; }
   font-weight: 900;
   font-size: 12px;
 }
-.node-title { min-height: 30px; padding-left: 28px; color: var(--navy-900); font-size: 12px; font-weight: 900; text-align: left; }
-.node-icon { margin: 13px auto 9px; color: var(--blue-600); font-size: 38px; font-weight: 900; line-height: 1; text-shadow: 0 4px 12px rgba(11,99,229,.12); }
+.node-title { min-height: 28px; padding-left: 26px; color: var(--navy-900); font-size: 12px; font-weight: 900; text-align: left; }
+.node-icon { margin: 12px auto 8px; color: var(--blue-600); font-size: 34px; font-weight: 900; line-height: 1; text-shadow: 0 3px 10px rgba(11,99,229,.10); }
 .node-metric { color: var(--slate-900); font-size: 18px; font-weight: 900; }
 .node-metric.is-critical { color: var(--red-600); }
 .node-sub { margin-top: 5px; color: var(--slate-700); font-size: 12px; font-weight: 700; }
