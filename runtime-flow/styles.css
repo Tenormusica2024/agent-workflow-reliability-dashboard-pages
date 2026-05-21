@@ -209,16 +209,49 @@ a { color: var(--blue-600); text-decoration: none; }
 }
 .flow-path--dash { stroke-dasharray: 7 9; opacity: .82; }
 .runtime-node {
+  --node-accent: var(--blue-600);
+  --node-border: #cbd8ea;
+  --node-tint: #fbfdff;
+  --node-glow: rgba(11, 99, 229, .07);
   position: absolute;
   z-index: 2;
   width: 128px;
   min-height: 132px;
-  padding: 14px 10px 12px;
-  border: 1px solid #cbd8ea;
+  isolation: isolate;
+  padding: 16px 10px 12px;
+  border: 1px solid var(--node-border);
   border-radius: 11px;
-  background: #fff;
-  box-shadow: 0 13px 25px rgba(15, 23, 42, .06), inset 0 1px 0 rgba(255,255,255,.9);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.98) 0%, var(--node-tint) 100%);
+  box-shadow:
+    0 13px 25px rgba(15, 23, 42, .055),
+    0 8px 18px var(--node-glow),
+    inset 0 1px 0 rgba(255,255,255,.94);
+  overflow: hidden;
   text-align: center;
+}
+.runtime-node::before,
+.runtime-node::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+}
+.runtime-node::before {
+  inset: 0 0 auto 0;
+  height: 4px;
+  z-index: 0;
+  background: linear-gradient(90deg, var(--node-accent) 0%, rgba(255,255,255,.25) 100%);
+}
+.runtime-node::after {
+  inset: 4px auto 0 0;
+  width: 3px;
+  z-index: 0;
+  background: var(--node-accent);
+  opacity: .16;
+}
+.runtime-node > * {
+  position: relative;
+  z-index: 1;
 }
 .runtime-node--intent { left: 2%; top: 54px; }
 .runtime-node--planner { left: 16%; top: 54px; }
@@ -229,8 +262,37 @@ a { color: var(--blue-600); text-decoration: none; }
 .runtime-node--reflection { left: 79%; top: 212px; }
 .runtime-node--memory { left: 49%; top: 238px; }
 .runtime-node--composer { left: 31%; top: 238px; }
-.runtime-node--critical { border-color: #f0a1a1; background: linear-gradient(180deg, #fff 0%, #fff8f8 100%); }
-.runtime-node--warning { border-color: #f3c56a; background: linear-gradient(180deg, #fff 0%, #fffaf0 100%); }
+.runtime-node--healthy {
+  --node-accent: var(--green-600);
+  --node-border: #c7ddf3;
+  --node-tint: #fbfdff;
+  --node-glow: rgba(11, 99, 229, .055);
+}
+.runtime-node--warning {
+  --node-accent: var(--amber-500);
+  --node-border: #f3c56a;
+  --node-tint: #fffaf0;
+  --node-glow: rgba(245, 158, 11, .13);
+}
+.runtime-node--critical {
+  --node-accent: var(--red-600);
+  --node-border: #f0a1a1;
+  --node-tint: #fff8f8;
+  --node-glow: rgba(220, 38, 38, .14);
+}
+.runtime-node--neutral {
+  --node-accent: var(--slate-500);
+  --node-border: #d4deeb;
+  --node-tint: #f8fafc;
+  --node-glow: rgba(100, 116, 139, .09);
+}
+.runtime-node.is-highlighted {
+  box-shadow:
+    0 0 0 2px rgba(220, 38, 38, .16),
+    0 16px 30px rgba(220, 38, 38, .14),
+    0 8px 18px var(--node-glow),
+    inset 0 1px 0 rgba(255,255,255,.94);
+}
 .node-badge {
   position: absolute;
   top: 10px; left: 10px;
@@ -241,9 +303,25 @@ a { color: var(--blue-600); text-decoration: none; }
   color: #fff;
   font-weight: 900;
   font-size: 12px;
+  box-shadow: 0 4px 10px rgba(6, 27, 51, .18);
 }
 .node-title { min-height: 28px; padding-left: 26px; color: var(--navy-900); font-size: 12px; font-weight: 900; text-align: left; }
-.node-icon { margin: 12px auto 8px; color: var(--blue-600); font-size: 34px; font-weight: 900; line-height: 1; text-shadow: 0 3px 10px rgba(11,99,229,.10); }
+.node-icon {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  margin: 10px auto 8px;
+  border: 1px solid rgba(11, 99, 229, .16);
+  border-radius: 10px;
+  color: var(--blue-600);
+  background: linear-gradient(180deg, #fff 0%, #f4f8ff 100%);
+  font-size: 28px;
+  font-weight: 900;
+  line-height: 1;
+  text-shadow: 0 3px 10px rgba(11,99,229,.10);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.92), 0 6px 14px rgba(11,99,229,.08);
+}
 .node-metric { color: var(--slate-900); font-size: 18px; font-weight: 900; }
 .node-metric.is-critical { color: var(--red-600); }
 .node-sub { margin-top: 5px; color: var(--slate-700); font-size: 12px; font-weight: 700; }
@@ -506,7 +584,7 @@ dt, dd { margin: 0; }
   }
   .node-badge { position: static; width: 24px; height: 24px; }
   .node-title { min-height: 0; padding-left: 0; font-size: 13px; }
-  .node-icon { margin: 0; font-size: 26px; }
+  .node-icon { width: 34px; height: 34px; margin: 0; border-radius: 9px; font-size: 24px; }
   .node-metric { grid-column: 2 / 4; font-size: 18px; }
   .node-sub { grid-column: 2 / 4; margin-top: 0; }
   .topbar__title { min-width: 0; }
