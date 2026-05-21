@@ -321,9 +321,9 @@ function renderTopbar(workflow, score) {
       <div class="topbar__controls">
         <label class="search-box"><span>⌕</span><input aria-label="search" value="検索（コンポーネント / トレースID）"></label>
         <select id="workflowSelect" class="top-select" aria-label="workflow select">${workflowOptions}</select>
-        <span class="top-pill">環境：${escapeHtml(workflow.environment)}</span>
-        <span class="top-pill">時間範囲：${escapeHtml(workflow.window)}</span>
-        <span class="system-health ${score < 80 ? "is-risk" : ""}"><span class="dot"></span><span class="system-health__text">システム健全性<br><strong>${score < 80 ? "要注意" : "良好"}</strong></span></span>
+        <span class="top-pill top-pill--env"><span class="top-pill__label">環境：</span><strong class="top-pill__value">${escapeHtml(workflow.environment)}</strong></span>
+        <span class="top-pill top-pill--window"><span class="top-pill__label">時間範囲：</span><strong class="top-pill__value">${escapeHtml(workflow.window)}</strong></span>
+        <span class="system-health ${score < 80 ? "is-risk" : ""}"><span class="dot"></span><span class="system-health__text"><span class="system-health__label">システム健全性</span><strong>${score < 80 ? "要注意" : "良好"}</strong></span></span>
         <button class="icon-button" type="button" aria-label="notification">♢</button>
         <button class="icon-button" type="button" aria-label="help">?</button>
       </div>

@@ -136,7 +136,8 @@ a { color: var(--blue-600); text-decoration: none; }
 .search-box input { width: 100%; border: 0; outline: 0; color: #fff; background: transparent; font-weight: 700; }
 .top-select { min-width: 160px; padding: 0 12px; color: #fff; }
 .top-select option { color: var(--slate-900); }
-.top-pill { display: inline-grid; place-items: center; padding: 0 14px; font-weight: 800; }
+.top-pill { display: inline-flex; align-items: center; justify-content: center; padding: 0 14px; font-weight: 800; }
+.top-pill__value { color: inherit; font: inherit; }
 .system-health {
   min-width: 170px;
   display: grid;
@@ -148,6 +149,7 @@ a { color: var(--blue-600); text-decoration: none; }
   line-height: 1.15;
 }
 .system-health__text { min-width: 0; }
+.system-health__label { display: block; }
 .system-health strong { color: #22c55e; }
 .system-health.is-risk strong { color: #fbbf24; }
 .system-health .dot { width: 8px; height: 8px; border-radius: 99px; background: #22c55e; box-shadow: 0 0 0 4px rgba(34,197,94,.14); }
@@ -618,8 +620,48 @@ dt, dd { margin: 0; }
 }
 
 @media (max-width: 520px) {
-  .topbar__controls { grid-template-columns: 1fr; }
-  .search-box, .system-health { grid-column: 1; }
+  .topbar__controls {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 7px;
+  }
+  .search-box {
+    grid-column: 1 / -1;
+    height: 36px;
+  }
+  .top-select {
+    grid-column: 1 / -1;
+    height: 34px;
+  }
+  .top-pill,
+  .system-health {
+    grid-column: auto;
+    height: 30px;
+    padding: 0 7px;
+    border-radius: 8px;
+    font-size: 11px;
+    line-height: 1;
+    white-space: nowrap;
+  }
+  .top-pill__label,
+  .system-health__label {
+    display: none;
+  }
+  .system-health {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+  }
+  .system-health__text {
+    display: inline-flex;
+    align-items: center;
+  }
+  .system-health strong {
+    display: inline;
+  }
+  .system-health .dot {
+    flex: 0 0 auto;
+  }
 }
 
 .panel-title--navy { background: linear-gradient(90deg, var(--navy-950), var(--navy-900)); }
