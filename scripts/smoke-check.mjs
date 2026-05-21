@@ -17,15 +17,26 @@ const data = JSON.parse(fs.readFileSync(path.join(root, "sample-runs.json"), "ut
 const combined = `${html}\n${app}\n${css}\n${JSON.stringify(data)}`;
 
 for (const needle of [
-  "エージェント実行トリアージ",
-  "トレースツリー",
-  "トレース・ウォーターフォール",
-  "原因推定アシスタント",
-  "実行履歴・過去run比較",
-  "運用判定",
-  "ツール入力（秘匿済み）",
-  "評価（トレース単位）",
-  "関連ログとエラー",
+  "Agent Workflow Reliability Dashboard",
+  "Agent Runtime Flow",
+  "AIエージェント内部構成",
+  "AIエージェント内部ワークフロー",
+  "Intent Parser",
+  "Task Planner",
+  "Context Retriever",
+  "Tool Selector",
+  "Sandbox Executor",
+  "Result Validator",
+  "Reflection Loop",
+  "Memory Writer",
+  "Final Composer",
+  "異常イベント",
+  "エラークラスタ",
+  "レイテンシ",
+  "トークンコスト",
+  "コンポーネント健全性",
+  "根本原因候補",
+  "技術確認項目",
   "workflowSelect",
   "sample-runs.json",
 ]) {
@@ -34,13 +45,15 @@ for (const needle of [
 
 for (const cssNeedle of [
   "triage-app",
+  "dashboard-shell",
   "sidebar",
-  "incident-card",
-  "main-grid",
-  "trace-row",
-  "span-bar",
-  "hypothesis",
-  "bottom-grid",
+  "topbar",
+  "runtime-card",
+  "flow-map",
+  "runtime-node",
+  "panel-title--navy",
+  "data-table",
+  "insight-rail",
   "@media",
 ]) {
   if (!css.includes(cssNeedle)) throw new Error(`${cssNeedle} CSS missing`);
@@ -54,4 +67,4 @@ for (const banned of ["AI求人市場調査", "salary band", "年" + "収", "cli
   if (combined.toLowerCase().includes(banned.toLowerCase())) throw new Error(`public-facing banned term remained: ${banned}`);
 }
 
-console.log("OK: trace triage dashboard smoke check passed");
+console.log("OK: internal agent workflow dashboard smoke check passed");
