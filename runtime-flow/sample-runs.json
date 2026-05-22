@@ -1,8 +1,8 @@
 {
   "schemaVersion": "0.3.0",
-  "generatedAt": "2026-05-13T00:25:00+09:00",
+  "generatedAt": "2026-05-22T21:50:00+09:00",
   "portfolioSafe": true,
-  "purpose": "Japanese-first, portfolio-safe mock data for an Agent Trace Triage Console. The structure is designed so multiple real AI-agent workflows can be connected later.",
+  "purpose": "Japanese-first, portfolio-safe public demo data for Agent Runtime Flow. All scheduled workflows, task names, traces, and metrics are synthetic and safe for GitHub Pages.",
   "navigation": [
     "トリアージ",
     "ライブ実行",
@@ -17,7 +17,7 @@
     {
       "id": "support-agent-timeout",
       "name": "サポート対応AI",
-      "environment": "本番",
+      "environment": "デモ本番相当",
       "viewState": "失敗 + 劣化",
       "window": "直近6時間",
       "rcaConfidence": 87,
@@ -30,7 +30,7 @@
         "sessionDelta": "-12.7%",
         "sloBurn": "2.6x",
         "sloLevel": "高",
-        "started": "今日 13:42",
+        "started": "05/22 21:30",
         "status": "対応中"
       },
       "traceTree": [
@@ -259,7 +259,12 @@
           "Tokens",
           "Email",
           "+12 more"
-        ]
+        ],
+        "profile_id": "support-routing-15m",
+        "source_type": "json health artifact",
+        "raw_body_copied": false,
+        "local_path_copied": false,
+        "command_output_copied": false
       },
       "evaluations": [
         {
@@ -410,36 +415,36 @@
       },
       "scheduler": {
         "profileId": "support-routing-15m",
-        "taskName": "agent-support-routing-health",
-        "trigger": "Windows Task Scheduler / every 15 minutes",
+        "taskName": "public-support-routing-health",
+        "trigger": "Scheduled Demo / every 15 minutes",
         "cadence": "15分ごと",
         "sourceType": "json health artifact",
-        "inputMode": "latest-run-health.json",
+        "inputMode": "synthetic latest-run-health.json",
         "adapter": "scheduled-source-profile.v0.1",
-        "outputTarget": "runtime-flow sample-runs schema",
+        "outputTarget": "runtime-flow public demo schema",
         "historyStore": "safe summary history enabled",
-        "lastRunAt": "今日 13:42",
-        "nextRunAt": "今日 13:57",
+        "lastRunAt": "05/22 21:30",
+        "nextRunAt": "05/22 21:45",
         "switchHint": "profile idだけを変えて同じUIで比較"
       }
     },
     {
       "id": "research-agent-retrieval",
       "name": "情報整理AI",
-      "environment": "本番",
+      "environment": "デモ本番相当",
       "viewState": "劣化",
       "window": "直近6時間",
       "rcaConfidence": 74,
       "incident": {
         "severity": "SEV-3",
         "severityLabel": "注意",
-        "title": "検索文脈の鮮度低下により回答検証が保留",
+        "title": "検索結果の一部が古い文脈を参照",
         "impactedWorkflows": 2,
         "affectedSessions": "384",
         "sessionDelta": "-4.1%",
         "sloBurn": "1.4x",
         "sloLevel": "中",
-        "started": "今日 11:08",
+        "started": "05/22 21:00",
         "status": "監視中"
       },
       "traceTree": [
@@ -638,7 +643,12 @@
           "Tokens",
           "Internal URLs",
           "+8 more"
-        ]
+        ],
+        "profile_id": "knowledge-curation-hourly",
+        "source_type": "markdown post-run report",
+        "raw_body_copied": false,
+        "local_path_copied": false,
+        "command_output_copied": false
       },
       "evaluations": [
         {
@@ -775,36 +785,36 @@
       },
       "scheduler": {
         "profileId": "knowledge-curation-hourly",
-        "taskName": "agent-knowledge-curation-health",
-        "trigger": "Windows Task Scheduler / hourly",
+        "taskName": "public-knowledge-curation-health",
+        "trigger": "Scheduled Demo / hourly",
         "cadence": "1時間ごと",
         "sourceType": "markdown post-run report",
-        "inputMode": "post-run-health.md",
+        "inputMode": "synthetic post-run markdown",
         "adapter": "scheduled-source-profile.v0.1",
-        "outputTarget": "runtime-flow sample-runs schema",
+        "outputTarget": "runtime-flow public demo schema",
         "historyStore": "safe summary history enabled",
-        "lastRunAt": "今日 11:08",
-        "nextRunAt": "今日 12:08",
-        "switchHint": "markdown reportも同じprofile mappingで表示"
+        "lastRunAt": "05/22 21:00",
+        "nextRunAt": "05/22 22:00",
+        "switchHint": "profile idだけを変えて同じUIで比較"
       }
     },
     {
       "id": "billing-agent-payment",
       "name": "手続き確認AI",
-      "environment": "本番",
+      "environment": "デモ本番相当",
       "viewState": "失敗",
       "window": "直近6時間",
       "rcaConfidence": 91,
       "incident": {
         "severity": "SEV-2",
         "severityLabel": "重要",
-        "title": "決済ツールの接続失敗により人による確認へ送信",
+        "title": "検証APIの待ち時間増加で確認処理が遅延",
         "impactedWorkflows": 1,
         "affectedSessions": "729",
         "sessionDelta": "-9.4%",
         "sloBurn": "2.1x",
         "sloLevel": "高",
-        "started": "今日 09:16",
+        "started": "05/22 21:30",
         "status": "対応中"
       },
       "traceTree": [
@@ -1007,7 +1017,12 @@
           "Secrets",
           "Tokens",
           "+10 more"
-        ]
+        ],
+        "profile_id": "transaction-check-15m",
+        "source_type": "pre-sanitized agent-run-json",
+        "raw_body_copied": false,
+        "local_path_copied": false,
+        "command_output_copied": false
       },
       "evaluations": [
         {
@@ -1147,17 +1162,805 @@
       },
       "scheduler": {
         "profileId": "transaction-check-15m",
-        "taskName": "agent-transaction-check-health",
-        "trigger": "Windows Task Scheduler / every 15 minutes",
+        "taskName": "public-transaction-check-health",
+        "trigger": "Scheduled Demo / every 15 minutes",
         "cadence": "15分ごと",
         "sourceType": "pre-sanitized agent-run-json",
-        "inputMode": "agent-run.v0.1 artifact",
+        "inputMode": "synthetic agent-run-json",
         "adapter": "scheduled-source-profile.v0.1",
-        "outputTarget": "runtime-flow sample-runs schema",
+        "outputTarget": "runtime-flow public demo schema",
         "historyStore": "safe summary history enabled",
-        "lastRunAt": "今日 09:16",
-        "nextRunAt": "今日 09:31",
-        "switchHint": "pre-sanitized workflowは安全scan後に表示"
+        "lastRunAt": "05/22 21:30",
+        "nextRunAt": "05/22 21:45",
+        "switchHint": "profile idだけを変えて同じUIで比較"
+      }
+    },
+    {
+      "id": "ops-report-generation",
+      "name": "業務レポートAI",
+      "environment": "デモ本番相当",
+      "viewState": "正常",
+      "window": "直近6時間",
+      "rcaConfidence": 94,
+      "incident": {
+        "severity": "INFO",
+        "severityLabel": "情報",
+        "title": "日次レポート生成は正常に完了",
+        "impactedWorkflows": 2,
+        "affectedSessions": "0",
+        "sessionDelta": "+0.0%",
+        "sloBurn": "0.6x",
+        "sloLevel": "低",
+        "started": "05/22 08:30",
+        "status": "正常"
+      },
+      "traceTree": [
+        {
+          "id": "session",
+          "level": 0,
+          "name": "セッション",
+          "status": "warning",
+          "duration": "31,540",
+          "provider": "—",
+          "retries": "—",
+          "cost": "—",
+          "muted": "sess_72ad48"
+        },
+        {
+          "id": "trace",
+          "level": 1,
+          "name": "実行トレース",
+          "status": "warning",
+          "duration": "31,540",
+          "provider": "gpt-4o-mini / Azure OpenAI",
+          "retries": "1",
+          "cost": "9,443 / $0.061",
+          "selected": true
+        },
+        {
+          "id": "planner",
+          "level": 2,
+          "name": "計画作成",
+          "status": "success",
+          "duration": "1,108",
+          "provider": "gpt-4o-mini",
+          "retries": "0",
+          "cost": "1,004 / $0.006"
+        },
+        {
+          "id": "retriever",
+          "level": 2,
+          "name": "文脈検索",
+          "status": "warning",
+          "duration": "8,920",
+          "provider": "vector-db / hybrid-search",
+          "retries": "1",
+          "cost": "1,820 / $0.004",
+          "highlight": true
+        },
+        {
+          "id": "web",
+          "level": 2,
+          "name": "tool_call.source_check",
+          "status": "success",
+          "duration": "6,410",
+          "provider": "REST (HTTPS) / source-check-api",
+          "retries": "0",
+          "cost": "— / —"
+        },
+        {
+          "id": "verifier",
+          "level": 2,
+          "name": "検証",
+          "status": "warning",
+          "duration": "11,204",
+          "provider": "gpt-4o-mini",
+          "retries": "0",
+          "cost": "5,612 / $0.036"
+        },
+        {
+          "id": "response",
+          "level": 2,
+          "name": "応答生成",
+          "status": "success",
+          "duration": "2,146",
+          "provider": "gpt-4o-mini",
+          "retries": "0",
+          "cost": "1,007 / $0.005"
+        }
+      ],
+      "waterfall": {
+        "scale": [
+          "0ms",
+          "10s",
+          "20s",
+          "30s",
+          "40s",
+          "50s"
+        ],
+        "spans": [
+          {
+            "id": "trace-total",
+            "label": "全体",
+            "status": "skipped",
+            "start": 11,
+            "width": 52,
+            "duration": "31.54s"
+          },
+          {
+            "id": "planner",
+            "label": "計画作成",
+            "status": "progress",
+            "start": 11,
+            "width": 5,
+            "duration": "1.10s"
+          },
+          {
+            "id": "retriever",
+            "label": "文脈検索",
+            "status": "warning",
+            "start": 18,
+            "width": 18,
+            "duration": "8.92s",
+            "annotation": "関連度低下",
+            "retries": [
+              {
+                "label": "再検索",
+                "start": 31,
+                "duration": "3.41s"
+              }
+            ]
+          },
+          {
+            "id": "source",
+            "label": "source_check",
+            "status": "progress",
+            "start": 35,
+            "width": 12,
+            "duration": "6.41s"
+          },
+          {
+            "id": "verifier",
+            "label": "検証",
+            "status": "progress",
+            "start": 43,
+            "width": 21,
+            "duration": "11.20s",
+            "annotation": "鮮度確認"
+          },
+          {
+            "id": "response",
+            "label": "応答生成",
+            "status": "progress",
+            "start": 62,
+            "width": 7,
+            "duration": "2.15s"
+          }
+        ]
+      },
+      "hypotheses": [
+        {
+          "rank": 1,
+          "title": "入力データ収集は正常",
+          "score": 0.31,
+          "tone": "success",
+          "evidence": [
+            "予定時刻内にartifact生成",
+            "欠損レコードなし"
+          ]
+        },
+        {
+          "rank": 2,
+          "title": "集計ロジックは正常",
+          "score": 0.28,
+          "tone": "success",
+          "evidence": [
+            "主要KPIの検証を通過",
+            "前日差分が許容範囲"
+          ]
+        },
+        {
+          "rank": 3,
+          "title": "配信前チェックは正常",
+          "score": 0.24,
+          "tone": "success",
+          "evidence": [
+            "公開前の安全確認を通過",
+            "raw payloadはコピーしていない"
+          ]
+        }
+      ],
+      "recommendedAction": {
+        "title": "通常監視を継続",
+        "body": "次回の営業日朝runで同じprofileを確認します。公開デモでは安全な集計値だけを表示しています。",
+        "button": "次回runを確認"
+      },
+      "payload": {
+        "mode": "Raw JSON",
+        "code": [
+          "{",
+          "  \"tool\": \"hybrid_search\",",
+          "  \"query\": \"agent reliability dashboard examples\",",
+          "  \"filters\": { \"freshness\": \"7d\" },",
+          "  \"top_k\": 8",
+          "}"
+        ],
+        "redactionRules": [
+          "Secrets",
+          "Tokens",
+          "Internal URLs",
+          "+8 more"
+        ],
+        "profile_id": "ops-report-generation-daily",
+        "source_type": "json report health artifact",
+        "raw_body_copied": false,
+        "local_path_copied": false,
+        "command_output_copied": false
+      },
+      "evaluations": [
+        {
+          "name": "目標達成",
+          "score": 0.63,
+          "baseline": 0.77,
+          "delta": -0.14,
+          "impact": "中"
+        },
+        {
+          "name": "正確性",
+          "score": 0.66,
+          "baseline": 0.73,
+          "delta": -0.07,
+          "impact": "低"
+        },
+        {
+          "name": "根拠の明確さ",
+          "score": 0.54,
+          "baseline": 0.75,
+          "delta": -0.21,
+          "impact": "中"
+        },
+        {
+          "name": "文脈関連度",
+          "score": 0.41,
+          "baseline": 0.68,
+          "delta": -0.27,
+          "impact": "高"
+        },
+        {
+          "name": "応答関連度",
+          "score": 0.62,
+          "baseline": 0.7,
+          "delta": -0.08,
+          "impact": "低"
+        },
+        {
+          "name": "有用性",
+          "score": 0.59,
+          "baseline": 0.71,
+          "delta": -0.12,
+          "impact": "中"
+        }
+      ],
+      "replay": {
+        "model": "gpt-4o-mini (Azure OpenAI)",
+        "temperature": "0.1",
+        "tools": "全ツール (3)",
+        "includeToolResponses": true
+      },
+      "logs": [
+        {
+          "time": "11:18:52.018",
+          "level": "WARN",
+          "source": "retriever",
+          "message": "検索上位の文書鮮度が低い"
+        },
+        {
+          "time": "11:18:50.103",
+          "level": "INFO",
+          "source": "source_check",
+          "message": "外部ソース確認完了"
+        },
+        {
+          "time": "11:18:43.912",
+          "level": "WARN",
+          "source": "verifier",
+          "message": "根拠の鮮度確認を要求"
+        },
+        {
+          "time": "11:18:32.601",
+          "level": "INFO",
+          "source": "session",
+          "message": "セッション開始"
+        }
+      ],
+      "history": [
+        {
+          "label": "latest",
+          "time": "今日 11:08",
+          "affectedSessions": 384,
+          "sloBurn": 1.4,
+          "durationMs": 31540,
+          "errorRate": 0.4,
+          "status": "監視中"
+        },
+        {
+          "label": "previous",
+          "time": "45分前",
+          "affectedSessions": 300,
+          "sloBurn": 1,
+          "durationMs": 25863,
+          "errorRate": 0.3,
+          "status": "監視中"
+        },
+        {
+          "label": "earlier",
+          "time": "2時間前",
+          "affectedSessions": 200,
+          "sloBurn": 0.6,
+          "durationMs": 18293,
+          "errorRate": 0.2,
+          "status": "stable"
+        },
+        {
+          "label": "baseline-7d",
+          "time": "7日基準",
+          "affectedSessions": 119,
+          "sloBurn": 0.5,
+          "durationMs": 13247,
+          "errorRate": 0.1,
+          "status": "baseline"
+        }
+      ],
+      "reliabilityDecision": {
+        "level": "alert",
+        "sloDelta": 0.4,
+        "sloBaselineRatio": 2.8,
+        "errorDelta": 0.1,
+        "affectedDelta": 84,
+        "ruleHits": [
+          "slo_baseline_ratio"
+        ],
+        "thresholds": {
+          "sloPreviousDeltaAlert": 0.5,
+          "sloBaselineRatioAlert": 2,
+          "errorRateDeltaAlert": 1,
+          "affectedSessionsDeltaAlert": 100,
+          "recoverySloBurnMax": 1.2,
+          "criticalSloBurnMin": 2
+        },
+        "nextActionKey": "watch_trend",
+        "state": "正常",
+        "confidence": 94
+      },
+      "scheduler": {
+        "profileId": "ops-report-generation-daily",
+        "taskName": "public-ops-report-health",
+        "trigger": "Scheduled Demo / every business morning",
+        "cadence": "営業日 朝",
+        "sourceType": "json report health artifact",
+        "inputMode": "synthetic report-health.json",
+        "adapter": "scheduled-source-profile.v0.1",
+        "outputTarget": "runtime-flow public demo schema",
+        "historyStore": "safe summary history enabled",
+        "lastRunAt": "05/22 08:30",
+        "nextRunAt": "05/23 08:30",
+        "switchHint": "profile idだけを変えて同じUIで比較"
+      }
+    },
+    {
+      "id": "quality-review-agent",
+      "name": "品質確認AI",
+      "environment": "デモ本番相当",
+      "viewState": "軽微な劣化",
+      "window": "直近6時間",
+      "rcaConfidence": 83,
+      "incident": {
+        "severity": "SEV-3",
+        "severityLabel": "注意",
+        "title": "評価サンプル数の偏りを検知し監視中",
+        "impactedWorkflows": 3,
+        "affectedSessions": "18",
+        "sessionDelta": "-1.6%",
+        "sloBurn": "1.2x",
+        "sloLevel": "中",
+        "started": "05/22 21:20",
+        "status": "監視中"
+      },
+      "traceTree": [
+        {
+          "id": "session",
+          "level": 0,
+          "name": "セッション",
+          "status": "error",
+          "duration": "48,712",
+          "provider": "—",
+          "retries": "—",
+          "cost": "—",
+          "muted": "sess_9f3a7c2b"
+        },
+        {
+          "id": "trace",
+          "level": 1,
+          "name": "実行トレース",
+          "status": "error",
+          "duration": "48,712",
+          "provider": "gpt-4o-mini / Azure OpenAI",
+          "retries": "2",
+          "cost": "12,842 / $0.089",
+          "muted": "trace_3b7f9c1a8e4d",
+          "selected": true
+        },
+        {
+          "id": "planner",
+          "level": 2,
+          "name": "計画作成",
+          "status": "success",
+          "duration": "1,234",
+          "provider": "gpt-4o-mini",
+          "retries": "0",
+          "cost": "1,256 / $0.008"
+        },
+        {
+          "id": "retriever",
+          "level": 2,
+          "name": "文脈検索",
+          "status": "success",
+          "duration": "2,105",
+          "provider": "text-embedding-3-small / Azure OpenAI",
+          "retries": "0",
+          "cost": "856 / $0.002"
+        },
+        {
+          "id": "crm",
+          "level": 2,
+          "name": "tool_call.crm_lookup",
+          "status": "warning",
+          "duration": "15,432",
+          "provider": "REST (HTTPS) / customer-records-api",
+          "retries": "2",
+          "cost": "— / —",
+          "highlight": true
+        },
+        {
+          "id": "policy",
+          "level": 2,
+          "name": "tool_call.policy_check",
+          "status": "success",
+          "duration": "3,210",
+          "provider": "REST (HTTPS) / policy-check-api",
+          "retries": "0",
+          "cost": "— / —"
+        },
+        {
+          "id": "verifier",
+          "level": 2,
+          "name": "検証",
+          "status": "warning",
+          "duration": "12,321",
+          "provider": "gpt-4o-mini / Azure OpenAI",
+          "retries": "1",
+          "cost": "6,120 / $0.041"
+        },
+        {
+          "id": "response",
+          "level": 2,
+          "name": "応答生成",
+          "status": "success",
+          "duration": "1,890",
+          "provider": "gpt-4o-mini",
+          "retries": "0",
+          "cost": "610 / $0.004"
+        }
+      ],
+      "waterfall": {
+        "scale": [
+          "0ms",
+          "10s",
+          "20s",
+          "30s",
+          "40s",
+          "50s"
+        ],
+        "spans": [
+          {
+            "id": "trace-total",
+            "label": "全体",
+            "status": "skipped",
+            "start": 12,
+            "width": 74,
+            "duration": "48.71s"
+          },
+          {
+            "id": "planner",
+            "label": "計画作成",
+            "status": "progress",
+            "start": 12,
+            "width": 6,
+            "duration": "1.23s"
+          },
+          {
+            "id": "retriever",
+            "label": "文脈検索",
+            "status": "progress",
+            "start": 18,
+            "width": 7,
+            "duration": "2.10s"
+          },
+          {
+            "id": "crm",
+            "label": "crm_lookup",
+            "status": "warning",
+            "start": 25,
+            "width": 30,
+            "duration": "15.43s",
+            "annotation": "Timeout (10s)",
+            "retries": [
+              {
+                "label": "再試行 1",
+                "start": 39,
+                "duration": "5.21s"
+              },
+              {
+                "label": "再試行 2",
+                "start": 51,
+                "duration": "4.87s"
+              }
+            ]
+          },
+          {
+            "id": "policy",
+            "label": "policy_check",
+            "status": "progress",
+            "start": 23,
+            "width": 6,
+            "duration": "3.21s"
+          },
+          {
+            "id": "verifier",
+            "label": "検証",
+            "status": "progress",
+            "start": 35,
+            "width": 24,
+            "duration": "12.32s",
+            "annotation": "古い文脈を検出"
+          },
+          {
+            "id": "response",
+            "label": "応答生成",
+            "status": "progress",
+            "start": 57,
+            "width": 7,
+            "duration": "1.89s"
+          }
+        ]
+      },
+      "hypotheses": [
+        {
+          "rank": 1,
+          "title": "評価対象の偏りを確認",
+          "score": 0.62,
+          "tone": "warning",
+          "evidence": [
+            "一部カテゴリの件数が低下",
+            "再評価キューは正常"
+          ]
+        },
+        {
+          "rank": 2,
+          "title": "ツール応答は正常",
+          "score": 0.34,
+          "tone": "success",
+          "evidence": [
+            "HTTP 5xxは検出なし",
+            "timeout率は基準内"
+          ]
+        },
+        {
+          "rank": 3,
+          "title": "次回runで傾向確認",
+          "score": 0.29,
+          "tone": "info",
+          "evidence": [
+            "30分ごとのprofileで比較可能",
+            "raw logは表示対象外"
+          ]
+        }
+      ],
+      "recommendedAction": {
+        "title": "次回runまで監視",
+        "body": "評価カテゴリの偏りが継続する場合だけ、元artifact側でサンプル抽出条件を確認します。",
+        "button": "評価傾向を確認"
+      },
+      "payload": {
+        "mode": "Raw JSON",
+        "code": [
+          "{",
+          "  \"tool\": \"crm_lookup\",",
+          "  \"endpoint\": \"https://customer-records-api/v1/accounts\",",
+          "  \"method\": \"POST\",",
+          "  \"headers\": { \"Authorization\": \"Bearer ********\" },",
+          "  \"body\": {",
+          "    \"record_id\": \"record_9f83bc2d\",",
+          "    \"include_history\": true,",
+          "    \"fields\": [\"id\", \"name\", \"status\", \"owner_id\"]",
+          "  }",
+          "}"
+        ],
+        "redactionRules": [
+          "個人情報",
+          "Secrets",
+          "Tokens",
+          "Email",
+          "+12 more"
+        ],
+        "profile_id": "quality-review-30m",
+        "source_type": "json evaluation summary",
+        "raw_body_copied": false,
+        "local_path_copied": false,
+        "command_output_copied": false
+      },
+      "evaluations": [
+        {
+          "name": "目標達成",
+          "score": 0.24,
+          "baseline": 0.78,
+          "delta": -0.54,
+          "impact": "高"
+        },
+        {
+          "name": "正確性",
+          "score": 0.31,
+          "baseline": 0.72,
+          "delta": -0.41,
+          "impact": "高"
+        },
+        {
+          "name": "根拠の明確さ",
+          "score": 0.58,
+          "baseline": 0.74,
+          "delta": -0.16,
+          "impact": "中"
+        },
+        {
+          "name": "文脈関連度",
+          "score": 0.29,
+          "baseline": 0.63,
+          "delta": -0.34,
+          "impact": "高"
+        },
+        {
+          "name": "応答関連度",
+          "score": 0.48,
+          "baseline": 0.69,
+          "delta": -0.21,
+          "impact": "中"
+        },
+        {
+          "name": "有用性",
+          "score": 0.52,
+          "baseline": 0.71,
+          "delta": -0.19,
+          "impact": "中"
+        }
+      ],
+      "replay": {
+        "model": "gpt-4o-mini (Azure OpenAI)",
+        "temperature": "0.2",
+        "tools": "全ツール (2)",
+        "includeToolResponses": true
+      },
+      "logs": [
+        {
+          "time": "13:45:12.321",
+          "level": "ERROR",
+          "source": "customer-records-api",
+          "message": "HTTP 504 Gateway Timeout"
+        },
+        {
+          "time": "13:45:12.318",
+          "level": "WARN",
+          "source": "verifier",
+          "message": "ツールエラーにより再試行"
+        },
+        {
+          "time": "13:45:07.109",
+          "level": "WARN",
+          "source": "retriever",
+          "message": "文脈関連度が低い (0.23)"
+        },
+        {
+          "time": "13:44:52.887",
+          "level": "ERROR",
+          "source": "customer-records-api",
+          "message": "10.0s で接続タイムアウト"
+        },
+        {
+          "time": "13:44:52.882",
+          "level": "INFO",
+          "source": "planner",
+          "message": "計画を生成 (2 tool calls)"
+        },
+        {
+          "time": "13:44:52.681",
+          "level": "INFO",
+          "source": "session",
+          "message": "セッション開始"
+        }
+      ],
+      "history": [
+        {
+          "label": "latest",
+          "time": "今日 13:42",
+          "affectedSessions": 1243,
+          "sloBurn": 2.6,
+          "durationMs": 48712,
+          "errorRate": 2.7,
+          "status": "対応中"
+        },
+        {
+          "label": "previous",
+          "time": "45分前",
+          "affectedSessions": 970,
+          "sloBurn": 1.9,
+          "durationMs": 39944,
+          "errorRate": 1.9,
+          "status": "対応中"
+        },
+        {
+          "label": "earlier",
+          "time": "2時間前",
+          "affectedSessions": 646,
+          "sloBurn": 1.2,
+          "durationMs": 28253,
+          "errorRate": 1.3,
+          "status": "stable"
+        },
+        {
+          "label": "baseline-7d",
+          "time": "7日基準",
+          "affectedSessions": 385,
+          "sloBurn": 0.9,
+          "durationMs": 20459,
+          "errorRate": 0.9,
+          "status": "baseline"
+        }
+      ],
+      "reliabilityDecision": {
+        "level": "critical",
+        "sloDelta": 0.7,
+        "sloBaselineRatio": 2.9,
+        "errorDelta": 0.8,
+        "affectedDelta": 273,
+        "ruleHits": [
+          "slo_prev_delta",
+          "slo_baseline_ratio",
+          "affected_sessions_delta"
+        ],
+        "thresholds": {
+          "sloPreviousDeltaAlert": 0.5,
+          "sloBaselineRatioAlert": 2,
+          "errorRateDeltaAlert": 1,
+          "affectedSessionsDeltaAlert": 100,
+          "recoverySloBurnMax": 1.2,
+          "criticalSloBurnMin": 2
+        },
+        "nextActionKey": "inspect_dependency",
+        "state": "監視中",
+        "confidence": 83
+      },
+      "scheduler": {
+        "profileId": "quality-review-30m",
+        "taskName": "public-quality-review-health",
+        "trigger": "Scheduled Demo / every 30 minutes",
+        "cadence": "30分ごと",
+        "sourceType": "json evaluation summary",
+        "inputMode": "synthetic evaluation-summary.json",
+        "adapter": "scheduled-source-profile.v0.1",
+        "outputTarget": "runtime-flow public demo schema",
+        "historyStore": "safe summary history enabled",
+        "lastRunAt": "05/22 21:20",
+        "nextRunAt": "05/22 21:50",
+        "switchHint": "profile idだけを変えて同じUIで比較"
       }
     }
   ],
