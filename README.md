@@ -179,6 +179,26 @@ profileを限定する場合:
 powershell -NoProfile -ExecutionPolicy Bypass -File scripts/update-local-scheduled-dashboard.ps1 -Profile public-safe-health-id
 ```
 
+Windows Task Scheduler にローカル更新ジョブを登録して、dashboard JSON を自動更新する場合:
+
+```powershell
+npm run register:scheduled:local
+```
+
+既定では `\Tenormusica\AgentWorkflowDashboardLocalUpdate` を登録し、15分ごとに `scripts/run-local-scheduled-dashboard-update.ps1` を実行します。
+登録直後に1回実行して、`tmp/scheduled-dashboard-update.log` に結果を残します。
+間隔やtask名を変える場合:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/register-local-scheduled-dashboard-task.ps1 -TaskName AgentWorkflowDashboardLocalUpdate -IntervalMinutes 30 -Force -RunNow
+```
+
+登録解除:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/register-local-scheduled-dashboard-task.ps1 -TaskName AgentWorkflowDashboardLocalUpdate -Unregister
+```
+
 ローカル表示:
 
 ```text
