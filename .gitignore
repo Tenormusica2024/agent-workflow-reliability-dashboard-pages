@@ -4,6 +4,7 @@ dist/
 *.log
 tmp/
 config/local-scheduled-sources.json
+config/local-task-scheduler-tasks.json
 data/private-incoming/
 data/private-runs/
 

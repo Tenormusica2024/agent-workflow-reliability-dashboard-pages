@@ -31,7 +31,8 @@
     "validate:scheduled:raw": "node scripts/validate-source-runs.mjs data/private-incoming",
     "validate:scheduled:merged": "node scripts/validate-source-runs.mjs tmp/scheduled-merged-agent-runs.json",
     "check:scheduled": "npm run validate:scheduled:raw && npm run build:scheduled && npm run validate:scheduled:merged && node scripts/validate-data.mjs tmp/scheduled-dashboard-runs.json --min-workflows 1 && node scripts/safety-scan.mjs --optional-target data/private-runs tmp/scheduled-merged-agent-runs.json tmp/scheduled-dashboard-runs.json",
-    "check:scheduled:example": "npm run import:scheduled:example && npm run validate:scheduled:example:raw && npm run build:scheduled:example && npm run validate:scheduled:example:merged && node scripts/validate-data.mjs tmp/scheduled-example-dashboard-runs.json --min-workflows 1 && node scripts/safety-scan.mjs tmp/scheduled-example-runs tmp/scheduled-example-merged-agent-runs.json tmp/scheduled-example-dashboard-runs.json"
+    "check:scheduled:example": "npm run import:scheduled:example && npm run validate:scheduled:example:raw && npm run build:scheduled:example && npm run validate:scheduled:example:merged && node scripts/validate-data.mjs tmp/scheduled-example-dashboard-runs.json --min-workflows 1 && node scripts/safety-scan.mjs tmp/scheduled-example-runs tmp/scheduled-example-merged-agent-runs.json tmp/scheduled-example-dashboard-runs.json",
+    "update:scheduled:local": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/update-local-scheduled-dashboard.ps1"
   },
   "keywords": [
     "ai-agent",

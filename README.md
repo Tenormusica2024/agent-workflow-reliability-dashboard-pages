@@ -146,6 +146,39 @@ npm run check:scheduled
 npm run serve
 ```
 
+Windows Task Scheduler の実タスクを health artifact 化して、profile import から dashboard JSON 生成・検証まで一括更新する場合は以下を使います。
+
+```powershell
+npm run update:scheduled:local
+```
+
+このコマンドは、存在すれば `config/local-task-scheduler-tasks.json`（gitignore対象）を読みます。
+ファイルには実タスク名を置けますが、public repoへはcommitしません。
+dashboardへコピーされるのは `publicId` / `displayName` / `cadence` / 実行状態 / last-next run / status summary だけです。
+実タスク名、Task Scheduler の action path、コマンド本文、raw log本文は `tmp/task-scheduler-health.json` へコピーしません。
+
+`config/local-task-scheduler-tasks.json` の形:
+
+```json
+{
+  "schemaVersion": "task-scheduler-health-sources.v0.1",
+  "tasks": [
+    {
+      "taskName": "実Task Scheduler名",
+      "publicId": "public-safe-health-id",
+      "displayName": "Public Safe Health Name",
+      "cadence": "5分ごと"
+    }
+  ]
+}
+```
+
+profileを限定する場合:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/update-local-scheduled-dashboard.ps1 -Profile public-safe-health-id
+```
+
 ローカル表示:
 
 ```text
