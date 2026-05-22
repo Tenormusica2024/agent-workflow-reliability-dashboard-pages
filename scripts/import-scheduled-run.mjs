@@ -59,11 +59,13 @@ console.log("  local/private profile flow: npm run check:scheduled");
 
 function buildWorkflow({ source, sourceText, inputPath, profile }) {
   const checks = normalizeChecks(profile.checks ?? [], source, profile.type);
-  const startedMs = timestamp(valueOf(profile.extract?.startedAt, source, profile.type))
+  const startedValue = valueOf(profile.extract?.startedAt, source, profile.type);
+  const startedMs = timestamp(startedValue)
     ?? fs.statSync(inputPath).mtimeMs;
   const durationMs = positiveNumber(valueOf(profile.extract?.durationMs, source, profile.type))
     ?? durationFromTimestamps(startedMs, valueOf(profile.extract?.finishedAt, source, profile.type))
     ?? Math.max(1000, sumCheckDurations(checks));
+  const nextRunAt = stringValue(valueOf(profile.extract?.nextRunAt, source, profile.type));
   const runId = stringValue(valueOf(profile.extract?.runId, source, profile.type))
     ?? `${profile.id}_${new Date(startedMs).toISOString().replace(/[-:.TZ]/g, "").slice(0, 14)}`;
   const sessionId = stringValue(valueOf(profile.extract?.sessionId, source, profile.type)) ?? `scheduled_${safeId(profile.id)}`;
@@ -90,7 +92,7 @@ function buildWorkflow({ source, sourceText, inputPath, profile }) {
     name: stringValue(profile.workflow?.name) ?? profile.id,
     environment: stringValue(profile.workflow?.environment) ?? "local scheduled run",
     window: stringValue(profile.workflow?.window) ?? "latest run",
-    scheduler: schedulerForProfile({ profile, outputPath, historyStorePath, historyDisabled }),
+    scheduler: schedulerForProfile({ profile, outputPath, historyStorePath, historyDisabled, lastRunAt: stringValue(startedValue) ?? new Date(startedMs).toISOString(), nextRunAt }),
     incident: {
       title: stringValue(profile.workflow?.incidentTitle)
         ?? (failed ? "定期実行runで確認が必要" : degraded ? "定期実行runに軽微な劣化" : "定期実行runは正常に完了"),
@@ -195,7 +197,7 @@ function redactionSummaryFor(profile) {
   return "raw artifact body, full local path, source file name, and command output are not copied; mapped annotations/evidence must be safe profile-selected summaries";
 }
 
-function schedulerForProfile({ profile, outputPath, historyStorePath, historyDisabled }) {
+function schedulerForProfile({ profile, outputPath, historyStorePath, historyDisabled, lastRunAt, nextRunAt }) {
   const configured = profile.workflow?.scheduler ?? {};
   return {
     profileId: profile.id,
@@ -207,8 +209,8 @@ function schedulerForProfile({ profile, outputPath, historyStorePath, historyDis
     adapter: "scheduled-source-profile.v0.1",
     outputTarget: stringValue(configured.outputTarget) ?? toRelative(outputPath),
     historyStore: historyDisabled ? "disabled" : stringValue(configured.historyStore) ?? `enabled: ${toRelative(historyStorePath)}`,
-    lastRunAt: new Date().toISOString(),
-    nextRunAt: stringValue(configured.nextRunAt) ?? "next scheduled trigger",
+    lastRunAt: stringValue(configured.lastRunAt) ?? stringValue(lastRunAt) ?? new Date().toISOString(),
+    nextRunAt: stringValue(configured.nextRunAt) ?? nextRunAt ?? "next scheduled trigger",
     switchHint: stringValue(configured.switchHint) ?? "change only --profile to view another scheduled program",
   };
 }

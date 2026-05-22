@@ -107,6 +107,14 @@ function schedulerLabel(workflow, key, fallback = "未設定") {
   return escapeHtml(scheduler[key] || fallback);
 }
 
+function compactTime(value, fallback = "未設定") {
+  const raw = String(value || "").trim();
+  if (!raw) return fallback;
+  const match = raw.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/);
+  if (match) return `${match[2]}/${match[3]} ${match[4]}:${match[5]}`;
+  return raw;
+}
+
 function statusClass(status) {
   const normalized = String(status || "").toLowerCase();
   if (["error", "critical", "danger", "failed"].some((item) => normalized.includes(item))) return "critical";
@@ -380,8 +388,8 @@ function renderSchedulerSwitcher(data, workflow) {
         <span class="program-card__status program-card__status--${health}">${statusLabel(health)}</span>
         <strong>${escapeHtml(item.name)}</strong>
         <span class="program-card__task">${escapeHtml(scheduler.taskName || scheduler.profileId || item.id)}</span>
-        <span class="program-card__meta">最新 ${escapeHtml(scheduler.lastRunAt || item.incident?.started || "latest")}</span>
-        <span class="program-card__meta">次回 ${escapeHtml(scheduler.nextRunAt || scheduler.cadence || "profile実行時")}</span>
+        <span class="program-card__meta">最新 ${escapeHtml(compactTime(scheduler.lastRunAt || item.incident?.started, "latest"))}</span>
+        <span class="program-card__meta">次回 ${escapeHtml(compactTime(scheduler.nextRunAt, scheduler.cadence || "profile実行時"))}</span>
       </button>
     `;
   }).join("");
@@ -638,8 +646,8 @@ function renderSchedulerRail(workflow) {
         <div><dt>profile</dt><dd>${escapeHtml(scheduler.profileId || workflow.id)}</dd></div>
         <div><dt>task</dt><dd>${escapeHtml(scheduler.taskName || "未接続")}</dd></div>
         <div><dt>source</dt><dd>${escapeHtml(scheduler.sourceType || "dashboard-json")}</dd></div>
-        <div><dt>latest</dt><dd>${escapeHtml(scheduler.lastRunAt || workflow.incident?.started || "latest")}</dd></div>
-        <div><dt>next</dt><dd>${escapeHtml(scheduler.nextRunAt || scheduler.cadence || "profile実行時")}</dd></div>
+        <div><dt>latest</dt><dd>${escapeHtml(compactTime(scheduler.lastRunAt || workflow.incident?.started, "latest"))}</dd></div>
+        <div><dt>next</dt><dd>${escapeHtml(compactTime(scheduler.nextRunAt, scheduler.cadence || "profile実行時"))}</dd></div>
       </dl>
     </section>
   `;
