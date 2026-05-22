@@ -406,8 +406,10 @@
           "recoverySloBurnMax": 1.2,
           "criticalSloBurnMin": 2
         },
-        "nextActionKey": "inspect_dependency"
-      }
+        "nextActionKey": "inspect_dependency",
+        "historySource": "fallback"
+      },
+      "historySource": "fallback"
     },
     {
       "id": "research-agent-retrieval",
@@ -757,8 +759,10 @@
           "recoverySloBurnMax": 1.2,
           "criticalSloBurnMin": 2
         },
-        "nextActionKey": "watch_trend"
-      }
+        "nextActionKey": "watch_trend",
+        "historySource": "fallback"
+      },
+      "historySource": "fallback"
     },
     {
       "id": "billing-agent-payment",
@@ -1115,8 +1119,10 @@
           "recoverySloBurnMax": 1.2,
           "criticalSloBurnMin": 2
         },
-        "nextActionKey": "inspect_dependency"
-      }
+        "nextActionKey": "inspect_dependency",
+        "historySource": "fallback"
+      },
+      "historySource": "fallback"
     }
   ],
   "reliabilityThresholds": {

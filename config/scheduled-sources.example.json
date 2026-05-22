@@ -1,0 +1,113 @@
+{
+  "schemaVersion": "scheduled-source-profiles.v0.1",
+  "defaultProfile": "example-json-health",
+  "profiles": [
+    {
+      "id": "example-json-health",
+      "type": "json",
+      "input": "data/source-examples/scheduled-run-health.example.json",
+      "historyLimit": 20,
+      "workflow": {
+        "id": "scheduled-project-health",
+        "name": "定期実行プロジェクト health",
+        "environment": "local scheduled run",
+        "window": "latest run",
+        "model": "Windows Task Scheduler / local scripts",
+        "incidentTitle": "定期実行プロジェクトの最新runを取り込み"
+      },
+      "extract": {
+        "runId": { "path": "$.run.id" },
+        "startedAt": { "path": "$.run.started_at" },
+        "finishedAt": { "path": "$.run.finished_at" },
+        "durationMs": { "path": "$.run.duration_ms" },
+        "status": { "path": "$.run.status" },
+        "affectedSessions": { "path": "$.metrics.affected_sessions" },
+        "sloBurn": { "path": "$.metrics.slo_burn" },
+        "errorRate": { "path": "$.metrics.error_rate" },
+        "model": { "path": "$.run.runner" }
+      },
+      "checks": [
+        {
+          "id": "collect",
+          "name": "collect latest artifact",
+          "provider": "Task Scheduler",
+          "status": { "path": "$.checks.collect.status" },
+          "durationMs": { "path": "$.checks.collect.duration_ms" },
+          "annotation": { "path": "$.checks.collect.message" },
+          "evidence": [
+            { "label": "files", "value": { "path": "$.checks.collect.files" } }
+          ]
+        },
+        {
+          "id": "transform",
+          "name": "transform summary",
+          "provider": "adapter",
+          "status": { "path": "$.checks.transform.status" },
+          "durationMs": { "path": "$.checks.transform.duration_ms" },
+          "annotation": { "path": "$.checks.transform.message" }
+        },
+        {
+          "id": "publish_guard",
+          "name": "publish safety guard",
+          "provider": "safety scan",
+          "status": { "path": "$.checks.publish_guard.status" },
+          "durationMs": { "path": "$.checks.publish_guard.duration_ms" },
+          "annotation": { "path": "$.checks.publish_guard.message" }
+        }
+      ],
+      "recommendedAction": {
+        "title": "profileを差し替えて実runへ接続",
+        "body": "config/local-scheduled-sources.json に対象プロジェクトのartifactパスとcheck対応を置けば、同じコマンドで別プロジェクトへ交換できます。",
+        "button": "profileを確認"
+      },
+      "replay": {
+        "model": "local scheduled profile",
+        "temperature": "n/a",
+        "tools": "file read, profile mapping, dashboard build"
+      }
+    },
+    {
+      "id": "example-markdown-health",
+      "type": "markdown",
+      "input": "data/source-examples/scheduled-run-health.example.md",
+      "workflow": {
+        "id": "scheduled-markdown-health",
+        "name": "Markdown health report",
+        "environment": "local scheduled run",
+        "window": "latest report",
+        "model": "markdown post-run report"
+      },
+      "extract": {
+        "runId": { "key": "run_id" },
+        "startedAt": { "key": "generated_at" },
+        "status": { "key": "verdict" },
+        "sloBurn": { "key": "slo_burn" },
+        "affectedSessions": { "key": "affected_sessions" },
+        "errorRate": { "key": "error_rate" }
+      },
+      "checks": [
+        {
+          "id": "postrun_audit",
+          "name": "post-run audit",
+          "provider": "markdown report",
+          "status": { "section": "Post-run audit", "key": "status" },
+          "annotation": { "section": "Post-run audit", "key": "reason" }
+        },
+        {
+          "id": "retry_queue",
+          "name": "retry queue",
+          "provider": "markdown report",
+          "status": { "section": "Retry queue", "key": "status" },
+          "annotation": { "section": "Retry queue", "key": "pending_retry_count" }
+        },
+        {
+          "id": "static_smoke",
+          "name": "static smoke",
+          "provider": "markdown report",
+          "status": { "section": "Static smoke", "key": "status" },
+          "annotation": { "section": "Static smoke", "key": "checks" }
+        }
+      ]
+    }
+  ]
+}

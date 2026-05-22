@@ -2,7 +2,9 @@ import fs from "node:fs";
 import path from "node:path";
 
 const root = path.resolve(new URL("..", import.meta.url).pathname.replace(/^\/(.:\/)/, "$1"));
-const dataPath = process.argv[2] ? path.resolve(root, process.argv[2]) : path.join(root, "sample-runs.json");
+const args = parseArgs(process.argv.slice(2));
+const dataPath = args.path ? path.resolve(root, args.path) : path.join(root, "sample-runs.json");
+const minWorkflows = Number(args.minWorkflows ?? 2);
 const data = JSON.parse(fs.readFileSync(dataPath, "utf8"));
 
 function assert(condition, message) {
@@ -23,7 +25,8 @@ assert(Array.isArray(data.navigation) && data.navigation.length >= 6, "navigatio
 if (data.reliabilityThresholds != null) {
   validateReliabilityThresholds(data.reliabilityThresholds, "reliabilityThresholds");
 }
-assert(Array.isArray(data.workflows) && data.workflows.length >= 2, "workflows must have >= 2 workflows for future multi-agent support");
+assert(Number.isInteger(minWorkflows) && minWorkflows >= 1, "minWorkflows must be a positive integer");
+assert(Array.isArray(data.workflows) && data.workflows.length >= minWorkflows, `workflows must have >= ${minWorkflows} workflow(s)`);
 assert(data.workflows.some((workflow) => workflow.id === data.defaultWorkflowId), "defaultWorkflowId must point to a workflow");
 
 const ids = new Set();
@@ -68,6 +71,9 @@ for (const workflow of data.workflows) {
   assert(workflow.payload && Array.isArray(workflow.payload.code) && workflow.payload.code.length >= 4, `${workflow.id}.payload.code required`);
   assert(Array.isArray(workflow.payload.redactionRules) && workflow.payload.redactionRules.length >= 3, `${workflow.id}.payload.redactionRules required`);
   assert(Array.isArray(workflow.evaluations) && workflow.evaluations.length >= 5, `${workflow.id}.evaluations required`);
+  if (workflow.historySource != null) {
+    assert(["collector", "fallback"].includes(workflow.historySource), `${workflow.id}.historySource invalid`);
+  }
   if (workflow.history != null) {
     assert(Array.isArray(workflow.history) && workflow.history.length >= 2, `${workflow.id}.history must have >= 2 items`);
     for (const [index, item] of workflow.history.entries()) {
@@ -87,6 +93,9 @@ for (const workflow of data.workflows) {
       assert(typeof decision[key] === "number" && Number.isFinite(decision[key]), `${workflow.id}.reliabilityDecision.${key} must be number`);
     }
     assert(Array.isArray(decision.ruleHits), `${workflow.id}.reliabilityDecision.ruleHits must be array`);
+    if (decision.historySource != null) {
+      assert(["collector", "fallback", "unknown"].includes(decision.historySource), `${workflow.id}.reliabilityDecision.historySource invalid`);
+    }
     if (decision.thresholds != null) {
       validateReliabilityThresholds(decision.thresholds, `${workflow.id}.reliabilityDecision.thresholds`);
     }
@@ -110,6 +119,22 @@ for (const term of bannedTerms) {
 }
 
 console.log(`OK: ${data.workflows.length} agent workflows validated for trace triage dashboard (${path.relative(root, dataPath)})`);
+
+function parseArgs(argv) {
+  const out = { path: null };
+  for (let i = 0; i < argv.length; i += 1) {
+    const arg = argv[i];
+    if (!arg.startsWith("--") && !out.path) {
+      out.path = arg;
+      continue;
+    }
+    if (!arg.startsWith("--")) continue;
+    const key = arg.slice(2).replace(/-([a-z])/g, (_, char) => char.toUpperCase());
+    const value = argv[i + 1] && !argv[i + 1].startsWith("--") ? argv[++i] : true;
+    out[key] = value;
+  }
+  return out;
+}
 
 function validateReliabilityThresholds(thresholds, pathName) {
   assert(thresholds && typeof thresholds === "object" && !Array.isArray(thresholds), `${pathName}: object required`);

@@ -18,8 +18,16 @@
     "safety:scan": "node scripts/safety-scan.mjs sample-runs.json data/agent-runs.example.json tmp/generated-sample-runs.json",
     "safety:scan:incoming": "node scripts/safety-scan.mjs tmp/merged-agent-runs.json tmp/generated-sample-runs.json",
     "smoke": "node scripts/smoke-check.mjs",
-    "check": "npm run validate:source && npm run build:data && npm run validate && npm run validate:generated && npm run smoke && npm run safety:scan",
-    "check:incoming": "npm run validate:incoming:raw && npm run build:incoming && npm run validate:incoming:merged && npm run validate:generated && npm run safety:scan:incoming && npm run safety:scan"
+    "check": "npm run validate:source && npm run build:data && npm run validate && npm run validate:generated && npm run check:scheduled:example && npm run smoke && npm run safety:scan",
+    "check:incoming": "npm run validate:incoming:raw && npm run build:incoming && npm run validate:incoming:merged && npm run validate:generated && npm run safety:scan:incoming && npm run safety:scan",
+    "import:scheduled": "node scripts/import-scheduled-run.mjs",
+    "import:scheduled:example": "node scripts/import-scheduled-run.mjs --config config/scheduled-sources.example.json --profile example-json-health --output data/private-incoming/example-json-health.json --history-store data/private-runs/example-json-health.history.json",
+    "merge:scheduled": "node scripts/merge-incoming-runs.mjs --input-dir data/private-incoming --output tmp/scheduled-merged-agent-runs.json",
+    "build:scheduled": "npm run merge:scheduled && node scripts/build-dashboard-data.mjs --input tmp/scheduled-merged-agent-runs.json --output tmp/scheduled-dashboard-runs.json",
+    "validate:scheduled:raw": "node scripts/validate-source-runs.mjs data/private-incoming",
+    "validate:scheduled:merged": "node scripts/validate-source-runs.mjs tmp/scheduled-merged-agent-runs.json",
+    "check:scheduled": "npm run validate:scheduled:raw && npm run build:scheduled && npm run validate:scheduled:merged && node scripts/validate-data.mjs tmp/scheduled-dashboard-runs.json --min-workflows 1 && node scripts/safety-scan.mjs data/private-runs tmp/scheduled-merged-agent-runs.json tmp/scheduled-dashboard-runs.json",
+    "check:scheduled:example": "npm run import:scheduled:example && npm run check:scheduled"
   },
   "keywords": [
     "ai-agent",

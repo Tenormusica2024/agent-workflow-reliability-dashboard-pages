@@ -133,6 +133,87 @@ npm run check:incoming
 
 The merge step rejects duplicate workflow IDs so the dashboard selector cannot silently point to the wrong run. `check:incoming` validates raw incoming files, validates the merged telemetry bundle, and scans both `tmp/merged-agent-runs.json` and `tmp/generated-sample-runs.json` before the data can be promoted.
 
+## Swappable scheduled project intake
+
+The dashboard now has a generic intake layer for already-running scheduled projects.
+The goal is to avoid writing a one-off importer for only one project. A project is represented by a **source profile**:
+
+```text
+config/scheduled-sources.example.json
+```
+
+Local real-data profiles should be stored in:
+
+```text
+config/local-scheduled-sources.json
+```
+
+That local file is intentionally ignored by git. It may point to private local artifacts, but the importer writes only a dashboard-safe summary:
+
+- profile id
+- source type
+- source file name, not full local path
+- source hash
+- mapped numeric/status signals
+- check statuses, durations, annotations, and short evidence
+- safe run-history summary
+
+It does not copy the raw artifact body, full local path, command output, secrets, or private payloads into dashboard data.
+
+### Profile types
+
+Current profile types:
+
+- `json`: read a JSON health/run artifact and map fields with JSON paths such as `$.run.status`.
+- `markdown`: read a markdown post-run health report and map `- key: value` lines, optionally scoped to a `## Section`.
+- `agent-run-json`: pass through an artifact that already uses `agent-run.v0.1`.
+
+Each profile can define:
+
+- `workflow`: dashboard identity and labels
+- `extract`: run-level fields such as `runId`, `startedAt`, `durationMs`, `status`, `sloBurn`, and `errorRate`
+- `checks[]`: span/evaluation/log rows derived from source signals
+- `recommendedAction`
+- `replay`
+
+### Commands
+
+Validate the committed example profile:
+
+```powershell
+npm run check:scheduled:example
+```
+
+Import a local real scheduled project by profile:
+
+```powershell
+npm run import:scheduled -- --config config/local-scheduled-sources.json --profile <profile-id>
+npm run check:scheduled
+```
+
+Generated local files:
+
+```text
+data/private-incoming/<profile-id>.json
+data/private-runs/<profile-id>.history.json
+tmp/scheduled-merged-agent-runs.json
+tmp/scheduled-dashboard-runs.json
+```
+
+For local visual verification, serve the repo and load the generated dashboard JSON:
+
+```powershell
+npm run serve
+```
+
+```text
+http://localhost:4173/?data=tmp/scheduled-dashboard-runs.json
+```
+
+The `data` query parameter accepts only same-origin relative JSON paths. Absolute URLs and parent-directory paths are ignored.
+
+To switch projects, add another profile to `config/local-scheduled-sources.json` and change only `--profile <profile-id>`. The dashboard schema and UI do not need to change.
+
 ## Safe promotion
 
 The browser reads `sample-runs.json`, so generated data should be promoted only after validation and safety scanning.
@@ -185,6 +266,7 @@ The workflow checks:
 
 - `npm run check`
 - `npm run check:incoming`
+- `npm run check:scheduled:example`
 - source/incoming telemetry contract validation
 - dry-run promotion to `tmp/promoted-sample-runs.json`
 - no tracked file mutations after generation
@@ -198,6 +280,7 @@ This is not yet a live backend. The dashboard still fetches `sample-runs.json` i
 For real operation, continue with one adapter per source system:
 
 - file drop adapter: export agent traces to `data/incoming/*.json` (initial local adapter is now available)
+- scheduled source profile adapter: map existing JSON/markdown run artifacts with `config/local-scheduled-sources.json`
 - API adapter: fetch recent run traces from an internal endpoint
 - CI adapter: build and validate dashboard data on every update
 - deployment adapter: publish only safety-scanned dashboard JSON

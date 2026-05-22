@@ -3,4 +3,7 @@ dist/
 .DS_Store
 *.log
 tmp/
+config/local-scheduled-sources.json
+data/private-incoming/
+data/private-runs/
 

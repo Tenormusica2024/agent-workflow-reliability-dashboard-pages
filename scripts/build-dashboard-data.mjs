@@ -69,7 +69,9 @@ function buildWorkflow(workflow, config, reliabilityThresholds) {
   const severity = severityFor(workflow.incident, config.thresholds);
   const maxMs = Math.min(Math.max(traceDuration, 1), config.thresholds.maxWaterfallMs);
   const traceRowCost = costLabel(workflow.trace.tokens, workflow.trace.costUsd);
+  const historySource = historySourceFor(workflow);
   const history = buildHistory(workflow);
+  const currentRunSignals = currentRunSignalsFor(workflow, failed, degraded);
 
   return {
     id: workflow.id,
@@ -161,7 +163,8 @@ function buildWorkflow(workflow, config, reliabilityThresholds) {
       delta: Number((item.score - item.baseline).toFixed(2)),
     })),
     history,
-    reliabilityDecision: buildReliabilityDecision(history, reliabilityThresholds),
+    historySource,
+    reliabilityDecision: buildReliabilityDecision(history, reliabilityThresholds, historySource, currentRunSignals),
     replay: workflow.replay,
     logs: workflow.logs,
   };
@@ -236,7 +239,24 @@ function buildHistory(workflow) {
   ];
 }
 
-function buildReliabilityDecision(history, thresholds) {
+function historySourceFor(workflow) {
+  return Array.isArray(workflow.history) && workflow.history.length >= 2 ? "collector" : "fallback";
+}
+
+function currentRunSignalsFor(workflow, failed, degraded) {
+  const incidentStatus = String(workflow.incident?.status ?? "").toLowerCase();
+  const incidentNeedsAction = /要対応|要確認|fail|error|critical|action required/.test(incidentStatus);
+  const evaluations = Array.isArray(workflow.evaluations) ? workflow.evaluations : [];
+  const evaluationFailed = evaluations.some((item) => Number(item.score) <= 0.01);
+  const evaluationDegraded = evaluations.some((item) => {
+    const score = Number(item.score);
+    const baseline = Number(item.baseline);
+    return Number.isFinite(score) && Number.isFinite(baseline) && score < baseline;
+  });
+  return { failed, degraded, incidentNeedsAction, evaluationFailed, evaluationDegraded };
+}
+
+function buildReliabilityDecision(history, thresholds, historySource = "unknown", currentRunSignals = {}) {
   const latest = history[0];
   const previous = history[1] ?? latest;
   const earlier = history[2] ?? previous;
@@ -263,6 +283,14 @@ function buildReliabilityDecision(history, thresholds) {
     level = "critical";
   }
 
+  if (currentRunSignals.failed || currentRunSignals.incidentNeedsAction || currentRunSignals.evaluationFailed) {
+    pushRuleOnce(ruleHits, "current_run_failed");
+    level = "critical";
+  } else if (currentRunSignals.degraded || currentRunSignals.evaluationDegraded) {
+    pushRuleOnce(ruleHits, "current_run_degraded");
+    if (level === "stable" || level === "recovering") level = "alert";
+  }
+
   return {
     level,
     sloDelta,
@@ -271,11 +299,16 @@ function buildReliabilityDecision(history, thresholds) {
     affectedDelta,
     ruleHits,
     thresholds,
+    historySource,
     nextActionKey: level === "critical" ? "inspect_dependency"
       : level === "alert" ? "watch_trend"
       : level === "recovering" ? "confirm_recovery"
       : "continue_monitoring",
   };
+}
+
+function pushRuleOnce(ruleHits, rule) {
+  if (!ruleHits.includes(rule)) ruleHits.unshift(rule);
 }
 
 function severityFor(incident, thresholds) {

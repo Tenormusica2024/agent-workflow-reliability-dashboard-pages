@@ -111,6 +111,41 @@ npm run validate:source
 
 現時点ではブラウザは引き続き `sample-runs.json` を読み込みます。実運用接続時は、実行ログ収集側が `agent-runs.v0.1` 形式を出し、`build:data` でUI用schemaへ変換する想定です。
 
+### Swappable scheduled project intake
+
+実際に動いている定期実行プロジェクトを、1プロジェクト専用のscriptではなく **source profile差し替え** で取り込めるようにしています。
+
+公開repoに置くのは安全な雛形だけです。
+
+- profile雛形: `config/scheduled-sources.example.json`
+- サンプル入力: `data/source-examples/*`
+- 汎用importer: `scripts/import-scheduled-run.mjs`
+- 履歴store: `scripts/run-history.mjs`
+- local実データprofile: `config/local-scheduled-sources.json`（gitignore対象）
+- local変換結果: `data/private-incoming/`, `data/private-runs/`, `tmp/scheduled-dashboard-runs.json`（gitignore対象）
+
+サンプルprofileの検証:
+
+```powershell
+npm run check:scheduled:example
+```
+
+実プロジェクトへ差し替える場合は、`config/local-scheduled-sources.json` に対象artifactのパスとcheck対応を追加し、profile名だけを変えて実行します。
+
+```powershell
+npm run import:scheduled -- --config config/local-scheduled-sources.json --profile <profile-id>
+npm run check:scheduled
+npm run serve
+```
+
+ローカル表示:
+
+```text
+http://localhost:4173/?data=tmp/scheduled-dashboard-runs.json
+```
+
+`?data=` は same-origin の相対JSONだけを受け付けます。絶対URLや `..` を含むpathは無視されます。
+
 複数の実行ログをファイル投入する場合は `data/incoming/*.json` に `agent-run.v0.1` を置き、以下で1つのUI用JSONに変換できます。
 
 ```powershell

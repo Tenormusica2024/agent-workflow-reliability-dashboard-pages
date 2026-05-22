@@ -1,4 +1,5 @@
-const DATA_URL = "sample-runs.json";
+const DEFAULT_DATA_URL = "sample-runs.json";
+const DATA_URL = dataUrlFromLocation();
 const LANGUAGE_STORAGE_KEY = "awrd-language";
 const DEFAULT_LANGUAGE = "ja";
 const DEFAULT_RELIABILITY_THRESHOLDS = Object.freeze({
@@ -42,6 +43,12 @@ const UI = {
     historyRecovered: "改善",
     historyWorse: "悪化",
     historyStable: "横ばい",
+    historySourceCollector: "履歴: 実測",
+    historySourceFallback: "履歴: 推定",
+    historySourceUnknown: "履歴: 未分類",
+    historySourceCollectorNote: "collector由来の過去runで判定",
+    historySourceFallbackNote: "単一runから生成した推定比較",
+    historySourceUnknownNote: "履歴の出所が未分類",
     decisionTitle: "運用判定",
     decisionReason: "判定理由",
     decisionCritical: "要対応",
@@ -60,6 +67,8 @@ const UI = {
     ruleBaselineRatio: "7日基準比",
     ruleErrorDelta: "エラー率",
     ruleAffectedDelta: "影響",
+    ruleCurrentRunFailed: "現在run失敗",
+    ruleCurrentRunDegraded: "現在run劣化",
     ruleTwoRunRecovery: "2連続改善",
     ruleNormal: "閾値内",
     traceTree: "トレースツリー",
@@ -152,6 +161,12 @@ const UI = {
     historyRecovered: "Recovered",
     historyWorse: "Worse",
     historyStable: "Stable",
+    historySourceCollector: "History: measured",
+    historySourceFallback: "History: estimated",
+    historySourceUnknown: "History: unknown",
+    historySourceCollectorNote: "Based on collector-provided previous runs",
+    historySourceFallbackNote: "Estimated from a single latest run",
+    historySourceUnknownNote: "History source is not classified",
     decisionTitle: "Operational decision",
     decisionReason: "Decision reason",
     decisionCritical: "Action required",
@@ -170,6 +185,8 @@ const UI = {
     ruleBaselineRatio: "7d baseline ratio",
     ruleErrorDelta: "Error rate",
     ruleAffectedDelta: "Affected",
+    ruleCurrentRunFailed: "Current run failed",
+    ruleCurrentRunDegraded: "Current run degraded",
     ruleTwoRunRecovery: "2-run recovery",
     ruleNormal: "Within threshold",
     traceTree: "Trace Tree",
@@ -451,6 +468,18 @@ function directionLabel(direction) {
   return ui("historyStable");
 }
 
+function dataUrlFromLocation() {
+  try {
+    const value = new URLSearchParams(window.location.search).get("data");
+    if (!value) return DEFAULT_DATA_URL;
+    const trimmed = value.trim();
+    if (!trimmed || trimmed.includes("..") || /^(?:[a-z]+:)?\/\//i.test(trimmed)) return DEFAULT_DATA_URL;
+    return trimmed;
+  } catch (_) {
+    return DEFAULT_DATA_URL;
+  }
+}
+
 function reliabilityThresholds() {
   return {
     ...DEFAULT_RELIABILITY_THRESHOLDS,
@@ -468,6 +497,24 @@ function thresholdsForDecision(decision) {
 function reliabilityDecisionFor(workflow, history) {
   if (workflow.reliabilityDecision?.level) return workflow.reliabilityDecision;
   return computeReliabilityDecision(history);
+}
+
+function historySourceForDecision(workflow, decision) {
+  const source = decision?.historySource ?? workflow.historySource;
+  if (source === "collector" || source === "fallback") return source;
+  return "unknown";
+}
+
+function historySourceLabel(source) {
+  if (source === "collector") return ui("historySourceCollector");
+  if (source === "fallback") return ui("historySourceFallback");
+  return ui("historySourceUnknown");
+}
+
+function historySourceNote(source) {
+  if (source === "collector") return ui("historySourceCollectorNote");
+  if (source === "fallback") return ui("historySourceFallbackNote");
+  return ui("historySourceUnknownNote");
 }
 
 function computeReliabilityDecision(history, thresholds = reliabilityThresholds()) {
@@ -551,6 +598,8 @@ function ruleLabel(rule, decision) {
   if (rule === "affected_sessions_delta") return state.language === "en"
     ? `${ui("ruleAffectedDelta")} >= +${formatThreshold(thresholds.affectedSessionsDeltaAlert)}`
     : `${ui("ruleAffectedDelta")} +${formatThreshold(thresholds.affectedSessionsDeltaAlert)}${atLeast}`;
+  if (rule === "current_run_failed") return ui("ruleCurrentRunFailed");
+  if (rule === "current_run_degraded") return ui("ruleCurrentRunDegraded");
   if (rule === "two_run_recovery") return ui("ruleTwoRunRecovery");
   if (rule === "normal_monitoring") return ui("ruleNormal");
   return rule;
@@ -668,6 +717,7 @@ function renderHistory(workflow) {
   const latestAffected = numericValue(latest.affectedSessions);
   const latestErrorRate = numericValue(latest.errorRate);
   const decision = reliabilityDecisionFor(workflow, history);
+  const historySource = historySourceForDecision(workflow, decision);
   const ruleHits = decision.ruleHits?.length ? decision.ruleHits : ["normal_monitoring"];
   return `
     <section class="panel history-panel" aria-label="${escapeHtml(ui("historyTitle"))}">
@@ -678,6 +728,7 @@ function renderHistory(workflow) {
           <div class="decision-copy">
             <strong>${escapeHtml(ui("decisionReason"))}</strong>
             <span>${escapeHtml(decisionSummary(decision))}</span>
+            <em class="history-source-note history-source-note--${historySource}">${escapeHtml(historySourceNote(historySource))}</em>
           </div>
           <div class="decision-rules">
             ${ruleHits.slice(0, 3).map((rule) => `<span>${escapeHtml(ruleLabel(rule, decision))}</span>`).join("")}
@@ -685,6 +736,7 @@ function renderHistory(workflow) {
         </div>
         <div class="decision-stack">
           <span class="history-state history-state--${decision.level}">${escapeHtml(decisionLabel(decision))}</span>
+          <span class="history-source-badge history-source-badge--${historySource}">${escapeHtml(historySourceLabel(historySource))}</span>
           <small>${escapeHtml(decisionAction(decision))}</small>
         </div>
       </div>
