@@ -1,7 +1,8 @@
 import fs from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 
-const root = path.resolve(new URL("..", import.meta.url).pathname.replace(/^\/(.:\/)/, "$1"));
+const root = path.resolve(fileURLToPath(new URL("..", import.meta.url)));
 const args = parseArgs(process.argv.slice(2));
 const dataPath = args.path ? path.resolve(root, args.path) : path.join(root, "sample-runs.json");
 const minWorkflows = Number(args.minWorkflows ?? 2);

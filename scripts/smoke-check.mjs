@@ -1,7 +1,8 @@
 import fs from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 
-const root = path.resolve(new URL("..", import.meta.url).pathname.replace(/^\/(.:\/)/, "$1"));
+const root = path.resolve(fileURLToPath(new URL("..", import.meta.url)));
 const requiredFiles = ["index.html", "styles.css", "app.js", "sample-runs.json", "README.md"];
 for (const file of requiredFiles) {
   const fullPath = path.join(root, file);

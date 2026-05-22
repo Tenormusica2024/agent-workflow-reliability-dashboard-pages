@@ -31,7 +31,11 @@ function getInitialLanguage() {
   const params = new URLSearchParams(window.location.search);
   const queryLang = params.get("lang");
   if (queryLang === "en" || queryLang === "ja") return queryLang;
-  return localStorage.getItem(LANGUAGE_STORAGE_KEY) || "ja";
+  try {
+    return localStorage.getItem(LANGUAGE_STORAGE_KEY) || "ja";
+  } catch (_) {
+    return "ja";
+  }
 }
 
 function dataUrlFromLocation() {
@@ -91,11 +95,19 @@ function currentWorkflow() {
 
 function workflowIdFromLocation(data) {
   const params = new URLSearchParams(window.location.search);
-  const requested = params.get("workflow") || params.get("profile");
+  const requestedProfile = params.get("profile");
+  const requestedWorkflow = params.get("workflow");
   const workflows = data?.workflows || [];
-  if (!requested) return data?.defaultWorkflowId;
-  return workflows.find((workflow) => workflow.id === requested || workflow.scheduler?.profileId === requested)?.id
-    || data?.defaultWorkflowId;
+  if (requestedProfile) {
+    const profileMatch = workflows.find((workflow) => workflow.scheduler?.profileId === requestedProfile);
+    if (profileMatch) return profileMatch.id;
+    const workflowIdMatch = workflows.find((workflow) => workflow.id === requestedProfile);
+    if (workflowIdMatch) return workflowIdMatch.id;
+  }
+  if (requestedWorkflow) {
+    return workflows.find((workflow) => workflow.id === requestedWorkflow)?.id || data?.defaultWorkflowId;
+  }
+  return data?.defaultWorkflowId;
 }
 
 function schedulerFor(workflow) {
@@ -605,24 +617,47 @@ function renderAnomalySummary(workflow, score) {
 }
 
 function renderFailedSpan(workflow, component) {
+  const incident = workflow.incident || {};
+  const severityTone = incidentSeverityTone(incident, component);
+  const severityLabel = incident.severityLabel || severityLabelFromTone(severityTone);
+  const spanTitle = incident.title || `${component.label}で異常増加`;
+  const primaryError = workflow.logs?.find((log) => log.level === "ERROR")?.message
+    || workflow.logs?.find((log) => log.level === "WARN")?.message
+    || "異常ログなし";
   return `
     <section class="card rail-card failed-span">
       <div class="rail-title"><h3>失敗スパン</h3><a href="#">詳細</a></div>
       <div class="failed-box">
-        <span class="severity severity--critical">異常</span>
-        <strong>${escapeHtml(component.label)}でHTTP 5xx増加</strong>
+        <span class="severity severity--${severityTone}">${escapeHtml(severityLabel)}</span>
+        <strong>${escapeHtml(spanTitle)}</strong>
         <dl>
           <dt>スパンID</dt><dd>spn_${component.key}_7f3a2b9e1c44a2d1</dd>
           <dt>コンポーネント</dt><dd>${escapeHtml(component.label)}</dd>
           <dt>開始時刻</dt><dd>${escapeHtml(workflow.incident?.started || "14:32:11")}</dd>
           <dt>時間</dt><dd>${component.durationMs >= 1000 ? `${(component.durationMs / 1000).toFixed(2)}s` : `${Math.round(component.durationMs)}ms`}（P95）</dd>
           <dt>エラー率</dt><dd>${(100 - component.successRate).toFixed(1)}%</dd>
-          <dt>主なエラー</dt><dd>${escapeHtml(workflow.logs?.find((log) => log.level === "ERROR")?.message || "HTTP 503 Service Unavailable")}</dd>
+          <dt>主なエラー</dt><dd>${escapeHtml(primaryError)}</dd>
         </dl>
         <a href="#">トレースを確認</a>
       </div>
     </section>
   `;
+}
+
+function incidentSeverityTone(incident, component) {
+  const severity = `${incident.severity || ""} ${incident.severityLabel || ""}`.toLowerCase();
+  if (/sev-1|sev-2|critical|重要|異常/.test(severity)) return "critical";
+  if (/sev-3|warning|注意/.test(severity)) return "warning";
+  if (severity) return "info";
+  if (component.status === "critical") return "critical";
+  if (component.status === "warning") return "warning";
+  return "info";
+}
+
+function severityLabelFromTone(tone) {
+  if (tone === "critical") return "異常";
+  if (tone === "warning") return "注意";
+  return "情報";
 }
 
 function renderRootCause(workflow) {
@@ -688,8 +723,15 @@ function bindInteractions() {
 function selectWorkflow(workflowId) {
   if (!workflowId || workflowId === state.selectedWorkflowId) return;
   state.selectedWorkflowId = workflowId;
+  const workflow = state.data?.workflows?.find((item) => item.id === workflowId);
   const url = new URL(window.location.href);
-  url.searchParams.set("workflow", workflowId);
+  url.searchParams.delete("workflow");
+  if (workflow?.scheduler?.profileId) {
+    url.searchParams.set("profile", workflow.scheduler.profileId);
+  } else {
+    url.searchParams.delete("profile");
+    url.searchParams.set("workflow", workflowId);
+  }
   window.history.replaceState(null, "", url);
   renderApp();
 }

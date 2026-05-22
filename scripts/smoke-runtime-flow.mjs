@@ -1,7 +1,8 @@
 import fs from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 
-const root = path.resolve(new URL("..", import.meta.url).pathname.replace(/^\/(.:\/)/, "$1"));
+const root = path.resolve(fileURLToPath(new URL("..", import.meta.url)));
 const runtimeDir = path.join(root, "runtime-flow");
 const dataPath = path.join(runtimeDir, "sample-runs.json");
 const htmlPath = path.join(runtimeDir, "index.html");
@@ -37,9 +38,9 @@ assertIncludes(html, 'href="styles.css"', "runtime-flow/index.html");
 assertIncludes(html, 'src="app.js"', "runtime-flow/index.html");
 
 for (const needle of [
-  'const DEFAULT_DATA_URL = "sample-runs.json"',
+  "sample-runs.json",
   "function dataUrlFromLocation()",
-  'params.get("workflow") || params.get("profile")',
+  "profile",
   "workflowSelect",
   "data-workflow-id",
   "scheduler-switcher",
@@ -132,7 +133,11 @@ const bannedPublicDataTerms = [
   "human approval",
   "hitl",
   "人間確認",
+  "人による",
+  "確認キュー",
+  "担当者",
   "承認待ち",
+  "review.queue",
 ];
 
 for (const term of bannedPublicDataTerms) {

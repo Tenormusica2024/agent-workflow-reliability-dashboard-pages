@@ -3,10 +3,15 @@ import http from "node:http";
 import os from "node:os";
 import path from "node:path";
 import { spawn } from "node:child_process";
+import { fileURLToPath } from "node:url";
 
-const root = path.resolve(new URL("..", import.meta.url).pathname.replace(/^\/(.:\/)/, "$1"));
+const root = path.resolve(fileURLToPath(new URL("..", import.meta.url)));
 const tmpDir = path.join(root, "tmp");
-const screenshotPath = path.join(tmpDir, "runtime-flow-browser-smoke.png");
+const dataPath = path.join(root, "runtime-flow", "sample-runs.json");
+fs.mkdirSync(tmpDir, { recursive: true });
+const smokeRunDir = fs.mkdtempSync(path.join(tmpDir, "runtime-flow-browser-"));
+const screenshotPath = path.join(smokeRunDir, "screenshot.png");
+let data;
 
 function assert(condition, message) {
   if (!condition) throw new Error(`runtime-flow browser smoke: ${message}`);
@@ -154,7 +159,11 @@ function baseBrowserArgs(url) {
     "--headless=new",
     "--disable-gpu",
     "--disable-dev-shm-usage",
+    "--disable-extensions",
     "--hide-scrollbars",
+    "--no-default-browser-check",
+    "--no-first-run",
+    `--user-data-dir=${path.join(smokeRunDir, "chrome-profile")}`,
     "--window-size=1792,1500",
     "--force-device-scale-factor=1",
     "--virtual-time-budget=6000",
@@ -194,13 +203,55 @@ function assertNoRenderError(dom, label) {
   }
 }
 
+function classTokenCount(dom, token) {
+  return [...dom.matchAll(/class="([^"]*)"/g)]
+    .filter(([, classes]) => classes.split(/\s+/).includes(token))
+    .length;
+}
+
+function hasClassTokens(dom, tokens) {
+  return [...dom.matchAll(/class="([^"]*)"/g)]
+    .some(([, classes]) => {
+      const classSet = new Set(classes.split(/\s+/));
+      return tokens.every((token) => classSet.has(token));
+    });
+}
+
+function tagWithAttribute(dom, tagName, attributeName, attributeValue) {
+  const tagPattern = new RegExp(`<${tagName}\\b[^>]*>`, "g");
+  const attrPattern = new RegExp(`${attributeName}="${attributeValue}"`);
+  return [...dom.matchAll(tagPattern)]
+    .map(([tag]) => tag)
+    .find((tag) => attrPattern.test(tag));
+}
+
+function tagHasClassTokens(tag, tokens) {
+  const match = tag?.match(/class="([^"]*)"/);
+  if (!match) return false;
+  const classSet = new Set(match[1].split(/\s+/));
+  return tokens.every((token) => classSet.has(token));
+}
+
+function assertSelectedWorkflow(dom, workflowId, expectedTexts = []) {
+  const selectedCard = tagWithAttribute(dom, "button", "data-workflow-id", workflowId);
+  const selectedOption = tagWithAttribute(dom, "option", "value", workflowId);
+  assert(tagHasClassTokens(selectedCard, ["program-card", "is-selected"]), `selected program card missing for ${workflowId}`);
+  assert(selectedOption?.includes("selected"), `selected workflow option missing for ${workflowId}`);
+  for (const text of expectedTexts) {
+    assertIncludes(dom, text, `selected workflow ${workflowId}`);
+  }
+}
+
 function assertDefaultRuntimeFlow(dom) {
   assertNoRenderError(dom, "default runtime-flow DOM");
+  assert(data.workflows.length >= 5, "runtime-flow browser smoke expects at least 5 workflows");
+  const programCardCount = classTokenCount(dom, "program-card");
+  assert(programCardCount === data.workflows.length, `program-card count ${programCardCount} did not match workflows ${data.workflows.length}`);
+  assertIncludes(dom, `<strong>${data.workflows.length}</strong>`, "default runtime-flow DOM");
   for (const needle of [
     "Agent Workflow Reliability Dashboard",
     "AIエージェント内部構成",
     "定期実行プログラム切替",
-    "5",
     "programs",
     "実タスクスケジューラへ移せる取り込みフロー",
     "Agent Runtime Flow",
@@ -222,33 +273,48 @@ function assertDefaultRuntimeFlow(dom) {
 
 function assertProfileRuntimeFlow(dom) {
   assertNoRenderError(dom, "profile-selected runtime-flow DOM");
+  assert(hasClassTokens(dom, ["program-card", "is-selected"]), "profile-selected runtime-flow DOM missing selected program card");
+  assertSelectedWorkflow(dom, "quality-review-agent", ["品質確認AI", "quality-review-30m", "public-quality-review-health"]);
   for (const needle of [
-    "品質確認AI",
-    "quality-review-30m",
-    "public-quality-review-health",
     "Scheduler 接続情報",
-    "program-card is-selected",
   ]) {
     assertIncludes(dom, needle, "profile-selected runtime-flow DOM");
   }
 }
 
-const browserPath = findBrowser();
-assert(browserPath, `Chrome/Chromium/Edge executable not found on ${os.platform()}`);
-
-const server = createStaticServer();
-const port = await listen(server);
-const baseUrl = `http://127.0.0.1:${port}/runtime-flow/`;
-
+let server;
 try {
+  data = JSON.parse(fs.readFileSync(dataPath, "utf8"));
+  const browserPath = findBrowser();
+  assert(browserPath, `Chrome/Chromium/Edge executable not found on ${os.platform()}`);
+
+  server = createStaticServer();
+  const port = await listen(server);
+  const baseUrl = `http://127.0.0.1:${port}/runtime-flow/`;
   const defaultUrl = `${baseUrl}?smoke=runtime-flow-browser`;
   const profileUrl = `${baseUrl}?profile=quality-review-30m&smoke=runtime-flow-browser`;
+  const workflowAliasUrl = `${baseUrl}?workflow=quality-review-agent&smoke=runtime-flow-browser`;
+  const profileAsWorkflowIdUrl = `${baseUrl}?profile=quality-review-agent&smoke=runtime-flow-browser`;
+  const mixedFallbackUrl = `${baseUrl}?profile=missing-profile&workflow=quality-review-agent&smoke=runtime-flow-browser`;
   const defaultDom = await dumpDom(browserPath, defaultUrl);
   assertDefaultRuntimeFlow(defaultDom);
   const profileDom = await dumpDom(browserPath, profileUrl);
   assertProfileRuntimeFlow(profileDom);
+  const workflowAliasDom = await dumpDom(browserPath, workflowAliasUrl);
+  assertProfileRuntimeFlow(workflowAliasDom);
+  const profileAsWorkflowIdDom = await dumpDom(browserPath, profileAsWorkflowIdUrl);
+  assertProfileRuntimeFlow(profileAsWorkflowIdDom);
+  const mixedFallbackDom = await dumpDom(browserPath, mixedFallbackUrl);
+  assertProfileRuntimeFlow(mixedFallbackDom);
   const screenshotSize = await captureScreenshot(browserPath, defaultUrl);
   console.log(`OK: runtime-flow browser smoke passed (${path.basename(browserPath)}, screenshot ${screenshotSize} bytes)`);
 } finally {
-  await new Promise((resolve) => server.close(resolve));
+  if (server?.listening) {
+    await new Promise((resolve) => server.close(resolve));
+  }
+  try {
+    fs.rmSync(smokeRunDir, { recursive: true, force: true, maxRetries: 3, retryDelay: 100 });
+  } catch (error) {
+    console.warn(`WARN: cleanup failed for ${smokeRunDir}: ${error.message}`);
+  }
 }

@@ -872,12 +872,12 @@
           "highlight": true
         },
         {
-          "id": "escalation",
+          "id": "internal-review",
           "level": 2,
-          "name": "人による確認へ送信",
+          "name": "内部ルール再検証",
           "status": "warning",
           "duration": "4,815",
-          "provider": "review.queue",
+          "provider": "policy-checker-service",
           "retries": "0",
           "cost": "— / —"
         },
@@ -948,13 +948,13 @@
             ]
           },
           {
-            "id": "escalation",
-            "label": "確認キュー",
+            "id": "internal-review",
+            "label": "内部再検証",
             "status": "warning",
             "start": 61,
             "width": 10,
             "duration": "4.82s",
-            "annotation": "人へ送信"
+            "annotation": "内部判定"
           },
           {
             "id": "response",
@@ -979,12 +979,12 @@
         },
         {
           "rank": 2,
-          "title": "確認キューの処理容量不足",
+          "title": "内部再検証ステップの滞留",
           "score": 0.49,
           "tone": "warning",
           "evidence": [
-            "高リスク案件の滞留が増加",
-            "担当者割当まで平均 8.2分"
+            "高リスク判定の再検証が増加",
+            "内部判定完了まで平均 8.2分"
           ]
         },
         {
@@ -1084,8 +1084,8 @@
         {
           "time": "09:28:16.887",
           "level": "WARN",
-          "source": "review.queue",
-          "message": "人による確認へ送信"
+          "source": "policy-checker-service",
+          "message": "内部ルール再検証へ送信"
         },
         {
           "time": "09:28:12.116",
