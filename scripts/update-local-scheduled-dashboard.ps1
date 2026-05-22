@@ -58,7 +58,8 @@ function ConvertFrom-TaskSpecFile {
     }
     $displayName = if ($item.displayName) { [string]$item.displayName } else { $publicId }
     $cadence = if ($item.cadence) { [string]$item.cadence } else { "scheduled" }
-    "$realTaskName|$publicId|$displayName|$cadence"
+    $taskPath = if ($item.taskPath) { [string]$item.taskPath } else { "" }
+    "$realTaskName|$publicId|$displayName|$cadence|$taskPath"
   }
   return @($rows)
 }

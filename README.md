@@ -165,6 +165,7 @@ dashboardへコピーされるのは `publicId` / `displayName` / `cadence` / �
   "tasks": [
     {
       "taskName": "実Task Scheduler名",
+      "taskPath": "\\Tenormusica\\",
       "publicId": "public-safe-health-id",
       "displayName": "Public Safe Health Name",
       "cadence": "5分ごと"

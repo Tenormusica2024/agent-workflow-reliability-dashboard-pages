@@ -94,23 +94,28 @@ function ConvertTo-PublicStatus {
 
 function Parse-TaskSpec {
   param([string]$Spec)
-  $parts = $Spec -split "\|", 4
+  $parts = $Spec -split "\|", 5
   if ($parts.Count -lt 2) {
-    throw "TaskSpec must be 'realTaskName|publicId|displayName|cadence': $Spec"
+    throw "TaskSpec must be 'realTaskName|publicId|displayName|cadence|taskPath(optional)': $Spec"
   }
   return @{
     realTaskName = $parts[0]
     publicId = $parts[1]
     displayName = if ($parts.Count -ge 3 -and $parts[2]) { $parts[2] } else { $parts[1] }
     cadence = if ($parts.Count -ge 4 -and $parts[3]) { $parts[3] } else { "scheduled" }
+    taskPath = if ($parts.Count -ge 5 -and $parts[4]) { $parts[4] } else { $null }
   }
 }
 
 $generatedAt = (Get-Date).ToString("o")
 $tasks = foreach ($specText in $TaskSpec) {
   $spec = Parse-TaskSpec $specText
-  $task = Get-ScheduledTask -TaskName $spec.realTaskName -ErrorAction SilentlyContinue
-  $info = if ($null -ne $task) { Get-ScheduledTaskInfo -TaskName $spec.realTaskName -ErrorAction SilentlyContinue } else { $null }
+  $taskArgs = @{ TaskName = $spec.realTaskName; ErrorAction = "SilentlyContinue" }
+  if ($spec.taskPath) {
+    $taskArgs.TaskPath = $spec.taskPath
+  }
+  $task = Get-ScheduledTask @taskArgs
+  $info = if ($null -ne $task) { Get-ScheduledTaskInfo @taskArgs } else { $null }
   $status = ConvertTo-PublicStatus -Task $task -Info $info
   $lastRun = if ($null -ne $info) { ConvertTo-PublicTaskTime $info.LastRunTime } else { $null }
   $nextRun = if ($null -ne $info) { ConvertTo-PublicTaskTime $info.NextRunTime } else { $null }
