@@ -473,11 +473,18 @@ function dataUrlFromLocation() {
     const value = new URLSearchParams(window.location.search).get("data");
     if (!value) return DEFAULT_DATA_URL;
     const trimmed = value.trim();
-    if (!trimmed || trimmed.includes("..") || /^(?:[a-z]+:)?\/\//i.test(trimmed)) return DEFAULT_DATA_URL;
+    if (!isSafeRelativeJsonPath(trimmed)) return DEFAULT_DATA_URL;
     return trimmed;
   } catch (_) {
     return DEFAULT_DATA_URL;
   }
+}
+
+function isSafeRelativeJsonPath(value) {
+  if (!value || value.includes("\\") || value.includes(":") || value.startsWith("/")) return false;
+  if (!value.toLowerCase().endsWith(".json")) return false;
+  const parts = value.split("/");
+  return parts.every((part) => part && part !== "." && part !== "..");
 }
 
 function reliabilityThresholds() {

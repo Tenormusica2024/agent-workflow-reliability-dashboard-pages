@@ -40,7 +40,8 @@ function historyRecordFromWorkflow(workflow) {
   const runId = String(workflow.trace?.traceId ?? `${workflow.id}_${started}`);
   const logs = Array.isArray(workflow.logs) ? workflow.logs : [];
   const errorCount = logs.filter((log) => String(log.level).toUpperCase() === "ERROR").length;
-  const errorRate = logs.length > 0 ? Number(((errorCount / logs.length) * 8).toFixed(1)) : 0;
+  const payloadErrorRate = nonNegativeNumberOrNull(workflow.payload?.latest_error_rate);
+  const errorRate = payloadErrorRate ?? (logs.length > 0 ? Number(((errorCount / logs.length) * 8).toFixed(1)) : 0);
 
   return {
     runId,
@@ -121,6 +122,13 @@ function normalizeRecord(record) {
 function nonNegativeNumber(value) {
   const numeric = Number(value);
   return Number.isFinite(numeric) && numeric >= 0 ? numeric : 0;
+}
+
+function nonNegativeNumberOrNull(value) {
+  if (value == null) return null;
+  if (typeof value === "string" && value.trim() === "") return null;
+  const numeric = Number(value);
+  return Number.isFinite(numeric) && numeric >= 0 ? numeric : null;
 }
 
 function normalizeLimit(value) {

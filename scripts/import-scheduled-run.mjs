@@ -9,10 +9,13 @@ const args = parseArgs(process.argv.slice(2));
 const configPath = path.resolve(root, args.config ?? "config/scheduled-sources.example.json");
 const config = readJson(configPath);
 const profile = selectProfile(config, args.profile);
+const profilePathId = validateProfileId(profile.id);
 const inputPath = path.resolve(root, args.input ?? profile.input);
-const outputPath = path.resolve(root, args.output ?? `data/private-incoming/${profile.id}.json`);
-const historyStorePath = path.resolve(root, args.historyStore ?? args["history-store"] ?? profile.historyStore ?? `data/private-runs/${profile.id}.history.json`);
+const outputPath = path.resolve(root, args.output ?? `data/private-incoming/${profilePathId}.json`);
 const historyDisabled = args.noHistoryStore === true || args["no-history-store"] === true || profile.historyStore === false;
+const historyStorePath = historyDisabled
+  ? null
+  : path.resolve(root, args.historyStore ?? args["history-store"] ?? profile.historyStore ?? `data/private-runs/${profilePathId}.history.json`);
 
 if (!fs.existsSync(inputPath)) {
   throw new Error([
@@ -33,9 +36,7 @@ const historyResult = attachRunHistory({
   limit: args.historyLimit ?? args["history-limit"] ?? profile.historyLimit,
   disabled: historyDisabled,
 });
-workflow.payload.history_store_enabled = historyResult.enabled;
-workflow.payload.history_record_count = historyResult.recordCount;
-workflow.payload.history_attached = historyResult.attached;
+applyHistoryResult(workflow, historyResult);
 
 const output = {
   schemaVersion: "agent-run.v0.1",
@@ -44,7 +45,7 @@ const output = {
     type: "scheduled-source-profile",
     profile: profile.id,
     sourceType: profile.type,
-    redaction: "raw artifact body, local path, and command output are not copied",
+    redaction: redactionSummaryFor(profile),
   },
   workflow,
 };
@@ -53,9 +54,8 @@ fs.mkdirSync(path.dirname(outputPath), { recursive: true });
 fs.writeFileSync(outputPath, `${JSON.stringify(output, null, 2)}\n`, "utf8");
 console.log(`OK: imported scheduled run profile '${profile.id}' to ${toRelative(outputPath)}`);
 console.log("Next:");
-console.log("  npm run validate:scheduled:raw");
-console.log("  npm run build:scheduled");
-console.log("  npm run check:scheduled");
+console.log("  example profile flow: npm run check:scheduled:example");
+console.log("  local/private profile flow: npm run check:scheduled");
 
 function buildWorkflow({ source, sourceText, inputPath, profile }) {
   const checks = normalizeChecks(profile.checks ?? [], source, profile.type);
@@ -67,9 +67,16 @@ function buildWorkflow({ source, sourceText, inputPath, profile }) {
   const runId = stringValue(valueOf(profile.extract?.runId, source, profile.type))
     ?? `${profile.id}_${new Date(startedMs).toISOString().replace(/[-:.TZ]/g, "").slice(0, 14)}`;
   const sessionId = stringValue(valueOf(profile.extract?.sessionId, source, profile.type)) ?? `scheduled_${safeId(profile.id)}`;
-  const rawStatus = valueOf(profile.extract?.status, source, profile.type) ?? valueOf(profile.extract?.verdict, source, profile.type);
-  const failed = checks.some((check) => check.status === "error") || statusFor(rawStatus) === "error";
-  const degraded = checks.some((check) => check.status === "warning") || statusFor(rawStatus) === "warning";
+  const { spec: primaryStatusSpec, value: rawStatus } = primaryStatusCandidate(profile, source, profile.type);
+  const primaryStatus = statusFor(rawStatus, primaryStatusSpec ?? {});
+  const hasPrimaryStatusMapping = profile.extract?.status != null || profile.extract?.verdict != null;
+  const primaryStatusUnknown = hasPrimaryStatusMapping && (rawStatus == null || primaryStatus === "skipped");
+  const primaryCheckStatus = primaryStatusUnknown ? "warning" : primaryStatus;
+  if (hasPrimaryStatusMapping && primaryCheckStatus !== "success") {
+    checks.unshift(primaryStatusCheckFor(checks, rawStatus, primaryCheckStatus, primaryStatusUnknown));
+  }
+  const failed = checks.some((check) => check.status === "error") || primaryStatus === "error";
+  const degraded = checks.some((check) => check.status === "warning") || primaryStatus === "warning" || primaryStatusUnknown;
   const state = failed ? "要対応" : degraded ? "監視中" : "正常";
   const affectedSessions = nonNegativeNumber(valueOf(profile.extract?.affectedSessions, source, profile.type), failed ? 1 : 0);
   const sloBurn = nonNegativeNumber(valueOf(profile.extract?.sloBurn, source, profile.type), failed ? 2.4 : degraded ? 1.4 : 0.7);
@@ -83,6 +90,7 @@ function buildWorkflow({ source, sourceText, inputPath, profile }) {
     name: stringValue(profile.workflow?.name) ?? profile.id,
     environment: stringValue(profile.workflow?.environment) ?? "local scheduled run",
     window: stringValue(profile.workflow?.window) ?? "latest run",
+    scheduler: schedulerForProfile({ profile, outputPath, historyStorePath, historyDisabled }),
     incident: {
       title: stringValue(profile.workflow?.incidentTitle)
         ?? (failed ? "定期実行runで確認が必要" : degraded ? "定期実行runに軽微な劣化" : "定期実行runは正常に完了"),
@@ -108,7 +116,8 @@ function buildWorkflow({ source, sourceText, inputPath, profile }) {
       adapter: "scheduled-source-profile.v0.1",
       profile_id: profile.id,
       source_type: profile.type,
-      source_file_name: path.basename(inputPath),
+      source_file_name_copied: false,
+      source_file_extension: path.extname(inputPath).toLowerCase() || "none",
       source_sha256: sourceHash,
       raw_body_copied: false,
       local_path_copied: false,
@@ -128,24 +137,103 @@ function buildWorkflow({ source, sourceText, inputPath, profile }) {
 }
 
 function workflowFromAgentRun(source, profile) {
+  if (profile.trustedPreSanitized !== true) {
+    throw new Error(`${profile.id}: agent-run-json requires trustedPreSanitized=true because the workflow body is reused`);
+  }
   const workflow = source?.schemaVersion === "agent-run.v0.1" ? source.workflow : null;
   if (!workflow || typeof workflow !== "object" || Array.isArray(workflow)) {
     throw new Error(`${profile.id}: agent-run-json profile requires schemaVersion=agent-run.v0.1 with workflow`);
   }
+  requireObject(workflow.payload, `${profile.id}: agent-run-json workflow.payload`);
+  requireObject(workflow.incident, `${profile.id}: agent-run-json workflow.incident`);
+  requireObject(workflow.trace, `${profile.id}: agent-run-json workflow.trace`);
+  requireObject(workflow.recommendedAction, `${profile.id}: agent-run-json workflow.recommendedAction`);
+  requireObject(workflow.replay, `${profile.id}: agent-run-json workflow.replay`);
+  requireArray(workflow.spans, `${profile.id}: agent-run-json workflow.spans`);
+  requireArray(workflow.hypotheses, `${profile.id}: agent-run-json workflow.hypotheses`);
+  requireArray(workflow.evaluations, `${profile.id}: agent-run-json workflow.evaluations`);
+  requireArray(workflow.logs, `${profile.id}: agent-run-json workflow.logs`);
   return JSON.parse(JSON.stringify(workflow));
+}
+
+function applyHistoryResult(workflow, historyResult) {
+  workflow.payload.history_store_enabled = historyResult.enabled;
+  workflow.payload.history_record_count = historyResult.recordCount;
+  workflow.payload.history_attached = historyResult.attached;
+
+  if (historyResult.enabled) return;
+
+  const historySpan = workflow.spans?.find((span) => span.id === "history_store"
+    && span.provider === "adapter"
+    && span.annotation === "safe summary history only");
+  if (historySpan) {
+    historySpan.status = "skipped";
+    historySpan.annotation = "history store disabled by profile";
+    historySpan.highlight = false;
+  }
+
+  const historyEvaluation = workflow.evaluations?.find((item) => item.name === "history_ready"
+    && item.baseline === 0.8
+    && item.impact === "中");
+  if (historyEvaluation) {
+    historyEvaluation.score = 0;
+    historyEvaluation.impact = "低";
+  }
+
+  const historyLog = workflow.logs?.find((log) => log.source === "history_store"
+    && log.message === "history store: safe summary history only");
+  if (historyLog) {
+    historyLog.level = "INFO";
+    historyLog.message = "history store disabled by profile";
+  }
+}
+
+function redactionSummaryFor(profile) {
+  if (profile.type === "agent-run-json") {
+    return "trusted pre-sanitized agent-run-json workflow body is reused, then adapter history metadata is applied; safety scan is still required before publishing";
+  }
+  return "raw artifact body, full local path, source file name, and command output are not copied; mapped annotations/evidence must be safe profile-selected summaries";
+}
+
+function schedulerForProfile({ profile, outputPath, historyStorePath, historyDisabled }) {
+  const configured = profile.workflow?.scheduler ?? {};
+  return {
+    profileId: profile.id,
+    taskName: stringValue(configured.taskName) ?? profile.id,
+    trigger: stringValue(configured.trigger) ?? "Windows Task Scheduler / manual run",
+    cadence: stringValue(configured.cadence) ?? "profile execution",
+    sourceType: profile.type,
+    inputMode: stringValue(configured.inputMode) ?? `${profile.type} artifact`,
+    adapter: "scheduled-source-profile.v0.1",
+    outputTarget: stringValue(configured.outputTarget) ?? toRelative(outputPath),
+    historyStore: historyDisabled ? "disabled" : stringValue(configured.historyStore) ?? `enabled: ${toRelative(historyStorePath)}`,
+    lastRunAt: new Date().toISOString(),
+    nextRunAt: stringValue(configured.nextRunAt) ?? "next scheduled trigger",
+    switchHint: stringValue(configured.switchHint) ?? "change only --profile to view another scheduled program",
+  };
+}
+
+function requireObject(value, label) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) throw new Error(`${label}: object required`);
+}
+
+function requireArray(value, label) {
+  if (!Array.isArray(value)) throw new Error(`${label}: array required`);
 }
 
 function normalizeChecks(checks, source, sourceType) {
   const normalized = checks.map((check, index) => {
     const rawStatus = valueOf(check.status, source, sourceType);
-    const annotation = stringValue(valueOf(check.annotation, source, sourceType) ?? check.annotationText);
+    const mappedStatus = statusFor(rawStatus, check);
+    const status = mappedStatus === "skipped" ? "warning" : mappedStatus;
+    const annotation = safeSignalText(valueOf(check.annotation, source, sourceType) ?? check.annotationText);
     return {
       id: safeId(check.id ?? `check_${index + 1}`),
       name: stringValue(check.name) ?? `check_${index + 1}`,
       provider: stringValue(check.provider) ?? "scheduled source",
-      status: statusFor(rawStatus, check),
+      status,
       durationMs: positiveNumber(valueOf(check.durationMs, source, sourceType)) ?? 1000,
-      annotation: annotation ?? valueLabel(rawStatus),
+      annotation: annotation ?? (rawStatus == null ? "status mapping returned empty" : valueLabel(rawStatus)),
       evidence: evidenceFor(check, source, sourceType, rawStatus),
     };
   });
@@ -160,6 +248,30 @@ function normalizeChecks(checks, source, sourceType) {
     normalized.push({ id, name, provider, status, durationMs: 1000, annotation, evidence: [annotation] });
   }
   return normalized;
+}
+
+function primaryStatusCheckFor(checks, rawStatus, status, unknown) {
+  const statusLabel = safeSignalText(rawStatus) ?? "unknown";
+  const annotation = unknown
+    ? `run-level status mapping returned ${rawStatus == null ? "empty" : "unknown; raw value omitted"}`
+    : `run-level status=${statusLabel}`;
+  return {
+    id: uniqueCheckId(checks, "current_run_status"),
+    name: "current run status",
+    provider: "scheduled source",
+    status,
+    durationMs: 1000,
+    annotation,
+    evidence: [annotation],
+  };
+}
+
+function uniqueCheckId(checks, baseId) {
+  const ids = new Set(checks.map((check) => check.id));
+  let id = baseId;
+  let suffix = 2;
+  while (ids.has(id)) id = `${baseId}_${suffix++}`;
+  return id;
 }
 
 function buildSpans(checks, totalMs) {
@@ -280,12 +392,37 @@ function buildLogs(startedMs, checks, state) {
   }));
 }
 
+function primaryStatusCandidate(profile, source, sourceType) {
+  const specs = [profile.extract?.status, profile.extract?.verdict].filter((spec) => spec != null);
+  for (const spec of specs) {
+    const value = valueOf(spec, source, sourceType);
+    if (value != null) return { spec, value };
+  }
+  return { spec: specs[0] ?? null, value: null };
+}
+
 function summarizeSignals(profile, source, sourceType) {
+  const numericSignals = new Set([
+    "durationMs",
+    "affectedSessions",
+    "impactedWorkflows",
+    "sloBurn",
+    "errorRate",
+    "tokens",
+    "costUsd",
+  ]);
+  const statusSignals = new Set(["status", "verdict"]);
   const entries = Object.entries(profile.extract ?? {})
     .filter(([, spec]) => spec && typeof spec === "object")
-    .slice(0, 12)
-    .map(([name, spec]) => ({ name, value: safeSignalValue(valueOf(spec, source, sourceType)) }))
-    .filter((item) => item.value !== null);
+    .map(([name, spec]) => {
+      const value = valueOf(spec, source, sourceType);
+      if (statusSignals.has(name)) return { name, value: statusFor(value, spec) };
+      if (numericSignals.has(name)) return { name, value: safeSignalValue(value) };
+      return null;
+    })
+    .filter(Boolean)
+    .filter((item) => item.value !== null)
+    .slice(0, 12);
   return entries;
 }
 
@@ -293,10 +430,11 @@ function evidenceFor(check, source, sourceType, rawStatus) {
   const rows = [];
   if (Array.isArray(check.evidence)) {
     for (const item of check.evidence) {
-      if (typeof item === "string") rows.push(item);
+      if (typeof item === "string") rows.push(safeSignalText(item) ?? "unknown");
       else if (item && typeof item === "object") {
-        const label = stringValue(item.label) ?? "signal";
-        rows.push(`${label}=${safeSignalValue(valueOf(item.value, source, sourceType)) ?? "unknown"}`);
+        const label = safeSignalText(item.label) ?? "signal";
+        const value = safeSignalText(valueOf(item.value, source, sourceType)) ?? "unknown";
+        rows.push(safeSignalText(`${label}=${value}`) ?? `${label}=unknown`);
       }
     }
   }
@@ -374,12 +512,32 @@ function statusFor(value, check = {}) {
 
 function selectProfile(config, requestedProfile) {
   if (!config || typeof config !== "object" || Array.isArray(config)) throw new Error("scheduled source config must be an object");
-  const profileId = requestedProfile ?? config.defaultProfile;
   const profiles = Array.isArray(config.profiles) ? config.profiles : [];
-  const profile = profiles.find((item) => item.id === profileId) ?? profiles[0];
+  if (profiles.length === 0) throw new Error("scheduled source config has no profiles");
+  const validIds = profiles.map((item) => item.id).filter(Boolean).join(", ");
+  let profile;
+  if (requestedProfile != null) {
+    profile = profiles.find((item) => item.id === requestedProfile);
+    if (!profile) throw new Error(`scheduled source profile not found: ${requestedProfile}. Valid profiles: ${validIds}`);
+  } else if (config.defaultProfile != null) {
+    profile = profiles.find((item) => item.id === config.defaultProfile);
+    if (!profile) throw new Error(`defaultProfile not found: ${config.defaultProfile}. Valid profiles: ${validIds}`);
+  } else {
+    profile = profiles[0];
+  }
   if (!profile) throw new Error("scheduled source config has no profiles");
   if (!profile.id || !profile.type || !profile.input) throw new Error("profile requires id, type, and input");
   return profile;
+}
+
+function validateProfileId(profileId) {
+  if (typeof profileId !== "string") {
+    throw new Error(`profile id must be a string safe path segment: ${profileId}`);
+  }
+  if (!/^[a-z0-9][a-z0-9_-]{0,79}$/.test(profileId)) {
+    throw new Error(`profile id must be a safe path segment: ${profileId}`);
+  }
+  return profileId;
 }
 
 function parseArgs(argv) {
@@ -449,6 +607,11 @@ function safeSignalValue(value) {
   const str = String(value).trim();
   if (!str) return null;
   return str.length > 80 ? `${str.slice(0, 77)}...` : str;
+}
+
+function safeSignalText(value) {
+  const safe = safeSignalValue(value);
+  return safe == null ? null : String(safe);
 }
 
 function valueLabel(value) {

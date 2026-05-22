@@ -152,13 +152,15 @@ That local file is intentionally ignored by git. It may point to private local a
 
 - profile id
 - source type
-- source file name, not full local path
+- source file extension/kind, not source file name or full local path
 - source hash
 - mapped numeric/status signals
-- check statuses, durations, annotations, and short evidence
+- check statuses, durations, annotations, and short evidence selected by the profile
 - safe run-history summary
 
 It does not copy the raw artifact body, full local path, command output, secrets, or private payloads into dashboard data.
+The only exception is `agent-run-json` with `trustedPreSanitized: true`, which is a trusted pass-through for already-sanitized dashboard workflows and must still pass the safety scan before publishing.
+For `json` and `markdown` profiles, mapped annotations/evidence are copied as capped profile-selected summaries; do not map raw command output, full paths, client names, secrets, or other private free text.
 
 ### Profile types
 
@@ -167,14 +169,40 @@ Current profile types:
 - `json`: read a JSON health/run artifact and map fields with JSON paths such as `$.run.status`.
 - `markdown`: read a markdown post-run health report and map `- key: value` lines, optionally scoped to a `## Section`.
 - `agent-run-json`: pass through an artifact that already uses `agent-run.v0.1`.
+  This mode reuses the supplied workflow body, so it is accepted only when the
+  profile explicitly sets `trustedPreSanitized: true`. Use it only for artifacts
+  that are already dashboard-safe. For raw project artifacts, prefer `json` or
+  `markdown` profiles so the importer rebuilds a safe summary instead of copying
+  private payload, logs, paths, or command output. The importer may still append
+  the standard history-store metadata used by the dashboard.
 
 Each profile can define:
 
 - `workflow`: dashboard identity and labels
+- `workflow.scheduler`: public-safe scheduler display metadata used by the runtime-flow switcher
 - `extract`: run-level fields such as `runId`, `startedAt`, `durationMs`, `status`, `sloBurn`, and `errorRate`
 - `checks[]`: span/evaluation/log rows derived from source signals
 - `recommendedAction`
 - `replay`
+
+`workflow.scheduler` is optional but recommended for real Task Scheduler integration. Keep it safe to publish because it is copied into generated dashboard JSON:
+
+```json
+{
+  "taskName": "example-json-health-task",
+  "trigger": "Windows Task Scheduler / every 30 minutes",
+  "cadence": "30分ごと",
+  "inputMode": "json health artifact",
+  "outputTarget": "data/private-incoming/example-json-health.json",
+  "historyStore": "enabled safe summary history"
+}
+```
+
+The runtime-flow page renders one switch card per workflow. To compare multiple scheduled programs, import multiple profiles into `data/private-incoming/`, merge/build them, and load the resulting dashboard JSON. No UI code change is required when the program list changes.
+
+`extract.status` / `extract.verdict` and `checks[].status` may define `okValues`, `warningValues`, and `errorValues` when a source uses project-specific status vocabulary such as `completed` or `succeeded`.
+
+Profile `id` is also used as the default private output/history file name and is copied into generated dashboard metadata, so it must be both path-safe and public-safe. Use an anonymized id matching `^[a-z0-9][a-z0-9_-]{0,79}$`; do not use client names, private repo names, or other sensitive project identifiers.
 
 ### Commands
 
@@ -211,6 +239,15 @@ http://localhost:4173/?data=tmp/scheduled-dashboard-runs.json
 ```
 
 The `data` query parameter accepts only same-origin relative JSON paths. Absolute URLs and parent-directory paths are ignored.
+
+The C2C runtime-flow page also accepts the same generated dashboard schema. It adds a scheduler switcher and optional deep-link selection:
+
+```text
+http://localhost:4173/runtime-flow/?data=../tmp/scheduled-dashboard-runs.json
+http://localhost:4173/runtime-flow/?data=../tmp/scheduled-dashboard-runs.json&profile=<profile-id>
+```
+
+Use this route when the goal is to inspect several scheduled programs as separate workflow cards.
 
 To switch projects, add another profile to `config/local-scheduled-sources.json` and change only `--profile <profile-id>`. The dashboard schema and UI do not need to change.
 

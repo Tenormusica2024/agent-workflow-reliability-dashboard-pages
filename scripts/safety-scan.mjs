@@ -3,8 +3,8 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const args = process.argv.slice(2);
-const targets = args.length > 0 ? args : ["sample-runs.json"];
+const parsedArgs = parseArgs(process.argv.slice(2));
+const targets = parsedArgs.targets.length > 0 ? parsedArgs.targets : ["sample-runs.json"];
 
 const bannedTerms = [
   "client" + " name",
@@ -32,17 +32,26 @@ const bannedPatterns = [
 ];
 
 const failures = [];
+const scannedTargets = [];
+const skippedOptionalTargets = [];
 for (const target of targets) {
   const fullPath = path.resolve(root, target);
+  const targetRel = path.relative(root, fullPath).replaceAll(path.sep, "/");
   if (!fs.existsSync(fullPath)) {
+    if (parsedArgs.optionalTargets.has(targetRel)) {
+      skippedOptionalTargets.push(target);
+      continue;
+    }
     failures.push(`${target}: missing`);
     continue;
   }
+  scannedTargets.push(target);
   const stat = fs.statSync(fullPath);
+  const allowedSkippedRoot = isSkippedRoot(targetRel) ? targetRel : null;
   if (stat.isDirectory()) {
-    for (const file of walk(fullPath)) scanFile(file);
+    for (const file of walk(fullPath)) scanFile(file, { allowedSkippedRoot });
   } else {
-    scanFile(fullPath);
+    scanFile(fullPath, { explicitFile: true });
   }
 }
 
@@ -51,11 +60,14 @@ if (failures.length > 0) {
   process.exit(1);
 }
 
-console.log(`OK: safety scan passed for ${targets.join(", ")}`);
+console.log(`OK: safety scan passed for ${scannedTargets.join(", ")}`);
+if (skippedOptionalTargets.length > 0) {
+  console.log(`INFO: skipped missing optional target(s): ${skippedOptionalTargets.join(", ")}`);
+}
 
-function scanFile(filePath) {
+function scanFile(filePath, { explicitFile = false, allowedSkippedRoot = null } = {}) {
   const rel = path.relative(root, filePath).replaceAll(path.sep, "/");
-  if (shouldSkip(rel)) return;
+  if (!explicitFile && shouldSkip(rel, allowedSkippedRoot)) return;
   const text = fs.readFileSync(filePath, "utf8");
   const normalized = text.toLowerCase();
   for (const term of bannedTerms) {
@@ -66,8 +78,15 @@ function scanFile(filePath) {
   }
 }
 
-function shouldSkip(rel) {
+function shouldSkip(rel, allowedSkippedRoot = null) {
+  if (allowedSkippedRoot && (rel === allowedSkippedRoot || rel.startsWith(`${allowedSkippedRoot}/`))) {
+    return rel.split("/").some((part) => part === ".git" || part === "node_modules" || part === "assets");
+  }
   return rel.startsWith(".git/") || rel.startsWith("node_modules/") || rel.startsWith("assets/") || rel.startsWith("tmp/");
+}
+
+function isSkippedRoot(rel) {
+  return rel === ".git" || rel === "node_modules" || rel === "assets" || rel === "tmp" || shouldSkip(rel);
 }
 
 function* walk(dir) {
@@ -80,4 +99,24 @@ function* walk(dir) {
 
 function safeLabel(term) {
   return term.replace(/[A-Za-z0-9]/g, "*");
+}
+
+function parseArgs(argv) {
+  const out = { targets: [], optionalTargets: new Set() };
+  for (let i = 0; i < argv.length; i += 1) {
+    const arg = argv[i];
+    if (arg === "--optional-target") {
+      const target = argv[++i];
+      if (!target) throw new Error("--optional-target requires a path");
+      out.targets.push(target);
+      out.optionalTargets.add(toRelativeTarget(target));
+      continue;
+    }
+    out.targets.push(arg);
+  }
+  return out;
+}
+
+function toRelativeTarget(target) {
+  return path.relative(root, path.resolve(root, target)).replaceAll(path.sep, "/");
 }

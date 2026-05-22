@@ -36,7 +36,18 @@ function getInitialLanguage() {
 
 function dataUrlFromLocation() {
   const params = new URLSearchParams(window.location.search);
-  return params.get("data") || params.get("dataUrl") || DEFAULT_DATA_URL;
+  const candidate = params.get("data") || params.get("dataUrl");
+  if (!candidate) return DEFAULT_DATA_URL;
+  const trimmed = candidate.trim();
+  if (!trimmed) return DEFAULT_DATA_URL;
+  try {
+    const url = new URL(trimmed, window.location.href);
+    if (url.origin !== window.location.origin) return DEFAULT_DATA_URL;
+    if (!url.pathname.toLowerCase().endsWith(".json")) return DEFAULT_DATA_URL;
+    return url.href;
+  } catch (_) {
+    return DEFAULT_DATA_URL;
+  }
 }
 
 async function loadDashboardData() {
@@ -76,6 +87,24 @@ function currentWorkflow() {
   return workflows.find((workflow) => workflow.id === state.selectedWorkflowId)
     || workflows.find((workflow) => workflow.id === state.data?.defaultWorkflowId)
     || workflows[0];
+}
+
+function workflowIdFromLocation(data) {
+  const params = new URLSearchParams(window.location.search);
+  const requested = params.get("workflow") || params.get("profile");
+  const workflows = data?.workflows || [];
+  if (!requested) return data?.defaultWorkflowId;
+  return workflows.find((workflow) => workflow.id === requested || workflow.scheduler?.profileId === requested)?.id
+    || data?.defaultWorkflowId;
+}
+
+function schedulerFor(workflow) {
+  return workflow?.scheduler || {};
+}
+
+function schedulerLabel(workflow, key, fallback = "未設定") {
+  const scheduler = schedulerFor(workflow);
+  return escapeHtml(scheduler[key] || fallback);
 }
 
 function statusClass(status) {
@@ -233,6 +262,8 @@ function renderApp() {
                 </div>
                 <div class="runtime-note">${APP_LABELS.workflowOnlyNotice}</div>
               </div>
+              ${renderSchedulerSwitcher(data, workflow)}
+              ${renderSchedulerBridge(workflow)}
               ${renderRuntimeFlow(components)}
               <div class="panel-grid panel-grid--two">
                 ${renderAnomalyEvents(events)}
@@ -248,6 +279,7 @@ function renderApp() {
               ${renderAnomalySummary(workflow, score)}
               ${renderFailedSpan(workflow, critical)}
               ${renderRootCause(workflow)}
+              ${renderSchedulerRail(workflow)}
               ${renderTechnicalChecks(critical)}
             </aside>
           </div>
@@ -302,6 +334,11 @@ function renderSidebar(data, workflow) {
         <span class="small-label">インスタンス</span>
         <strong>${(data.workflows || []).length * 17} / ${(data.workflows || []).length * 20} 稼働中</strong>
       </div>
+      <div class="sidebar-card sidebar-card--compact">
+        <span class="small-label">取り込みprofile</span>
+        <strong>${schedulerLabel(workflow, "profileId", workflow.id)}</strong>
+        <span>${schedulerLabel(workflow, "cadence", "定期実行")}</span>
+      </div>
       <button class="settings-button" type="button">⚙ 設定を開く</button>
     </aside>
   `;
@@ -320,14 +357,80 @@ function renderTopbar(workflow, score) {
       </div>
       <div class="topbar__controls">
         <label class="search-box"><span>⌕</span><input aria-label="search" value="検索（コンポーネント / トレースID）"></label>
-        <select id="workflowSelect" class="top-select" aria-label="workflow select">${workflowOptions}</select>
+        <select id="workflowSelect" class="top-select" aria-label="scheduled program select">${workflowOptions}</select>
         <span class="top-pill top-pill--env"><span class="top-pill__label">環境：</span><strong class="top-pill__value">${escapeHtml(workflow.environment)}</strong></span>
         <span class="top-pill top-pill--window"><span class="top-pill__label">時間範囲：</span><strong class="top-pill__value">${escapeHtml(workflow.window)}</strong></span>
+        <span class="top-pill top-pill--source"><span class="top-pill__label">入力：</span><strong class="top-pill__value">${schedulerLabel(workflow, "sourceType", "dashboard-json")}</strong></span>
         <span class="system-health ${score < 80 ? "is-risk" : ""}"><span class="dot"></span><span class="system-health__text"><span class="system-health__label">システム健全性</span><strong>${score < 80 ? "要注意" : "良好"}</strong></span></span>
         <button class="icon-button" type="button" aria-label="notification">♢</button>
         <button class="icon-button" type="button" aria-label="help">?</button>
       </div>
     </header>
+  `;
+}
+
+function renderSchedulerSwitcher(data, workflow) {
+  const workflows = data.workflows || [];
+  const cards = workflows.map((item) => {
+    const scheduler = schedulerFor(item);
+    const selected = item.id === workflow.id;
+    const health = statusClass(item.reliabilityDecision?.level || item.incident?.status);
+    return `
+      <button class="program-card ${selected ? "is-selected" : ""}" type="button" data-workflow-id="${escapeHtml(item.id)}">
+        <span class="program-card__status program-card__status--${health}">${statusLabel(health)}</span>
+        <strong>${escapeHtml(item.name)}</strong>
+        <span class="program-card__task">${escapeHtml(scheduler.taskName || scheduler.profileId || item.id)}</span>
+        <span class="program-card__meta">最新 ${escapeHtml(scheduler.lastRunAt || item.incident?.started || "latest")}</span>
+        <span class="program-card__meta">次回 ${escapeHtml(scheduler.nextRunAt || scheduler.cadence || "profile実行時")}</span>
+      </button>
+    `;
+  }).join("");
+
+  return `
+    <section class="card scheduler-switcher" aria-label="scheduled program switcher">
+      <div class="switcher-heading">
+        <div>
+          <h3>定期実行プログラム切替</h3>
+          <p>Task Scheduler のprofileを差し替えるだけで別runを表示</p>
+        </div>
+        <div class="switcher-count"><strong>${workflows.length}</strong><span>programs</span></div>
+      </div>
+      <div class="program-card-list">${cards}</div>
+    </section>
+  `;
+}
+
+function renderSchedulerBridge(workflow) {
+  const scheduler = schedulerFor(workflow);
+  const steps = [
+    ["1", "Task Scheduler", scheduler.taskName || "scheduled task"],
+    ["2", "Run Artifact", scheduler.inputMode || scheduler.sourceType || "json / markdown"],
+    ["3", "Profile Adapter", scheduler.profileId || workflow.id],
+    ["4", "Dashboard JSON", scheduler.outputTarget || "sample-runs.json"],
+  ];
+
+  return `
+    <section class="card scheduler-bridge">
+      <div class="bridge-copy">
+        <span class="small-label">実行データ接続準備</span>
+        <h3>実タスクスケジューラへ移せる取り込みフロー</h3>
+        <p>定期実行ごとに出力されるhealth artifactをprofileで正規化し、同じUI schemaへ変換します。</p>
+      </div>
+      <div class="bridge-steps">
+        ${steps.map(([number, title, meta]) => `
+          <div class="bridge-step">
+            <span>${number}</span>
+            <strong>${escapeHtml(title)}</strong>
+            <em>${escapeHtml(meta)}</em>
+          </div>
+        `).join("")}
+      </div>
+      <dl class="bridge-meta">
+        <div><dt>trigger</dt><dd>${escapeHtml(scheduler.trigger || scheduler.cadence || "manual / scheduled")}</dd></div>
+        <div><dt>history</dt><dd>${escapeHtml(scheduler.historyStore || "safe summary")}</dd></div>
+        <div><dt>adapter</dt><dd>${escapeHtml(scheduler.adapter || "scheduled-source-profile")}</dd></div>
+      </dl>
+    </section>
   `;
 }
 
@@ -526,6 +629,22 @@ function renderRootCause(workflow) {
   `;
 }
 
+function renderSchedulerRail(workflow) {
+  const scheduler = schedulerFor(workflow);
+  return `
+    <section class="card rail-card scheduler-rail">
+      <div class="rail-title"><h3>Scheduler 接続情報</h3><a href="#">詳細</a></div>
+      <dl>
+        <div><dt>profile</dt><dd>${escapeHtml(scheduler.profileId || workflow.id)}</dd></div>
+        <div><dt>task</dt><dd>${escapeHtml(scheduler.taskName || "未接続")}</dd></div>
+        <div><dt>source</dt><dd>${escapeHtml(scheduler.sourceType || "dashboard-json")}</dd></div>
+        <div><dt>latest</dt><dd>${escapeHtml(scheduler.lastRunAt || workflow.incident?.started || "latest")}</dd></div>
+        <div><dt>next</dt><dd>${escapeHtml(scheduler.nextRunAt || scheduler.cadence || "profile実行時")}</dd></div>
+      </dl>
+    </section>
+  `;
+}
+
 function renderTechnicalChecks(component) {
   const checks = [
     `${component.label}の外部API可用性を確認`,
@@ -551,9 +670,20 @@ function renderSpark(kind) {
 
 function bindInteractions() {
   document.getElementById("workflowSelect")?.addEventListener("change", (event) => {
-    state.selectedWorkflowId = event.target.value;
-    renderApp();
+    selectWorkflow(event.target.value);
   });
+  document.querySelectorAll("[data-workflow-id]").forEach((button) => {
+    button.addEventListener("click", () => selectWorkflow(button.dataset.workflowId));
+  });
+}
+
+function selectWorkflow(workflowId) {
+  if (!workflowId || workflowId === state.selectedWorkflowId) return;
+  state.selectedWorkflowId = workflowId;
+  const url = new URL(window.location.href);
+  url.searchParams.set("workflow", workflowId);
+  window.history.replaceState(null, "", url);
+  renderApp();
 }
 
 window.addEventListener("resize", syncArtboardScale);
@@ -572,7 +702,7 @@ function renderError(message) {
 async function init() {
   try {
     state.data = await loadDashboardData();
-    state.selectedWorkflowId = state.data.defaultWorkflowId;
+    state.selectedWorkflowId = workflowIdFromLocation(state.data);
     renderApp();
   } catch (error) {
     state.error = error;

@@ -77,6 +77,7 @@ function buildWorkflow(workflow, config, reliabilityThresholds) {
     id: workflow.id,
     name: workflow.name,
     environment: workflow.environment,
+    ...(workflow.scheduler ? { scheduler: buildScheduler(workflow.scheduler, workflow) } : {}),
     viewState: viewStateFor(failed, degraded),
     window: workflow.window,
     rcaConfidence: confidenceFromHypotheses(workflow.hypotheses),
@@ -168,6 +169,30 @@ function buildWorkflow(workflow, config, reliabilityThresholds) {
     replay: workflow.replay,
     logs: workflow.logs,
   };
+}
+
+function buildScheduler(scheduler, workflow) {
+  assert(scheduler && typeof scheduler === "object" && !Array.isArray(scheduler), `${workflow.id}.scheduler must be object`);
+  return {
+    profileId: stringValue(scheduler.profileId) ?? workflow.id,
+    taskName: stringValue(scheduler.taskName) ?? workflow.id,
+    trigger: stringValue(scheduler.trigger) ?? "scheduled",
+    cadence: stringValue(scheduler.cadence) ?? "scheduled",
+    sourceType: stringValue(scheduler.sourceType) ?? "agent-run-json",
+    inputMode: stringValue(scheduler.inputMode) ?? "scheduled artifact",
+    adapter: stringValue(scheduler.adapter) ?? "scheduled-source-profile.v0.1",
+    outputTarget: stringValue(scheduler.outputTarget) ?? "dashboard json",
+    historyStore: stringValue(scheduler.historyStore) ?? "safe summary history",
+    lastRunAt: stringValue(scheduler.lastRunAt) ?? workflow.incident.started,
+    nextRunAt: stringValue(scheduler.nextRunAt) ?? "next scheduled run",
+    ...(scheduler.switchHint ? { switchHint: stringValue(scheduler.switchHint) } : {}),
+  };
+}
+
+function stringValue(value) {
+  if (typeof value !== "string") return null;
+  const trimmed = value.trim();
+  return trimmed ? trimmed : null;
 }
 
 function reliabilityThresholdsFor(config) {

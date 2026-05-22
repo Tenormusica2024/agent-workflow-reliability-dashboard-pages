@@ -131,6 +131,14 @@ npm run check:scheduled:example
 ```
 
 実プロジェクトへ差し替える場合は、`config/local-scheduled-sources.json` に対象artifactのパスとcheck対応を追加し、profile名だけを変えて実行します。
+profile `id` は出力ファイル名とdashboard metadataにも使うため、英小文字/数字から始まる `^[a-z0-9][a-z0-9_-]{0,79}$` のpublic-safeな匿名path segmentにします。client名・private repo名・内部プロジェクト名は使いません。
+raw artifactは `json` / `markdown` profileで安全なsummaryへ写像するのが基本です。
+mapped annotation/evidenceには公開してよい短いsummaryだけを指定し、raw command output・full path・client名・secretなどは指定しません。
+`completed` / `succeeded` などプロジェクト固有の成功表現がある場合は、profile側の `okValues` / `warningValues` / `errorValues` でdashboard用の正常/監視/要対応へ翻訳します。
+`agent-run-json` は既に公開用へサニタイズ済みの `agent-run.v0.1` だけに使い、profileに `trustedPreSanitized: true` を明示します。
+この場合もimporterはdashboard用の履歴メタデータを付与するため、完全なbyte-for-byte pass-throughではありません。
+runtime-flow 画面では `workflow.scheduler` を使って定期実行プログラムの切替カードを表示します。
+複数profileを `data/private-incoming/` に取り込んでmerge/buildすれば、UIコードを変えずに複数の定期実行プログラムを横断表示できます。
 
 ```powershell
 npm run import:scheduled -- --config config/local-scheduled-sources.json --profile <profile-id>
@@ -144,7 +152,15 @@ npm run serve
 http://localhost:4173/?data=tmp/scheduled-dashboard-runs.json
 ```
 
-`?data=` は same-origin の相対JSONだけを受け付けます。絶対URLや `..` を含むpathは無視されます。
+runtime-flow で実行プログラムの切替UIを確認する場合:
+
+```text
+http://localhost:4173/runtime-flow/?data=../tmp/scheduled-dashboard-runs.json
+http://localhost:4173/runtime-flow/?data=../tmp/scheduled-dashboard-runs.json&profile=<profile-id>
+```
+
+root dashboard の `?data=` は same-origin の相対JSONだけを受け付けます。絶対URLや `..` を含むpathは無視されます。
+runtime-flow では同一origin内のJSONに限り、repo root の `tmp/` を参照するための `../tmp/...json` もローカル検証用に受け付けます。
 
 複数の実行ログをファイル投入する場合は `data/incoming/*.json` に `agent-run.v0.1` を置き、以下で1つのUI用JSONに変換できます。
 

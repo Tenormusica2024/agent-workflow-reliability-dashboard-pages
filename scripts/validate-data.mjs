@@ -35,6 +35,7 @@ for (const workflow of data.workflows) {
   assert(!ids.has(workflow.id), `duplicate workflow id: ${workflow.id}`);
   ids.add(workflow.id);
   for (const key of ["name", "environment", "viewState", "window"]) nonEmptyString(workflow[key], `${workflow.id}.${key}`);
+  if (workflow.scheduler != null) validateScheduler(workflow.scheduler, `${workflow.id}.scheduler`);
   assert(typeof workflow.rcaConfidence === "number" && workflow.rcaConfidence >= 0 && workflow.rcaConfidence <= 100, `${workflow.id}.rcaConfidence must be 0-100`);
 
   const incident = workflow.incident;
@@ -119,6 +120,13 @@ for (const term of bannedTerms) {
 }
 
 console.log(`OK: ${data.workflows.length} agent workflows validated for trace triage dashboard (${path.relative(root, dataPath)})`);
+
+function validateScheduler(scheduler, pathName) {
+  assert(scheduler && typeof scheduler === "object" && !Array.isArray(scheduler), `${pathName}: object required`);
+  for (const key of ["profileId", "taskName", "trigger", "cadence", "sourceType", "inputMode", "adapter", "outputTarget", "historyStore", "lastRunAt", "nextRunAt"]) {
+    if (scheduler[key] != null) nonEmptyString(scheduler[key], `${pathName}.${key}`);
+  }
+}
 
 function parseArgs(argv) {
   const out = { path: null };

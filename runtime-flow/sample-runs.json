@@ -407,6 +407,20 @@
           "criticalSloBurnMin": 2
         },
         "nextActionKey": "inspect_dependency"
+      },
+      "scheduler": {
+        "profileId": "support-routing-15m",
+        "taskName": "agent-support-routing-health",
+        "trigger": "Windows Task Scheduler / every 15 minutes",
+        "cadence": "15分ごと",
+        "sourceType": "json health artifact",
+        "inputMode": "latest-run-health.json",
+        "adapter": "scheduled-source-profile.v0.1",
+        "outputTarget": "runtime-flow sample-runs schema",
+        "historyStore": "safe summary history enabled",
+        "lastRunAt": "今日 13:42",
+        "nextRunAt": "今日 13:57",
+        "switchHint": "profile idだけを変えて同じUIで比較"
       }
     },
     {
@@ -758,6 +772,20 @@
           "criticalSloBurnMin": 2
         },
         "nextActionKey": "watch_trend"
+      },
+      "scheduler": {
+        "profileId": "knowledge-curation-hourly",
+        "taskName": "agent-knowledge-curation-health",
+        "trigger": "Windows Task Scheduler / hourly",
+        "cadence": "1時間ごと",
+        "sourceType": "markdown post-run report",
+        "inputMode": "post-run-health.md",
+        "adapter": "scheduled-source-profile.v0.1",
+        "outputTarget": "runtime-flow sample-runs schema",
+        "historyStore": "safe summary history enabled",
+        "lastRunAt": "今日 11:08",
+        "nextRunAt": "今日 12:08",
+        "switchHint": "markdown reportも同じprofile mappingで表示"
       }
     },
     {
@@ -1116,6 +1144,20 @@
           "criticalSloBurnMin": 2
         },
         "nextActionKey": "inspect_dependency"
+      },
+      "scheduler": {
+        "profileId": "transaction-check-15m",
+        "taskName": "agent-transaction-check-health",
+        "trigger": "Windows Task Scheduler / every 15 minutes",
+        "cadence": "15分ごと",
+        "sourceType": "pre-sanitized agent-run-json",
+        "inputMode": "agent-run.v0.1 artifact",
+        "adapter": "scheduled-source-profile.v0.1",
+        "outputTarget": "runtime-flow sample-runs schema",
+        "historyStore": "safe summary history enabled",
+        "lastRunAt": "今日 09:16",
+        "nextRunAt": "今日 09:31",
+        "switchHint": "pre-sanitized workflowは安全scan後に表示"
       }
     }
   ],

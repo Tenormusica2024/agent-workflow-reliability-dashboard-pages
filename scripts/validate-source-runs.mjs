@@ -93,6 +93,7 @@ function validateWorkflow(workflow, label) {
   for (const key of ["name", "environment", "window"]) {
     nonEmptyString(workflow[key], `${label}.${key}`);
   }
+  if (workflow.scheduler != null) validateScheduler(workflow.scheduler, `${label}.scheduler`);
 
   validateIncident(workflow.incident, `${label}.incident`);
   validateTrace(workflow.trace, `${label}.trace`);
@@ -106,6 +107,13 @@ function validateWorkflow(workflow, label) {
   if (workflow.history != null) validateHistory(workflow.history, `${label}.history`);
   validateReplay(workflow.replay, `${label}.replay`);
   validateLogs(workflow.logs, `${label}.logs`);
+}
+
+function validateScheduler(scheduler, label) {
+  if (!scheduler || typeof scheduler !== "object" || Array.isArray(scheduler)) fail(label, "object required");
+  for (const key of ["profileId", "taskName", "trigger", "cadence", "sourceType", "inputMode", "adapter", "outputTarget", "historyStore"]) {
+    optionalString(scheduler[key], `${label}.${key}`);
+  }
 }
 
 function validateIncident(incident, label) {

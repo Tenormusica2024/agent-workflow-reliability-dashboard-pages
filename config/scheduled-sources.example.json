@@ -13,7 +13,15 @@
         "environment": "local scheduled run",
         "window": "latest run",
         "model": "Windows Task Scheduler / local scripts",
-        "incidentTitle": "定期実行プロジェクトの最新runを取り込み"
+        "incidentTitle": "定期実行プロジェクトの最新runを取り込み",
+        "scheduler": {
+          "taskName": "example-json-health-task",
+          "trigger": "Windows Task Scheduler / every 30 minutes",
+          "cadence": "30分ごと",
+          "inputMode": "json health artifact",
+          "outputTarget": "data/private-incoming/example-json-health.json",
+          "historyStore": "enabled safe summary history"
+        }
       },
       "extract": {
         "runId": { "path": "$.run.id" },
@@ -75,7 +83,15 @@
         "name": "Markdown health report",
         "environment": "local scheduled run",
         "window": "latest report",
-        "model": "markdown post-run report"
+        "model": "markdown post-run report",
+        "scheduler": {
+          "taskName": "example-markdown-health-task",
+          "trigger": "Windows Task Scheduler / hourly",
+          "cadence": "1時間ごと",
+          "inputMode": "markdown post-run report",
+          "outputTarget": "data/private-incoming/example-markdown-health.json",
+          "historyStore": "enabled safe summary history"
+        }
       },
       "extract": {
         "runId": { "key": "run_id" },
